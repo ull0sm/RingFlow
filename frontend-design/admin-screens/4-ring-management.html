@@ -1,0 +1,434 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow | Admin Terminal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .ring-card-active {
+            border-left: 4px solid #0051d5;
+        }
+        .status-running { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status-paused { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+        .status-empty { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        
+        /* Custom scrollbar for data-density */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c6c6cd",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-container": "#271901",
+                        "primary": "#000000",
+                        "on-primary-container": "#7c839b",
+                        "surface": "#f7f9fb",
+                        "secondary": "#0051d5",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "secondary-fixed": "#dbe1ff",
+                        "outline": "#76777d",
+                        "on-tertiary-fixed": "#271901",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#fefcff",
+                        "on-primary-fixed": "#131b2e",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary-container": "#98805d",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "tertiary-fixed": "#fcdeb5",
+                        "tertiary": "#000000",
+                        "secondary-container": "#316bf3",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-surface": "#2d3133",
+                        "background": "#f7f9fb",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#131b2e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#45464d",
+                        "primary-fixed": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#565e74",
+                        "surface-dim": "#d8dadc",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-secondary-fixed": "#00174b",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#bec6e0",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "surface-container": "#eceef0",
+                        "surface-container-high": "#e6e8ea"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "card-padding": "20px",
+                        "unit": "4px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-hidden">
+<div class="flex h-screen w-full">
+<!-- Side Navigation (Shared Component) -->
+<aside class="hidden md:flex flex-col h-full w-64 border-r border-outline-variant bg-surface-container-lowest transition-all duration-300">
+<div class="p-6 flex flex-col gap-1">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Ring Flow</h1>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase tracking-widest">Admin Terminal</p>
+</div>
+<nav class="flex-1 px-3 space-y-1 mt-4">
+<a class="flex items-center px-4 py-3 gap-3 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 gap-3 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">balance</span>
+<span class="font-medium">Ring Balancing</span>
+</a>
+<a class="flex items-center px-4 py-3 gap-3 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">category</span>
+<span class="font-medium">Categories</span>
+</a>
+<a class="flex items-center px-4 py-3 gap-3 rounded text-secondary font-bold border-r-4 border-secondary bg-surface-container-high" href="#">
+<span class="material-symbols-outlined">sports_kabaddi</span>
+<span class="font-medium">Rings</span>
+</a>
+<a class="flex items-center px-4 py-3 gap-3 rounded text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-outline-variant"><div class="flex items-center gap-3 p-2"><img alt="Admin Profile" class="w-8 h-8 rounded-full bg-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9b5dmQpFcxHGdXTYMiPMNsLvk3M3pwGYUYp6LMPnKycz5xfbJMYkOY3Sz0f8x8zKQkmeRJWWx05HkkSCAHor0b7d7c5wjzpjMOz1Tky3wue3TtmSnhRMtbJntuaM8Heqhjz-85eNHhXPksUDYckOBvvlcAA0TwEzYsv-tghanKdQgpDAN7oarIzg6jfEKnIOillCaO0DjbCS7XRMisw6vVuS1ExnL74lY9jDGqLuq9hzSBAf_OUtMRCH5W6IYZfGczvXXtoZHaHE"><div class="flex flex-col"><span class="text-sm font-bold">Tournament Admin</span><span class="text-xs text-on-surface-variant">Lead Director</span></div></div></div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden">
+<!-- Top App Bar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-16 bg-surface border-b border-outline-variant shrink-0"><div class="flex items-center gap-4 flex-1"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm">event</span><span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">Elite Championship 2024</span></div></div><div class="flex items-center gap-4"><button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full relative"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span></button><button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full"><span class="material-symbols-outlined">account_circle</span></button></div></header>
+<!-- Scrollable Content Canvas -->
+<section class="flex-1 overflow-y-auto p-margin-desktop space-y-8">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary tracking-tight">Rings</h2>
+<p class="text-on-surface-variant font-body-sm">Managing 12 active rings across 3 halls</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-primary text-on-primary flex items-center justify-center text-[10px] font-bold">12</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-secondary text-on-primary flex items-center justify-center text-[10px] font-bold">4</div>
+</div>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-2.5 rounded-lg font-bold hover:bg-primary/90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">add</span>
+<span class="">Add Ring</span>
+</button>
+</div>
+</div>
+<!-- Stats Overview (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="p-5 bg-surface-container-lowest border border-outline-variant rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">timer</span>
+</div>
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase">Avg Match Time</p>
+<p class="text-xl font-bold font-data-mono">06:42</p>
+</div>
+</div>
+<div class="p-5 bg-surface-container-lowest border border-outline-variant rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase">Completed</p>
+<p class="text-xl font-bold font-data-mono">142/200</p>
+</div>
+</div>
+<div class="p-5 bg-surface-container-lowest border border-outline-variant rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 bg-amber-500/10 rounded-lg flex items-center justify-center text-amber-600">
+<span class="material-symbols-outlined">pause_circle</span>
+</div>
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase">Paused</p>
+<p class="text-xl font-bold font-data-mono">03</p>
+</div>
+</div>
+
+</div>
+<!-- Filters & Grid Layout -->
+<div class="grid grid-cols-1 @container sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+<!-- Ring Card 1: Running -->
+<div class="group relative flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-all ring-card-active">
+<div class="p-4 flex items-center justify-between border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline cursor-grab">drag_indicator</span>
+<span class="font-bold text-lg">Ring 01</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-label-caps status-running uppercase">Running</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary duration-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="p-card-padding space-y-4">
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase mb-1">Category</p>
+<p class="font-bold text-sm">Men's Lightweight (U70kg)</p>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<img alt="Moderator" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWgBMYP7PgJdk_u_O3xCGcT0-ES6_J7eiJDRdJoU4jQnvt9ahh167FaJj2vsfr33cBBr2VyLzDvo5HUGxfZAMeZjSww0uYSqFUpvzSFqeKQqOw3pnkuff4pyTDM5dlq5_e7yl50IkkP6iUR0g9kpqXC9IIFrWVJsw343abOjmIvles4_8LLS2YzvoQOeUc62nZx__Xd1TWa8U4dyslkAgRJtHK4_o1RQ75JHjTKZiqdPXG9yirE782xMyZo3RwUpki7uQClkbMx2o">
+<div class="flex flex-col">
+<p class="text-xs text-on-surface-variant">Moderator</p>
+<p class="text-sm font-bold">Jason Smith</p>
+</div>
+</div>
+
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps text-on-surface-variant">
+<span class="">HEALTH / WORKLOAD</span>
+<span class="">85%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary transition-all" style="width: 85%"></div>
+</div>
+</div>
+</div>
+
+</div>
+<!-- Ring Card 2: Paused -->
+<div class="group relative flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-all">
+<div class="p-4 flex items-center justify-between border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline cursor-grab">drag_indicator</span>
+<span class="font-bold text-lg">Ring 02</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-label-caps status-paused uppercase">Paused</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="p-card-padding space-y-4">
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase mb-1">Category</p>
+<p class="font-bold text-sm">Women's Heavyweight (O75kg)</p>
+</div>
+<div class="flex items-center justify-between gap-4 opacity-60">
+<div class="flex items-center gap-3">
+<img alt="Moderator" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCxDLXgdNfbh7btq9xpOF41CwV0RBPeiw-AoWT6h68NhsQZkrnmWKXt-m7KtF4By9DRHHd3rmdUTTAz2JGJw7xhPcite1dP7sMVhs9FTHjnh8iXBCzrPzCMbK9IZN4H6F3oWbOU-Xc_pSYU7HHuwq5_YqnzjxDRs8jRwZPRTtvqq5q8W9S7E_uIgIpWbmgCO8xeo_49RJ3BDbTJi1N2FxtSkn1Wb4DD_cCh6rSHRIUPGyCZm2lW0uRr2u98i8Z4d8M5kL9BhequZk">
+<div class="flex flex-col">
+<p class="text-xs text-on-surface-variant">Moderator</p>
+<p class="text-sm font-bold">Maria Lopez</p>
+</div>
+</div>
+
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps text-on-surface-variant">
+<span class="">HEALTH / WORKLOAD</span>
+<span class="">20%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 transition-all" style="width: 20%"></div>
+</div>
+</div>
+</div>
+
+</div>
+<!-- Ring Card 3: Empty -->
+
+<!-- Ring Card 4: High Load -->
+<div class="group relative flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-all ring-card-active">
+<div class="p-4 flex items-center justify-between border-b border-outline-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline cursor-grab">drag_indicator</span>
+<span class="font-bold text-lg">Ring 04</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-label-caps status-running uppercase">Running</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary duration-200">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="p-card-padding space-y-4">
+<div>
+<p class="text-xs font-label-caps text-on-surface-variant uppercase mb-1">Category</p>
+<p class="font-bold text-sm">Youth Open (Mixed)</p>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<img alt="Moderator" class="w-8 h-8 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUyhaMo4LHVrsahwQ7U3iBiEdt_RVC-oBVS1YcoM3NzEpFRjq_hiG3h4kfex8XwW0ZdAYgWhqawA2gWqSG9s-WrDVoZFYJVRZ2g7aIZQtAebyyNe1XylGPEkYQtbi9-nfKVxMWzlOE-E6N-FL99e1y-PrDQLj3qC1fSOmbsxG7n6lcxg5DdXNzwVpnsgBTmKKXLXkoWBFbmKhPhgrgs6JW0hWY29ekv8BejH7IflHm7Q3f51wzC7sB1SCOBtY3eWns0OHUgS6QFyw">
+<div class="flex flex-col">
+<p class="text-xs text-on-surface-variant">Moderator</p>
+<p class="text-sm font-bold">Kevin Durant</p>
+</div>
+</div>
+
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps text-on-surface-variant">
+<span class="">HEALTH / WORKLOAD</span>
+<span class="text-error font-bold">98% (OVERLOAD)</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error transition-all" style="width: 98%"></div>
+</div>
+</div>
+</div>
+
+</div>
+<!-- Additional Placeholder Rings for "10+ scale" representation -->
+<script>
+                        const generateRing = (id) => `
+                        <div class="group relative flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-all opacity-80">
+                            <div class="p-4 flex items-center justify-between border-b border-outline-variant">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-outline">drag_indicator</span>
+                                    <span class="font-bold text-lg text-outline">Ring ${id < 10 ? '0' + id : id}</span>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-label-caps status-empty uppercase">Idle</span>
+                                </div>
+                            </div>
+                            <div class="p-card-padding text-center py-12 text-outline-variant">
+                                <p class="text-xs">Awaiting schedule data...</p>
+                            </div>
+                        </div>`;
+                        
+                        for (let i = 5; i <= 12; i++) {
+                            document.write(generateRing(i));
+                        }
+                    </script>
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+</div>
+</section>
+<!-- Bottom Control Panel / Activity Feed Snippet -->
+<footer class="h-12 bg-surface-container-low border-t border-outline-variant px-margin-desktop flex items-center justify-between shrink-0">
+<div class="flex items-center gap-6 overflow-hidden">
+<span class="text-[10px] font-label-caps text-on-surface-variant uppercase whitespace-nowrap">Live Log:</span>
+<div class="flex items-center gap-4 text-xs font-data-mono text-on-surface-variant whitespace-nowrap">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> 14:02 - Ring 04 Match Started</span>
+<span class="flex items-center gap-1 text-secondary"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> 14:01 - Ring 01 Results Validated</span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> 13:58 - Ring 02 Paused by Mod</span>
+</div>
+</div>
+<div class="flex items-center gap-4 ml-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-xs font-bold">SERVER SYNC: OK</span>
+</div>
+</div>
+</footer>
+</main>
+</div>
+<!-- Mobile Navigation Toggle Overlay (Suppressed as per "Shell Visibility" mandate, focusing on Desktop Admin Terminal) -->
+<script>
+        // Micro-interaction: Active state visual feedback for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.classList.add('scale-95', 'duration-200'));
+            btn.addEventListener('mouseup', () => btn.classList.remove('scale-95'));
+            btn.addEventListener('mouseleave', () => btn.classList.remove('scale-95'));
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

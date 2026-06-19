@@ -1,0 +1,430 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow | Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#003ea8",
+                    "surface-dim": "#d8dadc",
+                    "inverse-surface": "#2d3133",
+                    "on-error": "#ffffff",
+                    "primary-fixed": "#dae2fd",
+                    "on-error-container": "#93000a",
+                    "surface-variant": "#e0e3e5",
+                    "tertiary-container": "#271901",
+                    "on-secondary-container": "#fefcff",
+                    "secondary-fixed": "#dbe1ff",
+                    "secondary-container": "#316bf3",
+                    "error-container": "#ffdad6",
+                    "primary": "#000000",
+                    "surface-container-low": "#f2f4f6",
+                    "on-secondary": "#ffffff",
+                    "primary-fixed-dim": "#bec6e0",
+                    "surface-bright": "#f7f9fb",
+                    "on-tertiary-fixed-variant": "#574425",
+                    "on-primary-container": "#7c839b",
+                    "tertiary-fixed-dim": "#dec29a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#45464d",
+                    "surface": "#f7f9fb",
+                    "tertiary": "#000000",
+                    "tertiary-fixed": "#fcdeb5",
+                    "on-tertiary-container": "#98805d",
+                    "surface-container": "#eceef0",
+                    "inverse-on-surface": "#eff1f3",
+                    "outline-variant": "#c6c6cd",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-primary": "#ffffff",
+                    "outline": "#76777d",
+                    "secondary-fixed-dim": "#b4c5ff",
+                    "on-surface": "#191c1e",
+                    "secondary": "#0051d5",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "on-primary-fixed": "#131b2e",
+                    "on-background": "#191c1e",
+                    "on-secondary-fixed": "#00174b",
+                    "surface-container-high": "#e6e8ea",
+                    "inverse-primary": "#bec6e0",
+                    "primary-container": "#131b2e",
+                    "error": "#ba1a1a",
+                    "background": "#f7f9fb",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-tint": "#565e74",
+                    "on-tertiary-fixed": "#271901"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-desktop": "32px",
+                    "gutter": "16px",
+                    "margin-mobile": "16px",
+                    "card-padding": "20px"
+            },
+            "fontFamily": {
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "body-md": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .drag-handle { cursor: grab; }
+        .drag-handle:active { cursor: grabbing; }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-hidden">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<aside class="hidden md:flex flex-col h-full py-6 px-4 space-y-2 w-64 bg-surface-container-low border-r border-outline-variant shrink-0">
+<div class="px-2 mb-8">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Ring Flow</h1>
+
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="balance">balance</span>
+<span class="font-label-caps text-label-caps">Ring Balancing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-label-caps text-label-caps">Categories</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+<span class="font-label-caps text-label-caps">Rings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-caps text-label-caps">Settings</span>
+</a>
+</nav>
+
+
+<div class="mt-auto pt-4 border-t border-outline-variant space-y-4"><div class="flex items-center gap-3 px-2"><div class="h-10 w-10 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden shrink-0"><img alt="Alex Rivera" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCg0ukqaQjZ487uOmP7Og1BlL45aBIuTn-U8Tkqd6hsZJgcNhPrBxdGNXRm2mYj8EAjNxTObM3PBxUkLrwB_gE0L8jYbinXVWE2Cp5ovjdGdro3o-TuOrfj1xxlPPqj97lLrd1xw1ARgP2W4GZB31q2BcE8dOFpEztBdF-tUK9ZkCjUT3m28PNg0Sl2KykpJt80bQ8OfkqXscLmw8ns2YeZjUqATYMJJNOVgiM69Fo_FlB7BwdzpQ1ktOHejVAjInvoMK9siRaAak"></div><div class="overflow-hidden"><p class="font-body-md font-bold text-sm text-on-surface truncate">Alex Rivera</p><p class="text-[10px] text-on-surface-variant uppercase tracking-wider">Head Coordinator</p></div></div><a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-error hover:bg-error-container/10 transition-all rounded-lg" href="#"><span class="material-symbols-outlined" data-icon="logout">logout</span><span class="font-label-caps text-label-caps">Logout</span></a></div></aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-background">
+<!-- TopNavBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-16 bg-surface-container-lowest border-b border-outline-variant shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="font-headline-sm text-headline-sm text-primary">Overview</h2><div class="flex items-center gap-2 ml-4 pl-4 border-l border-outline-variant"><span class="material-symbols-outlined text-secondary text-sm" data-icon="event">event</span><span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">Elite Championship 2024</span></div>
+</div>
+
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-margin-desktop space-y-8">
+<!-- Global Tournament Stats -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-lg flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Total Categories</span>
+<span class="material-symbols-outlined text-secondary" data-icon="category">category</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-lg text-headline-lg">32</span>
+<p class="text-body-sm text-on-surface-variant mt-1">12 Categories active now</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-lg flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Completed Matches</span>
+<span class="material-symbols-outlined text-on-secondary-fixed-variant" data-icon="check_circle">check_circle</span>
+</div>
+<div class="mt-4">
+<span class="font-headline-lg text-headline-lg">148 / 256</span>
+<p class="text-body-sm text-on-surface-variant mt-1">~57% Completion rate</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-lg">
+<div class="flex justify-between items-start">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Overall Progress</span>
+<span class="material-symbols-outlined text-secondary" data-icon="speed">speed</span>
+</div>
+<div class="mt-6">
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 57%"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="font-data-mono text-data-mono text-secondary">57.8%</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">108 Remaining</span>
+</div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+<!-- Rings Grid Overview -->
+<div class="xl:col-span-3 space-y-6">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-primary">Live Ring Status</h3>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-surface-container border border-outline-variant rounded font-label-caps text-label-caps">Filter: All</button>
+<button class="px-3 py-1 bg-surface-container border border-outline-variant rounded font-label-caps text-label-caps">View: Grid</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+<!-- Ring 1 -->
+<div class="bg-surface-container-lowest border-l-4 border-secondary p-card-padding border border-outline-variant rounded shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined drag-handle text-outline" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-headline-sm text-headline-sm">Ring 1</span>
+</div>
+<span class="px-2 py-1 bg-green-100 text-green-800 rounded font-label-caps text-[10px] uppercase">Running</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-1">Senior Male Kumite -75kg</h4>
+<div class="flex justify-between items-center text-on-surface-variant mb-4">
+<span class="font-body-sm">Match 8/19</span>
+<span class="font-data-mono text-data-mono text-secondary">02:45</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mb-4">
+<div class="bg-secondary h-full" style="width: 65%"></div>
+</div>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-outline-variant">
+<span class="font-body-sm text-on-surface-variant italic">Est. Finish: 16:45</span>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors" data-icon="open_in_new">open_in_new</button>
+</div>
+</div>
+<!-- Ring 2 -->
+<div class="bg-surface-container-lowest border-l-4 border-error p-card-padding border border-outline-variant rounded shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined drag-handle text-outline" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-headline-sm text-headline-sm">Ring 2</span>
+</div>
+<span class="px-2 py-1 bg-error-container text-on-error-container rounded font-label-caps text-[10px] uppercase">Paused</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-1">Junior Female Kata</h4>
+<div class="flex justify-between items-center text-on-surface-variant mb-4">
+<span class="font-body-sm">Match 4/12</span>
+<span class="font-data-mono text-data-mono text-error">Injury</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mb-4">
+<div class="bg-error h-full" style="width: 33%"></div>
+</div>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-outline-variant">
+<span class="font-body-sm text-on-surface-variant italic">Est. Finish: --:--</span>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors" data-icon="open_in_new">open_in_new</button>
+</div>
+</div>
+<!-- Ring 3 -->
+<div class="bg-surface-container-lowest border-l-4 border-outline p-card-padding border border-outline-variant rounded shadow-sm opacity-70">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined drag-handle text-outline" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-headline-sm text-headline-sm">Ring 3</span>
+</div>
+<span class="px-2 py-1 bg-surface-container-highest text-on-surface-variant rounded font-label-caps text-[10px] uppercase">Empty</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-1">Pending Next Category</h4>
+<div class="flex justify-between items-center text-on-surface-variant mb-4">
+<span class="font-body-sm">-- / --</span>
+<span class="font-data-mono text-data-mono">Ready</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mb-4">
+<div class="bg-outline h-full" style="width: 0%"></div>
+</div>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-outline-variant">
+<span class="font-body-sm text-on-surface-variant italic">Waiting for Assign</span>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors" data-icon="add_circle">add_circle</button>
+</div>
+</div>
+<!-- Ring 4 -->
+<div class="bg-surface-container-lowest border-l-4 border-secondary p-card-padding border border-outline-variant rounded shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined drag-handle text-outline" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-headline-sm text-headline-sm">Ring 4</span>
+</div>
+<span class="px-2 py-1 bg-green-100 text-green-800 rounded font-label-caps text-[10px] uppercase">Running</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-1">Cadet Male Kumite +70kg</h4>
+<div class="flex justify-between items-center text-on-surface-variant mb-4">
+<span class="font-body-sm">Match 15/22</span>
+<span class="font-data-mono text-data-mono text-secondary">01:12</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mb-4">
+<div class="bg-secondary h-full" style="width: 68%"></div>
+</div>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-outline-variant">
+<span class="font-body-sm text-on-surface-variant italic">Est. Finish: 17:15</span>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors" data-icon="open_in_new">open_in_new</button>
+</div>
+</div>
+<!-- Ring 5 -->
+<div class="bg-surface-container-lowest border-l-4 border-secondary p-card-padding border border-outline-variant rounded shadow-sm hover:shadow-md transition-shadow">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined drag-handle text-outline" data-icon="drag_indicator">drag_indicator</span>
+<span class="font-headline-sm text-headline-sm">Ring 5</span>
+</div>
+<span class="px-2 py-1 bg-green-100 text-green-800 rounded font-label-caps text-[10px] uppercase">Running</span>
+</div>
+<h4 class="font-body-md text-body-md font-bold mb-1">U21 Female Kumite -61kg</h4>
+<div class="flex justify-between items-center text-on-surface-variant mb-4">
+<span class="font-body-sm">Match 11/15</span>
+<span class="font-data-mono text-data-mono text-secondary">03:22</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full mb-4">
+<div class="bg-secondary h-full" style="width: 73%"></div>
+</div>
+<div class="flex justify-between items-center mt-4 pt-4 border-t border-outline-variant">
+<span class="font-body-sm text-on-surface-variant italic">Est. Finish: 16:30</span>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors" data-icon="open_in_new">open_in_new</button>
+</div>
+</div>
+<!-- Add Ring Placeholder -->
+<button class="bg-surface-container border border-dashed border-outline-variant rounded flex flex-col items-center justify-center p-card-padding hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary mb-2" data-icon="add_circle" style="font-size: 32px;">add_circle</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Deploy New Ring</span>
+</button>
+</div>
+</div>
+<!-- Sidebar Widgets (Requests & Logs) -->
+<div class="space-y-8">
+<!-- Moderator Requests -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col h-[400px]">
+<div class="p-4 bg-surface-container-low border-b border-outline-variant">
+<h4 class="font-label-caps text-label-caps text-primary">Moderator Requests</h4>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-4">
+<!-- Request 1 -->
+<div class="p-3 bg-surface-bright border border-outline-variant rounded">
+<div class="flex items-center gap-3 mb-3">
+<div class="h-10 w-10 bg-primary-fixed rounded-full flex items-center justify-center overflow-hidden">
+<img alt="Marco" data-alt="A profile illustration of a male sports moderator, wearing a whistle, looking professional in a clean minimalist vector art style with a corporate palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhuSEivSy2Lk8NYn_9NObybWx8DLVv_0tdPf78tcicPgUx2jTiXl1bECRtgvkmjD5a-Ljker2bnPjYzq48XdXDEoisHO8z6tXX-AsUZvGs7uCj29QR19jbQR3sqpqPJSHf1DFdSRbSMr7InJ19rZCrXJ9rKCWaRvTFLNtYytI3n8xea7BPBu_yWW7QBUyYKAUZofPiWv1hoFGL3MFz08n1sJuzhFjE7kHT0-gObs7XaMH6eQBE1Xlq6Sat35eciYme4G-I22VPRKE" class="">
+</div>
+<div>
+<p class="font-body-md font-bold text-sm">Marco Rossi</p>
+<p class="text-[10px] text-on-surface-variant">Requesting: Ring 2 Access</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1.5 bg-secondary text-on-secondary rounded text-[10px] font-bold uppercase hover:opacity-90">Approve</button>
+<button class="flex-1 py-1.5 border border-outline-variant text-on-surface-variant rounded text-[10px] font-bold uppercase hover:bg-surface-container">Reject</button>
+</div>
+</div>
+<!-- Request 2 -->
+<div class="p-3 bg-surface-bright border border-outline-variant rounded">
+<div class="flex items-center gap-3 mb-3">
+<div class="h-10 w-10 bg-secondary-fixed rounded-full flex items-center justify-center overflow-hidden">
+<img alt="Sarah" data-alt="A professional profile avatar of a female martial arts judge, depicting focus and authority, styled with a minimalist design using blue and white tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn7xDMa5cSjZvIlE1216e9E0twJtERvZzj-P6KQE3Ot0chUt9sfoUsIxwwD8SBcmDxrLhUMZrDHeSY17G9BPZVYdWUHPrX7q81RqcWoZ5yO4xSv4QYgrj3oni6RneeXs7Gaf9OIxGOY3PBmsv_y1UbbTlHGAgnz3fCDCgsC9ZMEIILV6F_rB79aiAff6kzHqE5Lz5SpFSPZtm37RPGjORaGBac8q-C7PEBe3cgU8nrp_tRpQNjedzSZ4NcyMr0SFIxZZzBo-p66jw" class="">
+</div>
+<div>
+<p class="font-body-md font-bold text-sm">Sarah Jenkins</p>
+<p class="text-[10px] text-on-surface-variant">Requesting: Category Lead</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-1.5 bg-secondary text-on-secondary rounded text-[10px] font-bold uppercase">Approve</button>
+<button class="flex-1 py-1.5 border border-outline-variant text-on-surface-variant rounded text-[10px] font-bold uppercase">Reject</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Real-time Event Log -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden flex flex-col h-[300px]">
+<div class="p-4 bg-surface-container-low border-b border-outline-variant flex justify-between items-center">
+<h4 class="font-label-caps text-label-caps text-primary">Live Activity Feed</h4>
+<span class="h-2 w-2 bg-error rounded-full animate-pulse"></span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+<div class="flex gap-3">
+<span class="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">14:52</span>
+<p class="text-body-sm"><span class="font-bold">Ring 2</span> Paused (Injury Timeout)</p>
+</div>
+<div class="flex gap-3">
+<span class="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">14:48</span>
+<p class="text-body-sm"><span class="font-bold">Ring 1</span> Category Finished</p>
+</div>
+<div class="flex gap-3">
+<span class="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">14:45</span>
+<p class="text-body-sm"><span class="font-bold">Ring 4</span> Match 14 Won by A. Smith</p>
+</div>
+<div class="flex gap-3">
+<span class="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">14:40</span>
+<p class="text-body-sm"><span class="font-bold">System</span> Ring 5 balancing complete</p>
+</div>
+<div class="flex gap-3">
+<span class="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">14:35</span>
+<p class="text-body-sm"><span class="font-bold">Ring 1</span> Match 7 Started</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Shared Component - Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-surface-container-highest shadow-lg border-t border-outline-variant z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-secondary text-on-secondary rounded-full p-2 w-12 h-12 scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="live_tv">live_tv</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50" href="#">
+<span class="material-symbols-outlined" data-icon="format_list_bulleted">format_list_bulleted</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50" href="#">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</a>
+</nav>
+<script>
+        // Micro-interactions and real-time feel simulator
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.add('opacity-80', 'duration-150');
+                setTimeout(() => this.classList.remove('opacity-80'), 150);
+            });
+        });
+
+        // Simulating live time update for the "Estimated Finish" data
+        const updateTimes = () => {
+            const now = new Date();
+            // Just for UI fluff
+        }
+        setInterval(updateTimes, 60000);
+    </script>
+
+
+
+
+
+
+</body></html>

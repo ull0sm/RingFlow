@@ -1,0 +1,331 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow | Admin Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f2f4f6",
+                    "surface": "#f7f9fb",
+                    "primary-container": "#131b2e",
+                    "on-surface": "#191c1e",
+                    "error-container": "#ffdad6",
+                    "tertiary-container": "#271901",
+                    "primary-fixed": "#dae2fd",
+                    "on-secondary-fixed-variant": "#003ea8",
+                    "on-secondary-container": "#fefcff",
+                    "outline-variant": "#c6c6cd",
+                    "secondary-fixed": "#dbe1ff",
+                    "background": "#f7f9fb",
+                    "tertiary-fixed": "#fcdeb5",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "on-error-container": "#93000a",
+                    "tertiary": "#000000",
+                    "secondary": "#0051d5",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#bec6e0",
+                    "inverse-primary": "#bec6e0",
+                    "surface-container-highest": "#e0e3e5",
+                    "surface-dim": "#d8dadc",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-tertiary-fixed": "#271901",
+                    "on-secondary-fixed": "#00174b",
+                    "on-background": "#191c1e",
+                    "primary": "#000000",
+                    "on-primary-fixed": "#131b2e",
+                    "surface-bright": "#f7f9fb",
+                    "surface-container": "#eceef0",
+                    "secondary-container": "#316bf3",
+                    "on-tertiary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-variant": "#e0e3e5",
+                    "tertiary-fixed-dim": "#dec29a",
+                    "surface-container-high": "#e6e8ea",
+                    "inverse-surface": "#2d3133",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-container": "#98805d",
+                    "on-secondary": "#ffffff",
+                    "outline": "#76777d",
+                    "secondary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-fixed-variant": "#574425",
+                    "on-surface-variant": "#45464d",
+                    "on-primary-container": "#7c839b",
+                    "surface-tint": "#565e74"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-desktop": "32px",
+                    "card-padding": "20px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f7f9fb;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="w-full top-0 sticky z-50 bg-surface dark:bg-surface-container-high border-b border-outline-variant dark:border-outline flat no shadows">
+<div class="flex justify-between items-center h-16 px-margin-desktop w-full max-w-full mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-headline-sm font-headline-sm font-bold text-primary dark:text-inverse-primary">Ring Flow</span>
+<nav class="hidden md:flex gap-6"><a class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 font-label-caps text-label-caps cursor-pointer active:opacity-80 transition-opacity" href="#">Dashboard</a></nav>
+</div>
+
+</div>
+</header>
+<main class="flex-grow px-margin-desktop py-12 max-w-7xl mx-auto w-full" style="opacity: 1; transform: translateY(0px); transition: opacity 0.6s ease-out, transform 0.6s ease-out;">
+<!-- Welcome Section -->
+<div class="mb-12">
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-2">Welcome back, Director</h1>
+
+</div>
+<!-- Primary Action Grid -->
+<div class="flex justify-center mb-16">
+<!-- Create New Tournament Card -->
+<button class="group relative overflow-hidden bg-primary-container text-white p-8 rounded-xl flex flex-col justify-between items-start transition-all hover:scale-[1.01] active:scale-[0.99] text-left w-full max-w-2xl">
+<div class="z-10">
+<div class="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="add_circle">add_circle</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm mb-2">Create New Tournament</h2>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim max-w-xs opacity-80">Configure brackets, assign referees, and set up rings for a new event.</p>
+</div>
+<div class="mt-8 flex items-center gap-2 font-label-caps text-label-caps uppercase tracking-widest text-secondary-fixed">
+                    Launch Setup Wizard <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</div>
+<!-- Subtle Background Pattern -->
+<div class="absolute top-0 right-0 w-32 h-32 opacity-10 transform translate-x-8 -translate-y-8">
+<span class="material-symbols-outlined text-[120px]" data-icon="trophy">trophy</span>
+</div>
+</button>
+<!-- Quick Stats/Active Status Summary -->
+
+</div>
+<!-- Section Header -->
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="history">history</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Select an Active Tournament</h3>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-surface-container rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm font-body-sm p-0 w-48 text-on-surface" placeholder="Filter tournaments..." type="text">
+</div>
+</div>
+<!-- Tournament Grid -->
+<div class="flex justify-center mb-16">
+<!-- Tournament Card: Live -->
+<div class="group bg-surface-container-lowest border border-outline-variant hover:border-secondary transition-all cursor-pointer rounded-lg overflow-hidden flex flex-col">
+<div class="p-card-padding flex-grow">
+<div class="flex justify-between items-start mb-4">
+<span class="px-2 py-1 bg-error-container text-on-error-container font-label-caps text-label-caps rounded flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error animate-pulse"></span>
+                            LIVE
+                        </span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ID: RF-2024-08</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-secondary transition-colors">Eastern Seaboard Open</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Sept 14-16, 2024 • Metro Arena</p>
+<div class="space-y-3">
+<div class="w-full bg-surface-container-high rounded-full h-1">
+<div class="bg-secondary h-1 rounded-full" style="width: 65%"></div>
+</div>
+<div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant opacity-70">
+<span class="">Progress</span>
+<span class="">65% Complete</span>
+</div>
+</div>
+</div>
+<div class="px-card-padding py-4 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border border-surface-container-lowest bg-primary-fixed flex items-center justify-center text-[10px] font-bold">JD</div>
+<div class="w-6 h-6 rounded-full border border-surface-container-lowest bg-tertiary-fixed flex items-center justify-center text-[10px] font-bold">AL</div>
+<div class="w-6 h-6 rounded-full border border-surface-container-lowest bg-surface-container-highest flex items-center justify-center text-[10px] font-bold">+4</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Tournament Card: Draft -->
+<div class="group bg-surface-container-lowest border border-outline-variant hover:border-secondary transition-all cursor-pointer rounded-lg overflow-hidden flex flex-col">
+<div class="p-card-padding flex-grow">
+<div class="flex justify-between items-start mb-4">
+<span class="px-2 py-1 bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps rounded">
+                            DRAFT
+                        </span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ID: RF-2024-12</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-secondary transition-colors">Interstate Invitational</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Oct 02, 2024 • Training Grounds</p>
+<div class="p-4 rounded bg-surface-container-low border border-dashed border-outline flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="assignment">assignment</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pending venue confirmation</span>
+</div>
+</div>
+<div class="px-card-padding py-4 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Last edited 2h ago</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Tournament Card: Scheduled -->
+<div class="group bg-surface-container-lowest border border-outline-variant hover:border-secondary transition-all cursor-pointer rounded-lg overflow-hidden flex flex-col">
+<div class="p-card-padding flex-grow">
+<div class="flex justify-between items-start mb-4">
+<span class="px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed font-label-caps text-label-caps rounded">
+                            SCHEDULED
+                        </span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">ID: RF-2024-15</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-secondary transition-colors">National Qualifiers</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Nov 12-14, 2024 • Grand Stadium</p>
+<div class="flex items-center gap-4">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">420</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Athletes</span>
+</div>
+<div class="w-px h-8 bg-outline-variant"></div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">18</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Rings</span>
+</div>
+</div>
+</div>
+<div class="px-card-padding py-4 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-secondary font-bold">Registration Open</span>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div><!-- Archive Section Header -->
+<div class="flex items-center justify-between mb-8 mt-16">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-on-surface-variant" data-icon="archive">archive</span>
+    <h3 class="font-headline-sm text-headline-sm text-on-surface">Tournament Archives</h3>
+  </div>
+</div>
+
+<!-- Archive Grid -->
+<div class="flex justify-center mb-16">
+  <!-- Archived Card 1 -->
+  <div class="group bg-surface-container border border-outline-variant hover:border-outline transition-all cursor-pointer rounded-lg overflow-hidden flex flex-col">
+    <div class="p-card-padding flex-grow">
+      <div class="flex justify-between items-start mb-4">
+        <span class="px-2 py-1 bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps rounded">
+          COMPLETED
+        </span>
+        <span class="font-data-mono text-data-mono text-on-surface-variant">ID: RF-2024-01</span>
+      </div>
+      <h4 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-secondary transition-colors">Winter Classic 2024</h4>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Jan 10-12, 2024 • North Arena</p>
+      <div class="flex items-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+        <span class="font-label-caps text-label-caps">Finalized</span>
+      </div>
+    </div>
+    <div class="px-card-padding py-4 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
+      <span class="font-label-caps text-label-caps text-on-surface-variant font-bold">View Results</span>
+      <span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+    </div>
+  </div>
+
+  <!-- Archived Card 2 -->
+  <div class="group bg-surface-container border border-outline-variant hover:border-outline transition-all cursor-pointer rounded-lg overflow-hidden flex flex-col">
+    <div class="p-card-padding flex-grow">
+      <div class="flex justify-between items-start mb-4">
+        <span class="px-2 py-1 bg-surface-container-highest text-on-surface-variant font-label-caps text-label-caps rounded">
+          ARCHIVED
+        </span>
+        <span class="font-data-mono text-data-mono text-on-surface-variant">ID: RF-2023-42</span>
+      </div>
+      <h4 class="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-secondary transition-colors">Regional Finals 2023</h4>
+      <p class="font-body-sm text-body-sm text-on-surface-variant mb-6">Dec 05-08, 2023 • Central Hub</p>
+      <div class="flex items-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+        <span class="font-label-caps text-label-caps">Finalized</span>
+      </div>
+    </div>
+    <div class="px-card-padding py-4 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
+      <span class="font-label-caps text-label-caps text-on-surface-variant font-bold">View Results</span>
+      <span class="material-symbols-outlined text-on-surface-variant group-hover:translate-x-1 transition-transform" data-icon="chevron_right">chevron_right</span>
+    </div>
+  </div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-8 mt-auto bg-surface-container-lowest dark:bg-surface-container border-t border-outline-variant dark:border-outline flat no shadows">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop w-full">
+<div class="flex flex-col items-center md:items-start mb-6 md:mb-0">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface-variant">Ring Flow</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 opacity-70">© 2024 Ring Flow Tournament Systems. All rights reserved.</p>
+</div>
+
+</div>
+</footer>
+<!-- Micro-interactions Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.group');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    // Optional: add haptic-like feel or custom sound effects
+                });
+            });
+
+            // Smooth entrance animation
+            const main = document.querySelector('main');
+            main.style.opacity = '0';
+            main.style.transform = 'translateY(10px)';
+            main.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            
+            requestAnimationFrame(() => {
+                main.style.opacity = '1';
+                main.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+
+
+
+
+</body></html>

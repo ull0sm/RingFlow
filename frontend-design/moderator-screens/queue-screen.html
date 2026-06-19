@@ -1,0 +1,254 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow - Moderator Queue</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c6c6cd",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-container": "#271901",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#dae2fd",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#98805d",
+                        "on-secondary-fixed": "#00174b",
+                        "on-background": "#191c1e",
+                        "on-secondary-container": "#fefcff",
+                        "surface-tint": "#565e74",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "on-surface-variant": "#45464d",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#000000",
+                        "on-surface": "#191c1e",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#fcdeb5",
+                        "on-tertiary-fixed": "#271901",
+                        "background": "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "surface-container-low": "#f2f4f6",
+                        "surface": "#f7f9fb",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "secondary-container": "#316bf3",
+                        "primary-container": "#131b2e",
+                        "on-error-container": "#93000a",
+                        "outline": "#76777d",
+                        "on-primary-fixed": "#131b2e",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed": "#dbe1ff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-primary": "#bec6e0",
+                        "secondary": "#0051d5",
+                        "tertiary": "#000000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "card-padding": "20px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-ring-card {
+            border-left: 4px solid #0051d5;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest text-primary docked full-width top-0 border-b border-outline-variant flex justify-between items-center w-full px-margin-desktop h-16 z-40 sticky"><div class="flex items-center gap-6">
+<span class="font-headline-sm text-headline-sm font-black text-primary tracking-tighter">Ring Flow</span>
+<div class="h-6 w-[1px] bg-outline-variant"></div>
+<h1 class="font-body-md font-bold text-on-surface">Ring 3 - Queue</h1>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 hover:bg-surface-container transition-colors rounded-full" title="Notifications">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 hover:bg-surface-container transition-colors rounded-full" title="Settings">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container overflow-hidden ml-2">
+<img alt="Administrator Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBotzsd4Aj5vE9XdPOJBWB-w3b_85Bz3I2LeSBB58z5qPd7182rkH87uUqt94eh5J3YWxBbucKkswfiy4YUyMlhQ1YKqgr7I5AXaAvepyjr4KA_E_WvubvYvv2l8DBSwpD8p9S_G3jSW0VFc4f6Feh_pBATcT92pKcRf1E_OK2ELl1g8ihn5c1FUsDaR2YFIB7tFf-VbM7VRkvGDY_xqqgt12ose7iUUWGAv5bhoRKeS6gvaYbQZrUzenO-2_k2tJxUAG3BrbJE1NU">
+</div>
+</div></header>
+<main class="flex-grow p-margin-mobile md:p-margin-desktop max-w-5xl mx-auto w-full pb-24">
+<!-- Empty State Toggle (Hidden by default, shown via JS for demo) -->
+<section class="hidden flex-col items-center justify-center py-20 text-center" id="empty-state">
+<div class="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-4xl text-outline" data-icon="event_busy">event_busy</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm mb-2">No category running</h2>
+<p class="text-on-surface-variant mb-8 max-w-sm">There is currently no active competition on Ring 3. Please initialize the first category to begin.</p>
+<button class="bg-primary text-on-primary px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:opacity-80 transition-opacity" onclick="toggleEmptyState()">
+<span class="material-symbols-outlined" data-icon="play_arrow">play_arrow</span>
+                Start First Category
+            </button>
+</section>
+<!-- Active Content -->
+<div class="space-y-gutter" id="queue-content">
+<!-- CURRENT SECTION -->
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">CURRENT</h2>
+<span class="flex items-center gap-2 bg-[#e8f5e9] text-[#2e7d32] px-3 py-1 rounded-full font-label-caps text-label-caps border border-[#c8e6c9]">
+<span class="w-2 h-2 rounded-full bg-[#2e7d32] animate-pulse"></span>
+                        RUNNING
+                    </span>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl active-ring-card shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 p-8"><div class="flex items-center gap-6">
+<div class="w-16 h-16 bg-secondary-container rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-3xl text-on-secondary-container" data-icon="sports_martial_arts">sports_martial_arts</span>
+</div>
+<div class="space-y-1">
+<h3 class="font-headline-sm text-headline-sm font-semibold">Junior Kata</h3>
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1 text-on-surface-variant font-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="timer">timer</span>
+<span class="font-data-mono">14:22</span>
+</span>
+<span class="flex items-center gap-1 text-on-surface-variant font-body-sm">
+<span class="material-symbols-outlined text-sm" data-icon="group">group</span>
+12 Participants
+</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-4 md:mt-0">
+<button class="flex-grow md:flex-grow-0 px-6 py-2.5 border border-outline-variant rounded-lg font-label-caps text-label-caps hover:bg-surface-container transition-colors">PAUSE RING</button>
+<button class="flex-grow md:flex-grow-0 px-6 py-2.5 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-80 transition-opacity">NEXT MATCH</button>
+</div></div>
+</div>
+<!-- UP NEXT SECTION -->
+<div class="space-y-4 pt-8">
+<div class="flex items-center justify-between">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">UP NEXT</h2>
+<button class="text-secondary font-label-caps text-label-caps hover:underline">REORDER QUEUE</button>
+</div>
+<div class="space-y-3"><div class="group bg-surface-container-low hover:bg-surface-container border border-outline-variant rounded-xl p-5 flex items-center justify-between transition-all">
+<div class="flex items-center gap-6">
+<span class="font-data-mono text-outline text-sm w-4">01</span>
+<div>
+<p class="font-body-md font-medium text-on-surface">Senior Female Kumite</p>
+<p class="text-on-surface-variant text-sm">Estimated start: 10:45 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit">edit</span></button>
+<button class="p-2 text-on-surface-variant hover:text-primary cursor-grab active:cursor-grabbing"><span class="material-symbols-outlined" data-icon="drag_indicator">drag_indicator</span></button>
+</div>
+</div>
+<div class="group bg-surface-container-low hover:bg-surface-container border border-outline-variant rounded-xl p-5 flex items-center justify-between transition-all">
+<div class="flex items-center gap-6">
+<span class="font-data-mono text-outline text-sm w-4">02</span>
+<div>
+<p class="font-body-md font-medium text-on-surface">Cadet Kata</p>
+<p class="text-on-surface-variant text-sm">Estimated start: 11:30 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit">edit</span></button>
+<button class="p-2 text-on-surface-variant hover:text-primary cursor-grab active:cursor-grabbing"><span class="material-symbols-outlined" data-icon="drag_indicator">drag_indicator</span></button>
+</div>
+</div>
+<div class="group bg-surface-container-low hover:bg-surface-container border border-outline-variant rounded-xl p-5 flex items-center justify-between transition-all">
+<div class="flex items-center gap-6">
+<span class="font-data-mono text-outline text-sm w-4">03</span>
+<div>
+<p class="font-body-md font-medium text-on-surface">Junior Kata</p>
+<p class="text-on-surface-variant text-sm">Estimated start: 12:15 PM</p>
+</div>
+</div>
+<div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined" data-icon="edit">edit</span></button>
+<button class="p-2 text-on-surface-variant hover:text-primary cursor-grab active:cursor-grabbing"><span class="material-symbols-outlined" data-icon="drag_indicator">drag_indicator</span></button>
+</div>
+</div>
+<div class="pt-8 text-center">
+<button class="text-on-surface-variant font-body-sm underline opacity-50 hover:opacity-100" onclick="toggleEmptyState()">Simulate Empty State</button>
+</div></div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-surface-container-highest shadow-lg border-t border-outline-variant z-50 rounded-t-xl"><div class="flex justify-around items-center w-full max-w-md mx-auto">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors p-2" href="#">
+<span class="material-symbols-outlined size-6" data-icon="grid_view">grid_view</span>
+<span class="font-label-caps text-[10px] mt-1">Current</span>
+</a>
+<a aria-current="page" class="flex flex-col items-center justify-center bg-secondary text-on-secondary rounded-full w-14 h-14 shadow-md transition-transform active:scale-95" href="#">
+<span class="material-symbols-outlined size-6" data-icon="format_list_bulleted">format_list_bulleted</span>
+<span class="font-label-caps text-[10px] mt-0.5">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors p-2" href="#">
+<span class="material-symbols-outlined size-6" data-icon="settings_accessibility">settings_accessibility</span>
+<span class="font-label-caps text-[10px] mt-1">Controls</span>
+</a>
+</div></nav>
+<script>
+        function toggleEmptyState() {
+            const content = document.getElementById('queue-content');
+            const empty = document.getElementById('empty-state');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                empty.classList.add('hidden');
+            } else {
+                content.classList.add('hidden');
+                empty.classList.remove('hidden');
+            }
+        }
+    </script>
+
+
+</body></html>

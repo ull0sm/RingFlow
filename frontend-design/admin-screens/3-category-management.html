@@ -1,0 +1,490 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow - Category Management</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "outline-variant": "#c6c6cd",
+                      "surface-variant": "#e0e3e5",
+                      "tertiary-container": "#271901",
+                      "primary": "#000000",
+                      "on-primary-container": "#7c839b",
+                      "surface": "#f7f9fb",
+                      "secondary": "#0051d5",
+                      "inverse-on-surface": "#eff1f3",
+                      "on-secondary-fixed-variant": "#003ea8",
+                      "secondary-fixed": "#dbe1ff",
+                      "outline": "#76777d",
+                      "on-tertiary-fixed": "#271901",
+                      "error-container": "#ffdad6",
+                      "on-secondary-container": "#fefcff",
+                      "on-primary-fixed": "#131b2e",
+                      "primary-fixed-dim": "#bec6e0",
+                      "on-tertiary-container": "#98805d",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "tertiary-fixed": "#fcdeb5",
+                      "tertiary": "#000000",
+                      "secondary-container": "#316bf3",
+                      "surface-bright": "#f7f9fb",
+                      "surface-container-highest": "#e0e3e5",
+                      "inverse-surface": "#2d3133",
+                      "background": "#f7f9fb",
+                      "on-primary": "#ffffff",
+                      "primary-container": "#131b2e",
+                      "on-tertiary": "#ffffff",
+                      "on-surface": "#191c1e",
+                      "on-surface-variant": "#45464d",
+                      "primary-fixed": "#dae2fd",
+                      "on-error-container": "#93000a",
+                      "on-error": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#565e74",
+                      "surface-dim": "#d8dadc",
+                      "secondary-fixed-dim": "#b4c5ff",
+                      "on-secondary-fixed": "#00174b",
+                      "on-secondary": "#ffffff",
+                      "on-background": "#191c1e",
+                      "surface-container-low": "#f2f4f6",
+                      "on-tertiary-fixed-variant": "#574425",
+                      "error": "#ba1a1a",
+                      "inverse-primary": "#bec6e0",
+                      "tertiary-fixed-dim": "#dec29a",
+                      "surface-container": "#eceef0",
+                      "surface-container-high": "#e6e8ea"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-desktop": "32px",
+                      "gutter": "16px",
+                      "card-padding": "20px",
+                      "unit": "4px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "data-mono": ["JetBrains Mono"],
+                      "label-caps": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c6c6cd;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-64 border-r border-outline-variant dark:border-outline bg-surface-container-lowest dark:bg-surface-container-low flex flex-col shrink-0">
+<div class="px-6 py-8">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-on-primary-fixed">Ring Flow</h1>
+<p class="text-on-primary-container text-[12px] font-medium tracking-wider">ADMIN TERMINAL</p>
+</div>
+<nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+<a class="flex items-center px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-3">balance</span>
+                Ring Balancing
+            </a>
+<!-- Active State: Categories -->
+<a class="flex items-center px-4 py-3 text-secondary dark:text-secondary-fixed-dim font-bold border-r-4 border-secondary font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-3" style="font-variation-settings: &quot;FILL&quot; 1;">category</span>
+                Categories
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-3">sports_kabaddi</span>
+                Rings
+            </a>
+<a class="flex items-center px-4 py-3 text-on-surface-variant dark:text-surface-variant hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors font-body-md text-body-md" href="#">
+<span class="material-symbols-outlined mr-3">settings</span>
+                Settings
+            </a>
+</nav>
+<div class="p-4 border-t border-outline-variant"><div class="flex items-center gap-3 px-2">
+<img alt="Tournament Admin Profile" class="w-8 h-8 rounded-full bg-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCVdvA3jfjB40NFaogyGX7obhZS0t4WMlkVxyy2VBQc-qcipf09Bswd5dlqMy8WsxLG_drVQpXBQmlozyYWMTR8XhxE50e78DVfgLSUSF42pVCayA51vQ_30teStVfgZp_4wLdZEfF7XGgSep6C8J-p0gok2VaD2SIvArS-ZPTWLgY84enYuOosUjb23ZjMlaBUL4qr1mEwJz37UeddjMQ_zyxs3OgL_x0kyKWv-obT-XsD-WsRnhPz_rMrBW_YLmmurdwDMuKB4U">
+<div class="overflow-hidden">
+<p class="text-on-surface font-bold text-sm truncate">Alex Rivera</p>
+<p class="text-on-surface-variant text-[11px] truncate">Head Coordinator</p>
+</div>
+</div></div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar Component -->
+<header class="flex justify-between items-center w-full px-margin-desktop h-16 bg-surface dark:bg-background border-b border-outline-variant dark:border-outline shrink-0">
+<div class="flex items-center gap-6 flex-1"><div class="flex items-center gap-2 pr-4 border-outline-variant"><span class="material-symbols-outlined text-secondary text-sm">event</span><span class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">Elite Championship 2024</span></div></div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors rounded-full relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors rounded-full">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto p-margin-desktop space-y-8 custom-scrollbar">
+<!-- Page Header -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-primary">Categories</h2>
+<p class="text-on-surface-variant font-body-sm">Manage tournament divisions, brackets, and active ring assignments.</p>
+</div>
+<button class="bg-secondary text-on-secondary py-3 px-6 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-secondary/10 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined">add_circle</span>
+                    Add Category
+                </button>
+</div>
+<!-- Summary Stats: Bento Grid Style -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-xl flex items-center gap-5">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]">list_alt</span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px] tracking-widest">Total Categories</p>
+<p class="text-headline-lg font-display-lg leading-none mt-1">32</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-xl flex items-center gap-5 relative overflow-hidden">
+<div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[28px]">play_circle</span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px] tracking-widest">Currently Active</p>
+<p class="text-headline-lg font-display-lg leading-none mt-1">20</p>
+</div>
+<!-- Small decorative pattern -->
+<div class="absolute -right-4 -bottom-4 opacity-5">
+<span class="material-symbols-outlined text-[100px]" style="font-variation-settings: &quot;FILL&quot; 1;">category</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-xl flex items-center gap-5">
+<div class="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
+<span class="material-symbols-outlined text-[28px]">check_circle</span>
+</div>
+<div>
+<p class="text-on-surface-variant font-label-caps uppercase text-[10px] tracking-widest">Completed</p>
+<p class="text-headline-lg font-display-lg leading-none mt-1">12</p>
+</div>
+</div>
+</section>
+<!-- Table Section -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+<!-- Filters and Actions -->
+<div class="p-6 border-b border-outline-variant flex flex-wrap gap-4 items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="flex border border-outline-variant rounded-md overflow-hidden bg-surface-container-low">
+<button class="px-4 py-2 text-body-sm font-bold bg-white text-secondary shadow-sm">All</button>
+<button class="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">Active</button>
+<button class="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">Scheduled</button>
+<button class="px-4 py-2 text-body-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors">Completed</button>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-md text-body-sm hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                            Advanced Filters
+                        </button>
+</div>
+<div class="text-on-surface-variant text-body-sm font-medium">
+                        Showing 1-10 of 32 categories
+                    </div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="px-6 py-4 text-[11px] font-label-caps uppercase tracking-wider text-on-surface-variant border-b border-outline-variant">Category Name</th>
+<th class="px-6 py-4 text-[11px] font-label-caps uppercase tracking-wider text-on-surface-variant border-b border-outline-variant">Status</th>
+<th class="px-6 py-4 text-[11px] font-label-caps uppercase tracking-wider text-on-surface-variant border-b border-outline-variant">Assigned Ring</th>
+<th class="px-6 py-4 text-[11px] font-label-caps uppercase tracking-wider text-on-surface-variant border-b border-outline-variant">Progress</th>
+<th class="px-6 py-4 text-[11px] font-label-caps uppercase tracking-wider text-on-surface-variant border-b border-outline-variant text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface transition-colors">
+<td class="px-6 py-5">
+<p class="text-primary font-bold text-body-md">Senior Male Kumite -75kg</p>
+<p class="text-on-surface-variant text-[12px]">Elite Division • 32 Participants</p>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 font-label-caps text-[10px]">RUNNING</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-on-surface font-medium text-body-sm">Ring 01</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="w-48">
+<div class="flex justify-between mb-1">
+<span class="text-[11px] font-data-mono">18 / 31 matches</span>
+<span class="text-[11px] font-data-mono">58%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 58%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Manage Brackets">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+</button>
+<button class="px-3 py-1 text-secondary font-bold text-[12px] hover:underline" title="View Details">
+                                            Details
+                                        </button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface transition-colors">
+<td class="px-6 py-5">
+<p class="text-primary font-bold text-body-md">U16 Female Kata</p>
+<p class="text-on-surface-variant text-[12px]">Junior Division • 16 Participants</p>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-label-caps text-[10px]">PAUSED</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-on-surface font-medium text-body-sm">Ring 04</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="w-48">
+<div class="flex justify-between mb-1">
+<span class="text-[11px] font-data-mono">4 / 15 matches</span>
+<span class="text-[11px] font-data-mono">26%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 rounded-full" style="width: 26%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Manage Brackets">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+</button>
+<button class="px-3 py-1 text-secondary font-bold text-[12px] hover:underline" title="View Details">
+                                            Details
+                                        </button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface transition-colors">
+<td class="px-6 py-5">
+<p class="text-primary font-bold text-body-md">Veteran Male Kumite Open</p>
+<p class="text-on-surface-variant text-[12px]">Masters • 8 Participants</p>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px]">SCHEDULED</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<span class="text-on-surface-variant font-medium text-body-sm italic">Unassigned</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="w-48">
+<div class="flex justify-between mb-1">
+<span class="text-[11px] font-data-mono">0 / 7 matches</span>
+<span class="text-[11px] font-data-mono">0%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 0%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Manage Brackets">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+</button>
+<button class="px-3 py-1 text-secondary font-bold text-[12px] hover:underline" title="View Details">
+                                            Details
+                                        </button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface transition-colors bg-surface-container-low/30">
+<td class="px-6 py-5">
+<p class="text-on-primary-container font-bold text-body-md line-through opacity-70">Senior Female Kumite -55kg</p>
+<p class="text-on-surface-variant text-[12px]">Elite Division • 24 Participants</p>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-label-caps text-[10px]">COMPLETED</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-blue-400"></div>
+<span class="text-on-surface font-medium text-body-sm">Ring 03</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="w-48">
+<div class="flex justify-between mb-1">
+<span class="text-[11px] font-data-mono">23 / 23 matches</span>
+<span class="text-[11px] font-data-mono">100%</span>
+</div>
+<div class="h-1.5 w-full bg-blue-200 rounded-full overflow-hidden">
+<div class="h-full bg-blue-600 rounded-full" style="width: 100%"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<div class="flex items-center justify-end gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-surface-container text-on-surface-variant transition-colors" title="Manage Brackets">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+</button>
+<button class="px-3 py-1 text-secondary font-bold text-[12px] hover:underline" title="View Details">
+                                            Details
+                                        </button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-6 border-t border-outline-variant flex items-center justify-between">
+<button class="px-4 py-2 text-body-sm font-bold border border-outline-variant rounded-md hover:bg-surface transition-colors disabled:opacity-40" disabled="">
+                        Previous
+                    </button>
+<div class="flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center bg-secondary text-on-secondary rounded-md font-bold">1</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-high rounded-md font-medium transition-colors">2</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-high rounded-md font-medium transition-colors">3</button>
+<span class="w-10 h-10 flex items-center justify-center">...</span>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-high rounded-md font-medium transition-colors">8</button>
+</div>
+<button class="px-4 py-2 text-body-sm font-bold border border-outline-variant rounded-md hover:bg-surface transition-colors">
+                        Next
+                    </button>
+</div>
+</section>
+<!-- Bottom Informational Cards -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+
+<div class="bg-white border border-outline-variant p-card-padding rounded-xl flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-headline-sm text-headline-sm text-primary">System Health</h3>
+<span class="flex items-center gap-1 text-green-600 font-bold text-[12px]">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                LIVE
+                            </span>
+</div>
+<p class="text-on-surface-variant font-body-sm">All 4 active rings are currently communicating with the central database. Average latency: 24ms.</p>
+</div>
+<div class="mt-6 flex gap-4">
+<div class="flex-1 bg-surface rounded p-2 text-center border border-outline-variant/30">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Active Refs</p>
+<p class="font-data-mono text-lg">12</p>
+</div>
+<div class="flex-1 bg-surface rounded p-2 text-center border border-outline-variant/30">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Spectators</p>
+<p class="font-data-mono text-lg">1,204</p>
+</div>
+<div class="flex-1 bg-surface rounded p-2 text-center border border-outline-variant/30">
+<p class="text-[10px] uppercase font-bold text-on-surface-variant">Uptime</p>
+<p class="font-data-mono text-lg">04:12h</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<script>
+        // Micro-interaction for table rows
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // Future expansion: Row selection logic
+                console.log('Category selected');
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-secondary/20');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-secondary/20');
+        });
+    </script>
+
+
+
+
+
+
+
+
+</body></html>

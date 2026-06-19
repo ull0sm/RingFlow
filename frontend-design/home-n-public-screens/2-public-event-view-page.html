@@ -1,0 +1,308 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow - Public Live View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed-variant": "#003ea8",
+                      "surface-dim": "#d8dadc",
+                      "inverse-surface": "#2d3133",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#dae2fd",
+                      "on-error-container": "#93000a",
+                      "surface-variant": "#e0e3e5",
+                      "tertiary-container": "#271901",
+                      "on-secondary-container": "#fefcff",
+                      "secondary-fixed": "#dbe1ff",
+                      "secondary-container": "#316bf3",
+                      "error-container": "#ffdad6",
+                      "primary": "#000000",
+                      "surface-container-low": "#f2f4f6",
+                      "on-secondary": "#ffffff",
+                      "primary-fixed-dim": "#bec6e0",
+                      "surface-bright": "#f7f9fb",
+                      "on-tertiary-fixed-variant": "#574425",
+                      "on-primary-container": "#7c839b",
+                      "tertiary-fixed-dim": "#dec29a",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#45464d",
+                      "surface": "#f7f9fb",
+                      "tertiary": "#000000",
+                      "tertiary-fixed": "#fcdeb5",
+                      "on-tertiary-container": "#98805d",
+                      "surface-container": "#eceef0",
+                      "inverse-on-surface": "#eff1f3",
+                      "outline-variant": "#c6c6cd",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-primary": "#ffffff",
+                      "outline": "#76777d",
+                      "secondary-fixed-dim": "#b4c5ff",
+                      "on-surface": "#191c1e",
+                      "secondary": "#0051d5",
+                      "on-primary-fixed-variant": "#3f465c",
+                      "on-primary-fixed": "#131b2e",
+                      "on-background": "#191c1e",
+                      "on-secondary-fixed": "#00174b",
+                      "surface-container-high": "#e6e8ea",
+                      "inverse-primary": "#bec6e0",
+                      "primary-container": "#131b2e",
+                      "error": "#ba1a1a",
+                      "background": "#f7f9fb",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#565e74",
+                      "on-tertiary-fixed": "#271901"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "margin-desktop": "32px",
+                      "gutter": "16px",
+                      "margin-mobile": "16px",
+                      "card-padding": "20px"
+              },
+              "fontFamily": {
+                      "headline-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "data-mono": ["JetBrains Mono"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "label-caps-mobile": ["10px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        .progress-bar-fill {
+            transition: width 1s ease-in-out;
+        }
+        body {
+            background-color: #F8FAFC; /* Slate Tint Level 0 */
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-on-background min-h-screen">
+<!-- Top Navigation Shell -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest border-b border-outline-variant fixed top-0 w-full z-50 flex justify-between items-center h-16 px-4 md:px-margin-desktop">
+<div class="flex items-center gap-3 py-2">
+<span class="font-headline-lg text-headline-lg font-black text-primary dark:text-primary tracking-tighter">Ring Flow</span>
+
+</div>
+
+</header>
+<main class="px-4 md:px-margin-desktop max-w-7xl mx-auto py-6 mt-8">
+<!-- Search & Info Bar -->
+<div class="flex flex-col space-y-4 mb-6">
+
+<div class="flex items-center gap-3 py-6">
+  <div class="w-3 h-3 rounded-full bg-secondary status-pulse"></div>
+  <h1 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight font-black">Elite Championship 2024</h1>
+</div><div class="relative group">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-4 pl-12 pr-4 focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none font-body-md" placeholder="Search categories, athletes, or rings..." type="text">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+</div>
+</div>
+<!-- Dashboard Grid / Ring List -->
+<div class="space-y-4">
+<!-- Ring 1 - Running -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="bg-secondary px-card-padding py-3 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-headline-sm text-on-secondary">RING 1</span>
+<span class="bg-on-secondary/20 text-on-secondary px-2 py-0.5 rounded font-label-caps text-[10px]">MAT A</span>
+</div>
+<div class="flex items-center gap-2 bg-on-secondary text-secondary px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">play_arrow</span>
+<span class="font-label-caps text-label-caps">RUNNING</span>
+</div>
+</div>
+<div class="p-card-padding">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Men's Black Belt / -88kg</h3>
+<p class="font-body-sm text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="groups">groups</span>
+                                Quarter-Finals • Match 104 of 112
+                            </p>
+</div>
+
+</div>
+<!-- Progress Section -->
+<div class="mb-6">
+<div class="flex justify-between text-label-caps font-label-caps text-on-surface-variant mb-2">
+<span class="">MATCHES COMPLETED</span>
+<span class="text-secondary">8 MATCHES REMAINING</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary progress-bar-fill" style="width: 98%;"></div>
+</div>
+</div>
+<!-- Athletes in Ring -->
+<!-- Upcoming -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-caps text-label-caps text-outline">NEXT:</span>
+<span class="font-body-sm text-on-surface font-semibold">Women's Purple Belt / Open Weight</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Ring 2 - Paused -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="bg-surface-container-highest px-card-padding py-3 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-headline-sm text-on-surface">RING 2</span>
+<span class="bg-on-surface/10 text-on-surface px-2 py-0.5 rounded font-label-caps text-[10px]">MAT B</span>
+</div>
+<div class="flex items-center gap-2 bg-error-container text-on-error-container px-3 py-1 rounded-full border border-error/20">
+<span class="material-symbols-outlined text-[16px]" data-icon="pause" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">pause</span>
+<span class="font-label-caps text-label-caps">PAUSED</span>
+</div>
+</div>
+<div class="p-card-padding opacity-75">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Boys / Yellow Belt / -42kg</h3>
+<p class="font-body-sm text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="medical_services">medical_services</span>
+                                Medical Timeout • Match 32 of 45
+                            </p>
+</div>
+
+</div>
+<div class="mb-6">
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-error/40 progress-bar-fill" style="width: 81.6%;"></div>
+</div>
+</div>
+<!-- Upcoming -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-caps text-label-caps text-outline">NEXT:</span>
+<span class="font-body-sm text-on-surface font-semibold">Boys / Orange Belt / -42kg</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Ring 3 - Running -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="bg-secondary px-card-padding py-3 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="font-headline-sm text-headline-sm text-on-secondary">RING 3</span>
+<span class="bg-on-secondary/20 text-on-secondary px-2 py-0.5 rounded font-label-caps text-[10px]">MAT C</span>
+</div>
+<div class="flex items-center gap-2 bg-on-secondary text-secondary px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-[16px]" data-icon="play_arrow" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">play_arrow</span>
+<span class="font-label-caps text-label-caps">RUNNING</span>
+</div>
+</div>
+<div class="p-card-padding">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-1">Executive / Brown / Heavy</h3>
+<p class="font-body-sm text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="groups">groups</span>
+                                Semi-Finals • Match 08 of 12
+                            </p>
+</div>
+
+</div>
+<div class="mb-6">
+<div class="flex justify-between text-label-caps font-label-caps text-on-surface-variant mb-2">
+<span class="">MATCHES COMPLETED</span>
+<span class="text-secondary">4 MATCHES REMAINING</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary progress-bar-fill" style="width: 98%;"></div>
+</div>
+</div>
+<!-- Upcoming -->
+<div class="bg-surface-container-low rounded-lg p-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="font-label-caps text-label-caps text-outline">NEXT:</span>
+<span class="font-body-sm text-on-surface font-semibold">Masters / Black Belt / Heavy</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Info -->
+<div class="mt-8 text-center p-6 border-t border-outline-variant">
+<p class="text-on-surface-variant font-body-sm">All match times are estimates based on current ring speed.</p>
+<p class="text-outline font-label-caps text-[10px] mt-2 tracking-widest">POWERED BY RING FLOW V2.4</p>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Mobile Only) -->
+
+<!-- Micro-interaction Scripts -->
+<script>
+        // Simulate auto-refresh timer
+        let timeLeft = 8;
+        const indicator = document.querySelector('.font-data-mono');
+        
+        setInterval(() => {
+            timeLeft--;
+            if (timeLeft < 0) timeLeft = 10;
+            if (indicator) indicator.textContent = `Auto-refreshing in ${timeLeft}s`;
+        }, 1000);
+
+        // Dynamic progress update simulation
+        const bars = document.querySelectorAll('.progress-bar-fill');
+        setInterval(() => {
+            bars.forEach(bar => {
+                const currentWidth = parseFloat(bar.style.width);
+                if (currentWidth < 98) {
+                    bar.style.width = (currentWidth + 0.1) + '%';
+                }
+            });
+        }, 3000);
+    </script>
+
+
+
+
+
+
+</body></html>

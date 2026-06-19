@@ -1,0 +1,245 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow - Ring 3 Moderator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c6c6cd",
+                    "on-secondary-fixed-variant": "#003ea8",
+                    "inverse-surface": "#2d3133",
+                    "tertiary-container": "#271901",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#dae2fd",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#98805d",
+                    "on-secondary-fixed": "#00174b",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#fefcff",
+                    "surface-tint": "#565e74",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "on-surface-variant": "#45464d",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#000000",
+                    "on-surface": "#191c1e",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#fcdeb5",
+                    "on-tertiary-fixed": "#271901",
+                    "background": "#f7f9fb",
+                    "surface-container": "#eceef0",
+                    "surface-container-low": "#f2f4f6",
+                    "surface": "#f7f9fb",
+                    "secondary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-fixed-variant": "#574425",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "secondary-container": "#316bf3",
+                    "primary-container": "#131b2e",
+                    "on-error-container": "#93000a",
+                    "outline": "#76777d",
+                    "on-primary-fixed": "#131b2e",
+                    "tertiary-fixed-dim": "#dec29a",
+                    "surface-bright": "#f7f9fb",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#d8dadc",
+                    "surface-container-high": "#e6e8ea",
+                    "secondary-fixed": "#dbe1ff",
+                    "primary-fixed-dim": "#bec6e0",
+                    "on-primary-container": "#7c839b",
+                    "surface-container-highest": "#e0e3e5",
+                    "inverse-primary": "#bec6e0",
+                    "secondary": "#0051d5",
+                    "tertiary": "#000000"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-desktop": "32px",
+                    "margin-mobile": "16px",
+                    "card-padding": "20px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen pb-24">
+<!-- Top Navigation Bar (Mobile Variant) -->
+<header class="bg-surface-container-lowest h-16 flex justify-between items-center px-margin-mobile border-b border-outline-variant sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="font-headline-lg text-headline-lg font-black text-primary tracking-tighter">Ring Flow</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container transition-colors p-2 rounded-full">notifications</button>
+<div class="w-8 h-8 rounded-full bg-outline-variant overflow-hidden">
+<img alt="Administrator Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkKei7h1oJaVCdYhPfN1HhhRPwT8x4cZtJ9JtDyFIZVZgR93kGvE1nIBAvO5Uc2E53XU1oBaVEINpRrHETtoR7gD8DRF0s2eEb_6iGMv_eUJX7lvFBXH_un3pOrR6o7KNl-7xvqaykxzez36M3ZGWApXqX7J9mgWpoyz35lz8xEZU18HvOhoX4aVKIAX2sr4vuDMYVf9k0icNVe2wI8rnXxHjiky69Z63qsg2jYzPJjH1XKagxUjvXyqmqkfQgBh9ibIYe3eycIOA">
+</div>
+</div>
+</header>
+<main class="px-margin-mobile py-8 space-y-0"><!-- Header Status -->
+<div class="flex justify-between items-center mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Ring 3</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Moderator Dashboard</p>
+</div>
+<div class="flex items-center gap-2 bg-success/10 px-4 py-2 rounded-full border border-emerald-500/20 shadow-sm">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="font-label-caps text-label-caps text-emerald-700">● LIVE</span>
+</div>
+</div>
+<!-- Current Category Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding shadow-sm relative overflow-hidden mb-10">
+<div class="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">CURRENT CATEGORY</span>
+<h2 class="font-headline-sm text-headline-sm text-primary">Junior Kata</h2>
+</div>
+<div class="text-right">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">STARTED</span>
+<span class="font-data-mono text-data-mono text-secondary">10:42 AM</span>
+</div>
+</div>
+<!-- Progress Section -->
+<div class="space-y-3 mt-6">
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="font-semibold text-primary">12 / 20 <span class="font-normal text-on-surface-variant">Completed</span></span>
+<span class="text-secondary font-bold">60% Complete</span>
+</div>
+<div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full transition-all duration-500 ease-out" style="width: 60%"></div>
+</div>
+<div class="flex justify-between text-on-surface-variant font-label-caps text-label-caps pt-1">
+<span class="">8 REMAINING</span>
+<span class="">EST. 45M LEFT</span>
+</div>
+</div>
+</div>
+<!-- Match Adjustment Controls -->
+<section class="space-y-4 mb-10">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant px-1">MATCH ADJUSTMENT</h3>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm">
+<span class="font-headline-sm text-headline-sm text-primary">-1</span>
+</button>
+<button class="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm">
+<span class="font-headline-sm text-headline-sm text-primary">+1</span>
+</button>
+<button class="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">-5</span>
+</button>
+<button class="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">+5</span>
+</button>
+</div>
+</section>
+<!-- Primary Actions -->
+<div class="grid grid-cols-1 gap-4 pt-4 mb-10">
+<button class="w-full bg-surface-container-lowest border border-amber-500 text-amber-700 h-14 rounded-xl font-bold font-body-md flex items-center justify-center gap-2 active:bg-amber-50 transition-colors">
+<span class="material-symbols-outlined">pause_circle</span>
+Pause Ring
+</button>
+<button class="w-full bg-primary text-on-primary h-14 rounded-xl font-bold font-body-md flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined">check_circle</span>
+Complete Category
+</button>
+</div>
+<!-- Public Visibility Preview -->
+<div class="mt-8 bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary opacity-50">visibility</span>
+<div>
+<h4 class="font-label-caps text-label-caps text-on-surface-variant opacity-70">CURRENTLY LIVE TO PUBLIC</h4>
+<p class="font-body-sm text-body-sm text-on-surface">Ring 3 Status: <span class="text-emerald-600 font-semibold uppercase">Active - Junior Kata</span></p>
+</div>
+</div>
+</div></main>
+<!-- Bottom Navigation Bar (Contextual Filter Applied) -->
+<!-- Determined active tab: 'Current Ring' as per prompt context -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-surface-container-highest z-50 rounded-t-xl shadow-lg border-t border-outline-variant">
+<a class="flex flex-col items-center justify-center bg-secondary text-on-secondary rounded-full p-2 w-14 h-14 scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined active-tab-icon" data-icon="adjust">adjust</span>
+<span class="font-label-caps text-[10px] uppercase mt-0.5">Ring</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50 p-2 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="queue_play_next">queue_play_next</span>
+<span class="font-label-caps text-[10px] uppercase mt-1">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50 p-2 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-caps text-[10px] uppercase mt-1">Controls</span>
+</a>
+</nav>
+<script>
+        // Simple Micro-interaction for Button Feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.classList.add('opacity-80');
+            });
+            btn.addEventListener('touchend', function() {
+                this.classList.remove('opacity-80');
+            });
+        });
+
+        // Dynamic adjustment mock
+        let currentCompleted = 12;
+        const total = 20;
+        
+        function updateProgress(change) {
+            currentCompleted = Math.max(0, Math.min(total, currentCompleted + change));
+            const percentage = (currentCompleted / total) * 100;
+            // In a real app, this would update the DOM. 
+            // This script is here for potential future interactivity.
+        }
+    </script>
+
+
+</body></html>

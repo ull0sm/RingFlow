@@ -1,0 +1,438 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Balancing | Ring Flow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .drag-ghost {
+            opacity: 0.4;
+            border: 2px dashed #0051d5;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom scrollbar for horizontal rings */
+        .ring-scroll::-webkit-scrollbar {
+            height: 8px;
+        }
+        .ring-scroll::-webkit-scrollbar-track {
+            background: #eceef0;
+        }
+        .ring-scroll::-webkit-scrollbar-thumb {
+            background: #c6c6cd;
+            border-radius: 4px;
+        }
+        .ring-scroll::-webkit-scrollbar-thumb:hover {
+            background: #76777d;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-dim": "#d8dadc",
+                        "inverse-surface": "#2d3133",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e0e3e5",
+                        "tertiary-container": "#271901",
+                        "on-secondary-container": "#fefcff",
+                        "secondary-fixed": "#dbe1ff",
+                        "secondary-container": "#316bf3",
+                        "error-container": "#ffdad6",
+                        "primary": "#000000",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "surface-bright": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "on-primary-container": "#7c839b",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#45464d",
+                        "surface": "#f7f9fb",
+                        "tertiary": "#000000",
+                        "tertiary-fixed": "#fcdeb5",
+                        "on-tertiary-container": "#98805d",
+                        "surface-container": "#eceef0",
+                        "inverse-on-surface": "#eff1f3",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary": "#ffffff",
+                        "outline": "#76777d",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-surface": "#191c1e",
+                        "secondary": "#0051d5",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "on-primary-fixed": "#131b2e",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed": "#00174b",
+                        "surface-container-high": "#e6e8ea",
+                        "inverse-primary": "#bec6e0",
+                        "primary-container": "#131b2e",
+                        "error": "#ba1a1a",
+                        "background": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-tint": "#565e74",
+                        "on-tertiary-fixed": "#271901"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "card-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex overflow-hidden font-body-md">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-screen w-64 left-0 top-0 bg-surface-container-low border-r border-outline-variant py-6 px-4 space-y-2 shrink-0 z-20">
+<div class="mb-8 px-2">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Ring Flow</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-70">Elite Championship</p>
+</div>
+<nav class="flex-1 space-y-1"><a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span> Dashboard
+        </a>
+<a class="flex items-center gap-3 px-3 py-2 bg-secondary-container text-on-secondary-container rounded-lg font-bold font-label-caps text-label-caps scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="balance">balance</span> Ring Balancing
+        </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span> Categories
+        </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" data-icon="sports_martial_arts">sports_martial_arts</span> Rings
+        </a>
+<a class="flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span> Settings
+        </a></nav>
+
+
+<div class="pt-4 border-t border-outline-variant">
+<div class="flex items-center gap-3 px-2 py-2">
+<div class="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-on-secondary font-bold text-xs">AR</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-primary">Alex Rivera</span>
+<span class="text-[10px] text-on-surface-variant opacity-70">Tournament Admin</span>
+</div>
+</div>
+<a class="flex items-center gap-3 px-3 py-2 mt-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all font-label-caps text-label-caps" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span> Logout
+</a>
+</div></aside>
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-8 h-16 bg-surface-container-lowest border-b border-outline-variant shrink-0 z-10">
+<div class="flex items-center gap-6">
+<span class="font-headline-lg text-headline-lg font-black text-primary tracking-tighter">Ring Flow</span>
+<div class="h-8 w-[1px] bg-outline-variant"></div>
+<div class="flex items-center gap-2"><h2 class="font-headline-sm text-headline-sm text-primary">Ring Balancing</h2><span class="text-outline-variant">/</span><span class="text-on-surface-variant font-label-caps text-label-caps opacity-70">Elite Championship 2024</span></div>
+</div>
+<div class="flex items-center gap-4">
+
+
+
+</div>
+</header>
+<!-- Tournament Overview Bar -->
+<div class="bg-primary text-on-primary px-8 py-3 flex items-center justify-between shrink-0 shadow-lg z-10">
+<div class="flex items-center gap-10">
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps opacity-60">TOTAL RINGS</span>
+<span class="font-data-mono text-lg font-bold">12 ACTIVE</span>
+</div>
+<div class="h-6 w-[1px] bg-white/20"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps opacity-60">TOTAL WORKLOAD</span>
+<span class="font-data-mono text-lg font-bold text-secondary-fixed">54h 45m</span>
+</div>
+<div class="h-6 w-[1px] bg-white/20"></div>
+<div class="flex flex-col">
+<span class="text-[10px] font-label-caps opacity-60">AVERAGE LOAD</span>
+<span class="font-data-mono text-lg font-bold text-green-400">4h 34m</span>
+</div>
+</div>
+<div class="flex gap-3">
+
+<button class="p-2 border border-white/20 rounded hover:bg-white/10 material-symbols-outlined" data-icon="more_vert">more_vert</button>
+</div>
+</div>
+<!-- Main Content Area -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Persistent Left Sidebar: Unassigned -->
+<section class="w-80 flex flex-col bg-surface-container-lowest border-r border-outline-variant shrink-0">
+<div class="p-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+<h3 class="font-label-caps text-label-caps text-primary">Unassigned Categories</h3>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-data-mono text-[10px]">12 ITEMS</span>
+</div>
+
+<div class="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide bg-surface-container-lowest">
+<!-- Compact Category Card -->
+<div class="p-4 bg-white border border-outline-variant rounded-xl hover:border-secondary cursor-grab active:cursor-grabbing transition-all group shadow-sm" draggable="true">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-secondary-fixed/30 text-secondary rounded font-label-caps text-[10px] font-bold">U18 KATA</span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-secondary text-sm" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<h4 class="font-headline-sm text-sm text-primary mb-3">Male Advanced +75kg</h4>
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/30">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 font-data-mono text-[11px]"><span class="material-symbols-outlined text-[14px] text-outline" data-icon="group">group</span> 24</span>
+<span class="flex items-center gap-1 font-data-mono text-[11px]"><span class="material-symbols-outlined text-[14px] text-outline" data-icon="format_list_numbered">format_list_numbered</span> 12</span>
+</div>
+<span class="font-data-mono text-xs font-bold px-2 py-0.5 bg-primary text-on-primary rounded">1h 15m</span>
+</div>
+</div>
+<div class="p-4 bg-white border border-outline-variant rounded-xl hover:border-secondary cursor-grab active:cursor-grabbing transition-all group shadow-sm" draggable="true">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-0.5 bg-error-container text-error rounded font-label-caps text-[10px] font-bold">U14 KUMITE</span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-secondary text-sm" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<h4 class="font-headline-sm text-sm text-primary mb-3">Female Open Weight</h4>
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/30">
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1 font-data-mono text-[11px]"><span class="material-symbols-outlined text-[14px] text-outline" data-icon="group">group</span> 32</span>
+<span class="flex items-center gap-1 font-data-mono text-[11px]"><span class="material-symbols-outlined text-[14px] text-outline" data-icon="format_list_numbered">format_list_numbered</span> 16</span>
+</div>
+<span class="font-data-mono text-xs font-bold px-2 py-0.5 bg-error text-on-error rounded">2h 40m</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Horizontal Scrollable Ring Grid -->
+<section class="flex-1 overflow-x-auto ring-scroll bg-surface-container-low flex p-6 gap-6 items-start">
+<!-- Ring Column Template -->
+<!-- Ring 1: Optimum -->
+<div class="w-72 shrink-0 flex flex-col bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm h-full">
+<!-- Sticky Header -->
+<div class="sticky top-0 z-10 p-4 bg-primary text-on-primary flex justify-between items-center shrink-0">
+<div>
+<h4 class="font-headline-sm text-lg tracking-tight leading-none mb-1">RING 01</h4>
+<span class="text-[9px] font-label-caps text-secondary-fixed">OPTIMUM CAPACITY</span>
+</div>
+<span class="material-symbols-outlined opacity-50" data-icon="drag_handle">drag_handle</span>
+</div>
+<!-- Workload Badge Section -->
+<div class="p-4 bg-secondary/5 border-b border-outline-variant flex flex-col items-center">
+<span class="text-[10px] font-label-caps text-secondary font-bold mb-1">CURRENT WORKLOAD</span>
+<span class="font-data-mono text-3xl font-black text-secondary leading-none">1h 10m</span>
+</div>
+<!-- Compact Categories Scroll Area -->
+<div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-hide">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-lg hover:border-secondary transition-colors">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[9px] font-bold text-secondary uppercase tracking-wider">KATA</span>
+<span class="font-data-mono text-[10px] font-bold">1h 10m</span>
+</div>
+<h5 class="text-xs font-bold text-primary mb-2">U16 Female Adv</h5>
+<div class="flex gap-4 text-[10px] font-data-mono text-outline">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="group">group</span> 22</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="format_list_numbered">format_list_numbered</span> 14</span>
+</div>
+</div>
+</div>
+<!-- Drop Zone -->
+<div class="m-3 p-6 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center bg-surface-container-low/50 group hover:border-secondary hover:bg-secondary/5 transition-all">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary mb-2" data-icon="add_circle">add_circle</span>
+<p class="text-[9px] font-label-caps text-outline text-center">DRAG HERE</p>
+</div>
+</div>
+<!-- Ring 2: Overloaded -->
+<div class="w-72 shrink-0 flex flex-col bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm h-full">
+<div class="sticky top-0 z-10 p-4 bg-error text-on-error flex justify-between items-center shrink-0">
+<div>
+<h4 class="font-headline-sm text-lg tracking-tight leading-none mb-1">RING 02</h4>
+<span class="text-[9px] font-label-caps text-white/70">OVERLOADED (&gt;6H)</span>
+</div>
+<span class="material-symbols-outlined opacity-50" data-icon="warning">warning</span>
+</div>
+<div class="p-4 bg-error/5 border-b border-outline-variant flex flex-col items-center">
+<span class="text-[10px] font-label-caps text-error font-bold mb-1">CURRENT WORKLOAD</span>
+<span class="font-data-mono text-3xl font-black text-error leading-none">7h 00m</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-hide">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-lg">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[9px] font-bold text-error uppercase tracking-wider">KUMITE</span>
+<span class="font-data-mono text-[10px] font-bold">3h 20m</span>
+</div>
+<h5 class="text-xs font-bold text-primary mb-2">U18 Male +84kg</h5>
+<div class="flex gap-4 text-[10px] font-data-mono text-outline">
+<span class="flex items-center gap-1 font-bold text-error"><span class="material-symbols-outlined text-[12px]" data-icon="group">group</span> 40</span>
+<span class="flex items-center gap-1 font-bold text-error"><span class="material-symbols-outlined text-[12px]" data-icon="format_list_numbered">format_list_numbered</span> 28</span>
+</div>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-lg">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[9px] font-bold text-error uppercase tracking-wider">KUMITE</span>
+<span class="font-data-mono text-[10px] font-bold">3h 40m</span>
+</div>
+<h5 class="text-xs font-bold text-primary mb-2">Senior Male Open</h5>
+<div class="flex gap-4 text-[10px] font-data-mono text-outline">
+<span class="flex items-center gap-1 font-bold text-error"><span class="material-symbols-outlined text-[12px]" data-icon="group">group</span> 32</span>
+<span class="flex items-center gap-1 font-bold text-error"><span class="material-symbols-outlined text-[12px]" data-icon="format_list_numbered">format_list_numbered</span> 32</span>
+</div>
+</div>
+</div>
+<div class="m-3 p-6 border-2 border-dashed border-outline-variant/30 rounded-xl flex flex-col items-center justify-center bg-surface-container-low/50 group hover:border-secondary transition-all">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary mb-2" data-icon="add_circle">add_circle</span>
+<p class="text-[9px] font-label-caps text-outline text-center">DRAG HERE</p>
+</div>
+</div>
+<!-- Ring 3: Empty/Add Zone -->
+<div class="w-72 shrink-0 flex flex-col bg-surface-container-low border border-dashed border-outline-variant/50 rounded-xl overflow-hidden h-full">
+<div class="p-4 bg-surface-container-highest/50 flex justify-between items-center shrink-0">
+<h4 class="font-headline-sm text-lg text-outline">RING 03</h4>
+<span class="material-symbols-outlined text-outline" data-icon="add">add</span>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+<div class="w-16 h-16 rounded-full border-4 border-dashed border-outline-variant flex items-center justify-center text-outline group-hover:border-secondary hover:text-secondary cursor-pointer transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="post_add">post_add</span>
+</div>
+<p class="font-label-caps text-[10px] text-outline leading-relaxed uppercase tracking-widest">Available Ring<br>Drag items here</p>
+</div>
+</div>
+<!-- Repeated Rings for Scroll demonstration -->
+<div class="w-72 shrink-0 flex flex-col bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm h-full">
+<div class="sticky top-0 z-10 p-4 bg-primary text-on-primary flex justify-between items-center shrink-0">
+<div>
+<h4 class="font-headline-sm text-lg tracking-tight leading-none mb-1">RING 04</h4>
+<span class="text-[9px] font-label-caps text-secondary-fixed">NEAR CAPACITY (AMBER)</span>
+</div>
+</div>
+<div class="p-4 bg-amber-500/10 border-b border-outline-variant flex flex-col items-center">
+<span class="text-[10px] font-label-caps text-amber-600 font-bold mb-1">CURRENT WORKLOAD</span>
+<span class="font-data-mono text-3xl font-black text-amber-600 leading-none">5h 15m</span>
+</div>
+<div class="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-hide">
+<div class="p-3 bg-surface-container-lowest border border-outline-variant rounded-lg">
+<p class="text-[9px] font-bold text-secondary uppercase tracking-wider mb-1">KATA</p>
+<h5 class="text-xs font-bold text-primary mb-2">U12 Mixed Team</h5>
+<div class="flex justify-between items-center">
+<div class="flex gap-3 text-[10px] font-data-mono text-outline">
+<span class="">60 A</span>
+<span class="">20 M</span>
+</div>
+<span class="font-data-mono text-[10px] font-bold">2h 15m</span>
+</div>
+</div>
+</div>
+</div>
+<div class="w-72 shrink-0 flex flex-col bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm h-full opacity-60">
+<div class="p-4 bg-primary text-on-primary flex justify-between items-center shrink-0">
+<h4 class="font-headline-sm text-lg">RING 05</h4>
+</div>
+<div class="p-4 bg-green-500/10 border-b border-outline-variant flex flex-col items-center">
+<span class="font-data-mono text-3xl font-black text-green-600">0h 50m</span>
+</div>
+<div class="flex-1 p-3">
+<div class="p-3 border border-outline-variant rounded-lg bg-surface-container-lowest">
+<h5 class="text-xs font-bold truncate">Senior Kata 50+</h5>
+</div>
+</div>
+</div>
+<!-- Placeholder for Ring 6-10+ -->
+<div class="w-72 shrink-0 flex flex-col items-center justify-center bg-surface-container-highest/20 border border-outline-variant rounded-xl h-full border-dashed">
+<span class="font-headline-lg text-outline/20">RING 06...12</span>
+</div>
+</section>
+</div>
+<!-- Bottom Status Bar -->
+<footer class="h-10 bg-surface-container-highest border-t border-outline-variant px-8 flex items-center justify-between shrink-0 z-10">
+<div class="flex gap-6 items-center">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">System Live</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-outline" data-icon="sync">sync</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant">Last balanced 2m ago</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex gap-3 items-center mr-4 border-r border-outline-variant pr-4">
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-[9px] font-label-caps opacity-70">OPTIMUM</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-amber-500"></div>
+<span class="text-[9px] font-label-caps opacity-70">WARNING</span>
+</div>
+<div class="flex items-center gap-1.5">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="text-[9px] font-label-caps opacity-70">OVERLOAD</span>
+</div>
+</div>
+<span class="font-data-mono text-[11px] text-on-surface-variant">
+                SESSION ESTIMATE: <span class="font-bold text-primary">11h 15m</span>
+</span>
+</div>
+</footer>
+</main>
+<script>
+    // Drag and drop visual simulation
+    const draggables = document.querySelectorAll('[draggable="true"]');
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', () => {
+            draggable.classList.add('drag-ghost');
+        });
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('drag-ghost');
+        });
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

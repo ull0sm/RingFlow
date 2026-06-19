@@ -1,0 +1,288 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring 3 - Controls | Ring Flow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c6c6cd",
+                    "on-secondary-fixed-variant": "#003ea8",
+                    "inverse-surface": "#2d3133",
+                    "tertiary-container": "#271901",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#dae2fd",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#98805d",
+                    "on-secondary-fixed": "#00174b",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#fefcff",
+                    "surface-tint": "#565e74",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "on-surface-variant": "#45464d",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-lowest": "#ffffff",
+                    "primary": "#000000",
+                    "on-surface": "#191c1e",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed": "#fcdeb5",
+                    "on-tertiary-fixed": "#271901",
+                    "background": "#f7f9fb",
+                    "surface-container": "#eceef0",
+                    "surface-container-low": "#f2f4f6",
+                    "surface": "#f7f9fb",
+                    "secondary-fixed-dim": "#b4c5ff",
+                    "on-tertiary-fixed-variant": "#574425",
+                    "on-primary-fixed-variant": "#3f465c",
+                    "secondary-container": "#316bf3",
+                    "primary-container": "#131b2e",
+                    "on-error-container": "#93000a",
+                    "outline": "#76777d",
+                    "on-primary-fixed": "#131b2e",
+                    "tertiary-fixed-dim": "#dec29a",
+                    "surface-bright": "#f7f9fb",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#d8dadc",
+                    "surface-container-high": "#e6e8ea",
+                    "secondary-fixed": "#dbe1ff",
+                    "primary-fixed-dim": "#bec6e0",
+                    "on-primary-container": "#7c839b",
+                    "surface-container-highest": "#e0e3e5",
+                    "inverse-primary": "#bec6e0",
+                    "secondary": "#0051d5",
+                    "tertiary": "#000000"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-desktop": "32px",
+                    "margin-mobile": "16px",
+                    "card-padding": "20px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "display-lg": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "data-mono": ["JetBrains Mono"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-tab {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-margin-desktop h-16 sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<span class="font-headline-lg text-headline-lg font-black text-primary dark:text-primary tracking-tighter">Ring Flow</span>
+<div class="hidden md:flex gap-6 ml-8">
+<a class="text-on-surface-variant font-medium hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors px-3 py-1 rounded-lg" href="#">Dashboard</a>
+<a class="text-secondary font-bold border-b-2 border-secondary pb-1" href="#">Moderation</a>
+<a class="text-on-surface-variant font-medium hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors px-3 py-1 rounded-lg" href="#">Schedules</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container px-4 py-2 rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-48" placeholder="Search matches..." type="text">
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container p-2 rounded-full">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container p-2 rounded-full">settings</span>
+<img alt="Administrator Profile" class="w-10 h-10 rounded-full border border-outline-variant object-cover" data-alt="A professional headshot of a tournament director in a modern, well-lit environment. The lighting is crisp and cinematic, emphasizing a professional and authoritative look suitable for a high-stakes martial arts event management platform. The color palette is composed of clean whites and soft grays, matching a corporate and technologically advanced aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0IA9NLKZWrM1qUklmLuJ0nI5n1BxvwD0gv9Zg96PjCbBGUk2Jo592nzn-g4xHa1uMq1469sBJIHL0L58oYlBAsGBCUvBo2VpFZSjPozmyKc57Ke1JEIETS39hGwrQBuf8CNdX0AmxTXurvht-NjnH-nEk_RprEPDIb7gDd0mBIryX3DjYNutHNbgCeMM1Brjq5h4hIy6NE3jRLCXjRgjEulK7SF_PKP11VljXwmujeTt7kDlU_SmAVvHBsSkRSG6B377U248nGkw">
+</div>
+</header>
+<main class="max-w-4xl mx-auto p-4 md:p-8 pb-32">
+<!-- Page Header -->
+<div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 items-start">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-primary mb-1">Ring 3 - Controls</h1>
+<p class="text-on-surface-variant font-body-sm">Tournament Control Center • Arena 1</p>
+</div>
+<!-- Ring Status Section -->
+<div class="bg-white border border-outline-variant rounded-xl p-4 flex items-center gap-4 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="flex h-3 w-3 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
+</span>
+<span class="font-label-caps text-label-caps text-green-700">Status: ● Running</span>
+</div>
+<div class="h-8 w-px bg-outline-variant"></div>
+<div class="font-data-mono text-data-mono text-primary bg-surface-container px-3 py-1 rounded">
+                    M: 104 | 02:45
+                </div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Pause Ring Section -->
+<section class="space-y-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface px-1">Control Operations</h2>
+<div class="bg-white border border-outline-variant rounded-xl p-card-padding">
+<button class="w-full bg-secondary text-on-secondary font-label-caps text-label-caps py-4 rounded-lg flex items-center justify-center gap-3 active:scale-95 transition-transform" onclick="togglePauseMenu()">
+<span class="material-symbols-outlined">pause_circle</span>
+                        PAUSE RING
+                    </button>
+<div class="hidden mt-6 space-y-2 border-t border-outline-variant pt-4 animate-in fade-in slide-in-from-top-2 duration-300" id="pauseReasons">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-3">SELECT REASON FOR PAUSE</p>
+<div class="grid grid-cols-1 gap-2">
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Injury
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">chevron_right</span>
+</button>
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Medical Assistance
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">medical_services</span>
+</button>
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Technical Problem
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">settings</span>
+</button>
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Referee Delay
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">timer</span>
+</button>
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Equipment Issue
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">fitness_center</span>
+</button>
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Admin Request
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">person</span>
+</button>
+<button class="text-left px-4 py-3 bg-surface-container-low hover:bg-surface-container rounded-lg font-body-md transition-colors flex items-center justify-between group">
+                                Other
+                                <span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Emergency Alert -->
+<div class="bg-error-container border border-error/20 rounded-xl p-card-padding mt-4">
+<button class="w-full bg-error text-on-error font-headline-lg text-headline-lg py-12 rounded-xl flex flex-col items-center justify-center gap-4 hover:brightness-95 active:scale-95 transition-all shadow-lg ring-4 ring-error/20">
+<span class="material-symbols-outlined text-5xl" data-weight="fill">emergency_home</span>
+                        EMERGENCY
+                    </button>
+<p class="text-on-error-container text-body-sm text-center mt-4 font-medium italic opacity-80">
+                        This action notifies the Event Director, Medical Lead, and Security immediately.
+                    </p>
+</div>
+</section>
+<!-- Request Assistance Section -->
+<section class="space-y-4">
+<h2 class="font-headline-sm text-headline-sm text-on-surface px-1">Request Assistance</h2>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-secondary-container/5 hover:border-secondary transition-all active:scale-95 group aspect-square">
+<span class="material-symbols-outlined text-secondary text-3xl transition-transform group-hover:scale-110">medical_information</span>
+<span class="font-label-caps text-label-caps">Doctor</span>
+</button>
+<button class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-secondary-container/5 hover:border-secondary transition-all active:scale-95 group aspect-square">
+<span class="material-symbols-outlined text-secondary text-3xl transition-transform group-hover:scale-110">engineering</span>
+<span class="font-label-caps text-label-caps">Technical Support</span>
+</button>
+<button class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-secondary-container/5 hover:border-secondary transition-all active:scale-95 group aspect-square">
+<span class="material-symbols-outlined text-secondary text-3xl transition-transform group-hover:scale-110">badge</span>
+<span class="font-label-caps text-label-caps">Admin</span>
+</button>
+<button class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-secondary-container/5 hover:border-secondary transition-all active:scale-95 group aspect-square">
+<span class="material-symbols-outlined text-secondary text-3xl transition-transform group-hover:scale-110">security</span>
+<span class="font-label-caps text-label-caps">Security</span>
+</button>
+<button class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-secondary-container/5 hover:border-secondary transition-all active:scale-95 group aspect-square">
+<span class="material-symbols-outlined text-secondary text-3xl transition-transform group-hover:scale-110">fitness_center</span>
+<span class="font-label-caps text-label-caps">Equipment</span>
+</button>
+<button class="bg-white border border-outline-variant p-6 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-secondary-container/5 hover:border-secondary transition-all active:scale-95 group aspect-square">
+<span class="material-symbols-outlined text-secondary text-3xl transition-transform group-hover:scale-110">directions_run</span>
+<span class="font-label-caps text-label-caps">Runner / Volunteer</span>
+</button>
+</div>
+<!-- Recent Activity Context (Atmospheric) -->
+<div class="bg-surface-container-low rounded-xl p-card-padding border border-outline-variant/50">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">RECENT ALERTS</span>
+<span class="material-symbols-outlined text-outline">history</span>
+</div>
+<div class="space-y-6">
+<div class="flex gap-3">
+<span class="font-data-mono text-data-mono text-outline shrink-0 opacity-60">14:32</span>
+<p class="text-body-sm text-on-surface">Match 103 Completed (Winner: Silva)</p>
+</div>
+<div class="flex gap-3">
+<span class="font-data-mono text-data-mono text-outline shrink-0 opacity-60">14:10</span>
+<p class="text-body-sm text-on-surface">Technical Support requested (Resolved)</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 bg-surface-container-highest shadow-lg border-t border-outline-variant z-50 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50 p-2 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined size-6">radio_button_checked</span>
+<span class="font-label-caps text-[10px] mt-1">Current Ring</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-secondary-container/50 p-2 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined size-6">list_alt</span>
+<span class="font-label-caps text-[10px] mt-1">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary text-on-secondary rounded-full p-2 w-12 h-12 scale-110 ring-4 ring-surface-container-highest transition-transform" href="#">
+<span class="material-symbols-outlined size-6 active-tab">settings</span>
+<span class="sr-only">Ring Controls</span>
+</a>
+</nav>
+<script>
+        function togglePauseMenu() {
+            const menu = document.getElementById('pauseReasons');
+            menu.classList.toggle('hidden');
+            if(!menu.classList.contains('hidden')) {
+                menu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Simple button active state feedback
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.classList.add('opacity-80');
+                setTimeout(() => this.classList.remove('opacity-80'), 150);
+            });
+        });
+    </script>
+
+
+</body></html>

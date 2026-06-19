@@ -1,0 +1,492 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow - Tournament Setup Wizard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#000000",
+                        "error-container": "#ffdad6",
+                        "background": "#f7f9fb",
+                        "surface-container-low": "#f2f4f6",
+                        "on-secondary-fixed": "#00174b",
+                        "primary-fixed-dim": "#bec6e0",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#98805d",
+                        "on-background": "#191c1e",
+                        "inverse-surface": "#2d3133",
+                        "secondary-container": "#316bf3",
+                        "inverse-primary": "#bec6e0",
+                        "surface-container": "#eceef0",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "secondary": "#0051d5",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-dim": "#d8dadc",
+                        "primary": "#000000",
+                        "surface-bright": "#f7f9fb",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-tertiary-fixed": "#271901",
+                        "on-primary-container": "#7c839b",
+                        "outline-variant": "#c6c6cd",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary": "#ffffff",
+                        "primary-fixed": "#dae2fd",
+                        "tertiary-container": "#271901",
+                        "on-surface-variant": "#45464d",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#76777d",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "primary-container": "#131b2e",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#565e74",
+                        "tertiary-fixed": "#fcdeb5",
+                        "surface": "#f7f9fb"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "4px",
+                        "lg": "4px",
+                        "xl": "4px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "16px",
+                        "margin-desktop": "32px",
+                        "unit": "4px",
+                        "card-padding": "20px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono"],
+                        "headline-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { background-color: #f7f9fb; font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .step-transition { transition: all 0.3s ease-in-out; }
+        .wizard-container { max-width: 900px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest border-b border-outline-variant flex justify-between items-center w-full px-margin-desktop h-16 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">Ring Flow</span>
+<div class="h-6 w-px bg-outline-variant mx-2"></div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Setup Wizard</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full" title="Notifications">notifications</button>
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full" title="Account">account_circle</button>
+</div>
+</header>
+<main class="min-h-[calc(100vh-64px)] py-12 px-margin-mobile md:px-margin-desktop">
+<div class="wizard-container mx-auto">
+<!-- Progress Tracker -->
+<nav class="mb-12">
+<ol class="flex items-center w-full">
+<li class="flex w-full items-center text-secondary after:content-[''] after:w-full after:h-1 after:border-b after:border-secondary after:border-4 after:inline-block">
+<span class="flex items-center justify-center w-10 h-10 bg-secondary text-white rounded-full lg:h-12 lg:w-12 shrink-0">
+<span class="material-symbols-outlined">info</span>
+</span>
+<div class="absolute mt-16 ml-[-10px] hidden md:block">
+<p class="font-label-caps text-label-caps text-secondary whitespace-nowrap">Step 1: Info</p>
+</div>
+</li>
+<li class="flex w-full items-center after:content-[''] after:w-full after:h-1 after:border-b after:border-outline-variant after:border-4 after:inline-block text-on-surface-variant" id="step-line-2">
+<span class="flex items-center justify-center w-10 h-10 bg-surface-container-highest rounded-full lg:h-12 lg:w-12 shrink-0" id="step-bubble-2">
+<span class="material-symbols-outlined">category</span>
+</span>
+<div class="absolute mt-16 ml-[-10px] hidden md:block">
+<p class="font-label-caps text-label-caps text-on-surface-variant whitespace-nowrap">Step 2: Categories</p>
+</div>
+</li>
+<li class="flex items-center text-on-surface-variant" id="step-line-3">
+<span class="flex items-center justify-center w-10 h-10 bg-surface-container-highest rounded-full lg:h-12 lg:w-12 shrink-0" id="step-bubble-3">
+<span class="material-symbols-outlined">grid_view</span>
+</span>
+<div class="absolute mt-16 ml-[-40px] hidden md:block">
+<p class="font-label-caps text-label-caps text-on-surface-variant whitespace-nowrap">Step 3: Ring Setup</p>
+</div>
+</li>
+</ol>
+</nav>
+<!-- Wizard Content Canvas -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+<!-- Step 1: Basic Info -->
+<div class="step-transition p-8 flex-grow" id="step-1-content">
+<div class="mb-8">
+<h1 class="font-headline-lg text-headline-lg mb-2">Tournament Fundamentals</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Define the primary details for your event. This information will appear on official brackets and public displays.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Tournament Name</label>
+<input class="w-full h-12 px-4 border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body-md text-body-md" placeholder="e.g. 2024 Championship Finals" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Event Date</label>
+<div class="relative">
+<input class="w-full h-12 px-4 border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body-md text-body-md" type="date">
+</div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Venue Name</label>
+<input class="w-full h-12 px-4 border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body-md text-body-md" placeholder="e.g. Olympic Arena" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Location City</label>
+<input class="w-full h-12 px-4 border border-outline-variant rounded focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-body-md text-body-md" placeholder="City, Country" type="text">
+</div>
+</div>
+</div>
+<div class="mt-12 p-6 bg-surface-container border border-outline-variant rounded flex items-center gap-4">
+<div class="w-12 h-12 bg-secondary/10 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-sm">Official Sanctioning</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ensure your tournament follows the standard Ring Flow international ruleset.</p>
+</div>
+</div>
+</div>
+<!-- Step 2: Categories (Hidden by default) -->
+<div class="step-transition p-8 flex-grow hidden" id="step-2-content">
+<div class="mb-8 flex justify-between items-end">
+<div>
+<h1 class="font-headline-lg text-headline-lg mb-2">Division Management</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Configure the age groups and weight classes for this competition.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 border border-outline-variant hover:bg-surface-container-low rounded font-label-caps text-label-caps transition-colors">
+<span class="material-symbols-outlined text-[18px]">upload_file</span> IMPORT CSV
+                            </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white hover:opacity-90 rounded font-label-caps text-label-caps transition-opacity">
+<span class="material-symbols-outlined text-[18px]">add</span> ADD NEW
+                            </button>
+</div>
+</div>
+<div class="overflow-hidden border border-outline-variant rounded">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low border-b border-outline-variant">
+<tr>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Division Name</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Age Bracket</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Weight</th>
+<th class="px-6 py-4 font-label-caps text-label-caps text-on-surface-variant">Athletes</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-body-sm divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-bold">Men's Senior Elite</td>
+<td class="px-6 py-4">18 - 35</td>
+<td class="px-6 py-4">-75kg</td>
+<td class="px-6 py-4"><span class="bg-secondary-container/10 text-secondary px-2 py-1 rounded font-data-mono">12</span></td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-bold">Women's Senior Elite</td>
+<td class="px-6 py-4">18 - 35</td>
+<td class="px-6 py-4">-61kg</td>
+<td class="px-6 py-4"><span class="bg-secondary-container/10 text-secondary px-2 py-1 rounded font-data-mono">8</span></td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4 font-bold">Junior Boys A</td>
+<td class="px-6 py-4">14 - 15</td>
+<td class="px-6 py-4">-55kg</td>
+<td class="px-6 py-4"><span class="bg-secondary-container/10 text-secondary px-2 py-1 rounded font-data-mono">16</span></td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Step 3: Ring Setup (Hidden by default) -->
+<div class="step-transition p-8 flex-grow hidden" id="step-3-content">
+<div class="mb-8">
+<h1 class="font-headline-lg text-headline-lg mb-2">Arena Configuration</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Designate the number of active rings and assign initial divisions.</p>
+</div>
+<div class="flex flex-col gap-8">
+<div class="flex items-center gap-6 p-6 bg-surface-container-low border border-outline-variant rounded">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Total Mats / Rings</label>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 border border-outline rounded flex items-center justify-center hover:bg-surface-container-highest transition-colors" onclick="decrementRings()">-</button>
+<input class="w-16 h-10 border border-outline rounded text-center font-bold text-headline-sm" id="ring-count" readonly="" type="number" value="4">
+<button class="w-10 h-10 border border-outline rounded flex items-center justify-center hover:bg-surface-container-highest transition-colors" onclick="incrementRings()">+</button>
+</div>
+</div>
+<div class="h-12 w-px bg-outline-variant"></div>
+<div class="flex-grow">
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">Efficiency Rating</p>
+<div class="w-full bg-outline-variant h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full" style="width: 75%"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="ring-grid">
+<!-- Ring Card -->
+<div class="border border-outline-variant rounded p-5 bg-surface-container-lowest">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-secondary">RING 1</span>
+<span class="material-symbols-outlined text-outline-variant cursor-grab">drag_indicator</span>
+</div>
+<div class="space-y-3">
+<div class="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium">Men's Senior Elite -75kg</div>
+<div class="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium">Junior Boys A -55kg</div>
+<button class="w-full py-2 border border-dashed border-outline-variant text-on-surface-variant text-xs flex items-center justify-center gap-1 hover:bg-surface-container-low rounded transition-colors">
+<span class="material-symbols-outlined text-sm">add</span> ASSIGN
+                                    </button>
+</div>
+</div>
+<!-- Ring Card -->
+<div class="border border-outline-variant rounded p-5 bg-surface-container-lowest">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-secondary">RING 2</span>
+<span class="material-symbols-outlined text-outline-variant cursor-grab">drag_indicator</span>
+</div>
+<div class="space-y-3">
+<div class="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium">Women's Senior Elite -61kg</div>
+<button class="w-full py-2 border border-dashed border-outline-variant text-on-surface-variant text-xs flex items-center justify-center gap-1 hover:bg-surface-container-low rounded transition-colors">
+<span class="material-symbols-outlined text-sm">add</span> ASSIGN
+                                    </button>
+</div>
+</div>
+<!-- Ring Card -->
+<div class="border border-outline-variant rounded p-5 bg-surface-container-lowest">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-secondary">RING 3</span>
+<span class="material-symbols-outlined text-outline-variant cursor-grab">drag_indicator</span>
+</div>
+<div class="space-y-3">
+<div class="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium text-on-surface-variant/50 italic text-center py-4">No categories assigned</div>
+<button class="w-full py-2 border border-dashed border-outline-variant text-on-surface-variant text-xs flex items-center justify-center gap-1 hover:bg-surface-container-low rounded transition-colors">
+<span class="material-symbols-outlined text-sm">add</span> ASSIGN
+                                    </button>
+</div>
+</div>
+<!-- Ring Card -->
+<div class="border border-outline-variant rounded p-5 bg-surface-container-lowest">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-secondary">RING 4</span>
+<span class="material-symbols-outlined text-outline-variant cursor-grab">drag_indicator</span>
+</div>
+<div class="space-y-3">
+<div class="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium text-on-surface-variant/50 italic text-center py-4">No categories assigned</div>
+<button class="w-full py-2 border border-dashed border-outline-variant text-on-surface-variant text-xs flex items-center justify-center gap-1 hover:bg-surface-container-low rounded transition-colors">
+<span class="material-symbols-outlined text-sm">add</span> ASSIGN
+                                    </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="border-t border-outline-variant p-6 bg-surface-container-lowest flex justify-between items-center mt-auto">
+<button class="px-8 h-12 border border-outline-variant font-label-caps text-label-caps hover:bg-surface-container-low transition-colors opacity-0 pointer-events-none" id="back-btn" onclick="prevStep()">
+                        BACK
+                    </button>
+<div class="flex gap-4">
+<button class="px-8 h-12 text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-low transition-colors">
+                            SAVE DRAFT
+                        </button>
+<button class="px-10 h-12 bg-primary text-white font-label-caps text-label-caps hover:opacity-90 transition-opacity" id="next-btn" onclick="nextStep()">
+                            NEXT STEP
+                        </button>
+</div>
+</div>
+</div>
+<!-- Contextual Help -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-4 bg-transparent border border-outline-variant/50 rounded flex gap-4">
+<span class="material-symbols-outlined text-secondary">help_outline</span>
+<div>
+<p class="font-label-caps text-label-caps mb-1">Documentation</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">View the Ring Flow rulebook for weight class guidance.</p>
+</div>
+</div>
+<div class="p-4 bg-transparent border border-outline-variant/50 rounded flex gap-4">
+<span class="material-symbols-outlined text-secondary">support_agent</span>
+<div>
+<p class="font-label-caps text-label-caps mb-1">Live Support</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Chat with a tournament coordinator for assistance.</p>
+</div>
+</div>
+<div class="p-4 bg-transparent border border-outline-variant/50 rounded flex gap-4">
+<span class="material-symbols-outlined text-secondary">history</span>
+<div>
+<p class="font-label-caps text-label-caps mb-1">Templates</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Load configuration from your previous tournaments.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Global Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant flex justify-between items-center w-full px-margin-desktop py-4 mt-auto">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">© 2024 Martial Arts Management Systems. All Rights Reserved.</span>
+<div class="flex gap-8">
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#">Support</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#">Documentation</a>
+<a class="font-body-sm text-body-sm text-on-surface-variant hover:text-secondary transition-colors" href="#">Privacy Policy</a>
+</div>
+</footer>
+<script>
+        let currentStep = 1;
+        const maxSteps = 3;
+
+        function updateUI() {
+            // Hide all steps
+            for (let i = 1; i <= maxSteps; i++) {
+                document.getElementById(`step-${i}-content`).classList.add('hidden');
+            }
+            // Show current step
+            document.getElementById(`step-${currentStep}-content`).classList.remove('hidden');
+
+            // Update Progress Tracker
+            const bubble2 = document.getElementById('step-bubble-2');
+            const line2 = document.getElementById('step-line-2');
+            const bubble3 = document.getElementById('step-bubble-3');
+            const line3 = document.getElementById('step-line-3');
+            const backBtn = document.getElementById('back-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (currentStep >= 2) {
+                bubble2.classList.remove('bg-surface-container-highest', 'text-on-surface-variant');
+                bubble2.classList.add('bg-secondary', 'text-white');
+                line2.classList.remove('after:border-outline-variant');
+                line2.classList.add('after:border-secondary', 'text-secondary');
+                backBtn.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                bubble2.classList.add('bg-surface-container-highest', 'text-on-surface-variant');
+                bubble2.classList.remove('bg-secondary', 'text-white');
+                line2.classList.add('after:border-outline-variant');
+                line2.classList.remove('after:border-secondary', 'text-secondary');
+                backBtn.classList.add('opacity-0', 'pointer-events-none');
+            }
+
+            if (currentStep >= 3) {
+                bubble3.classList.remove('bg-surface-container-highest', 'text-on-surface-variant');
+                bubble3.classList.add('bg-secondary', 'text-white');
+                line3.classList.remove('text-on-surface-variant');
+                line3.classList.add('text-secondary');
+                nextBtn.innerText = "COMPLETE SETUP";
+                nextBtn.classList.remove('bg-primary');
+                nextBtn.classList.add('bg-secondary');
+            } else {
+                bubble3.classList.add('bg-surface-container-highest', 'text-on-surface-variant');
+                bubble3.classList.remove('bg-secondary', 'text-white');
+                line3.classList.add('text-on-surface-variant');
+                line3.classList.remove('text-secondary');
+                nextBtn.innerText = "NEXT STEP";
+                nextBtn.classList.add('bg-primary');
+                nextBtn.classList.remove('bg-secondary');
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < maxSteps) {
+                currentStep++;
+                updateUI();
+            } else {
+                alert('Tournament Setup Complete! Redirecting to Dashboard...');
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function incrementRings() {
+            const input = document.getElementById('ring-count');
+            const val = parseInt(input.value);
+            if (val < 12) {
+                input.value = val + 1;
+                renderRings(val + 1);
+            }
+        }
+
+        function decrementRings() {
+            const input = document.getElementById('ring-count');
+            const val = parseInt(input.value);
+            if (val > 1) {
+                input.value = val - 1;
+                renderRings(val - 1);
+            }
+        }
+
+        function renderRings(count) {
+            const grid = document.getElementById('ring-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                grid.innerHTML += `
+                    <div class="border border-outline-variant rounded p-5 bg-surface-container-lowest">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-label-caps text-label-caps text-secondary">RING ${i}</span>
+                            <span class="material-symbols-outlined text-outline-variant cursor-grab">drag_indicator</span>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium text-on-surface-variant/50 italic text-center py-4">No categories assigned</div>
+                            <button class="w-full py-2 border border-dashed border-outline-variant text-on-surface-variant text-xs flex items-center justify-center gap-1 hover:bg-surface-container-low rounded transition-colors">
+                                <span class="material-symbols-outlined text-sm">add</span> ASSIGN
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body></html>

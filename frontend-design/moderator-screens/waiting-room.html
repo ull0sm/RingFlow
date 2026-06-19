@@ -1,0 +1,260 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow | Moderator Waiting Room</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "outline": "#76777d",
+                        "on-primary-fixed": "#131b2e",
+                        "tertiary-fixed-dim": "#dec29a",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "secondary-container": "#316bf3",
+                        "primary-container": "#131b2e",
+                        "on-error-container": "#93000a",
+                        "surface": "#f7f9fb",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "on-tertiary-fixed-variant": "#574425",
+                        "secondary": "#0051d5",
+                        "tertiary": "#000000",
+                        "surface-container-highest": "#e0e3e5",
+                        "inverse-primary": "#bec6e0",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed": "#dbe1ff",
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-primary-container": "#7c839b",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary-fixed": "#271901",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-container": "#eceef0",
+                        "background": "#f7f9fb",
+                        "on-surface-variant": "#45464d",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#fcdeb5",
+                        "on-surface": "#191c1e",
+                        "primary": "#000000",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#271901",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "inverse-surface": "#2d3133",
+                        "outline-variant": "#c6c6cd",
+                        "surface-tint": "#565e74",
+                        "on-background": "#191c1e",
+                        "on-secondary-container": "#fefcff",
+                        "on-secondary-fixed": "#00174b",
+                        "primary-fixed": "#dae2fd",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#98805d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "card-padding": "20px",
+                        "margin-mobile": "16px",
+                        "unit": "4px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 0.1; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+        .timer-glow {
+            text-shadow: 0 0 20px rgba(49, 107, 243, 0.3);
+        }
+        .grid-bg {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-md overflow-hidden">
+<!-- Top Navigation (Shell suppressed content but identity maintained) -->
+<header class="bg-surface border-b border-outline-variant flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-unit h-16 fixed top-0 z-50">
+<div class="text-headline-sm font-headline-sm font-bold text-primary">Ring Flow</div>
+<div class="flex items-center gap-4">
+<span class="text-label-caps font-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                ESTABLISHING SECURE CONNECTION
+            </span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center relative p-margin-mobile grid-bg">
+<!-- Background Atmospheric Element -->
+<div class="absolute inset-0 pointer-events-none opacity-20">
+</div>
+<!-- Waiting Card (Bento-style layout) -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant rounded shadow-sm z-10 transition-all duration-500 overflow-hidden max-w-md" id="main-container">
+<!-- Card Header: Status Bar -->
+<div class="bg-secondary-container text-on-secondary-container px-card-padding py-2 flex justify-between items-center transition-colors duration-300" id="status-header">
+<span class="text-label-caps font-label-caps" id="status-badge">PENDING APPROVAL</span>
+<span class="text-data-mono font-data-mono text-[10px]" id="request-id">REQ_ID: 8842-XF</span>
+</div>
+<!-- Card Body -->
+<div class="p-card-padding md:p-12 flex flex-col items-center text-center">
+<!-- Animated Loading Circle & Timer Container -->
+<div class="relative md:w-64 md:h-64 flex items-center justify-center mb-8 w-40 h-40">
+<!-- Subtle Pulse Ring -->
+<div class="absolute inset-0 border-4 border-secondary rounded-full pulse-ring" id="pulse-element"></div>
+<!-- Static Progress Track -->
+<div class="absolute inset-0 border-2 border-outline-variant rounded-full opacity-20"></div>
+<!-- Countdown Text -->
+<div class="flex flex-col items-center z-10">
+<div class="font-display-lg text-primary timer-glow font-data-mono text-headline-lg" id="timer-display">00:58</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant mt-2">SEC REMAINING</div>
+</div>
+</div>
+<!-- Primary Messaging -->
+<div id="messaging-area">
+<h1 class="font-headline-lg text-primary mb-4 text-headline-sm">Waiting for Admin Approval...</h1>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-md mx-auto leading-relaxed">
+                        Your request has been sent to the tournament director. Please stay on this screen to maintain your position in the queue.
+                    </p>
+</div>
+<!-- Footer Info -->
+<div class="mt-10 pt-8 border-t border-outline-variant w-full flex flex-col md:flex-row justify-around gap-6 items-start px-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+<div class="text-left">
+<div class="text-label-caps font-label-caps text-on-surface-variant">SECURITY</div>
+<div class="text-body-sm font-body-sm font-bold">End-to-End Encrypted</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="stadium" style="font-variation-settings: 'FILL' 1;">stadium</span>
+<div class="text-left">
+<div class="text-label-caps font-label-caps text-on-surface-variant">LOCATION</div>
+<div class="text-body-sm font-body-sm font-bold">Ring 4 | Main Arena</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Expired State (Hidden by default via JS) -->
+<div class="hidden w-full max-w-md bg-surface-container-lowest border-2 border-error rounded shadow-sm z-20 overflow-hidden animate-in fade-in zoom-in duration-300" id="expired-container">
+<div class="bg-error text-on-error px-card-padding py-2 flex justify-between items-center">
+<span class="text-label-caps font-label-caps">SESSION EXPIRED</span>
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<div class="p-card-padding text-center">
+<span class="material-symbols-outlined text-error text-6xl mb-4" data-icon="error">error</span>
+<h2 class="text-headline-sm font-headline-sm text-primary mb-2">Request Timed Out</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-6">
+                    The tournament director did not approve your request within the allocated window. This may be due to high traffic or an incorrect access code.
+                </p>
+<button class="w-full py-3 bg-primary text-on-primary font-bold text-label-caps hover:bg-surface-container-highest transition-colors rounded" onclick="location.reload()">
+                    RE-ENTER ACCESS CODE
+                </button>
+</div>
+</div>
+<!-- Help Info -->
+<p class="text-label-caps font-label-caps text-on-surface-variant mt-12 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="help">help</span>
+            Need assistance? Contact tournament logistics desk.
+        </p>
+</main>
+<!-- Navigation Shell (BottomNavBar suppressed for linear flow, but here is the 'Auth/Help/Contact' logic as per JSON if needed, though instruction says to suppress for linear) -->
+<!-- We omit navigation items to focus the user as requested by the "Relevance Check" rule -->
+<script>
+        let timeLeft = 60;
+        const timerDisplay = document.getElementById('timer-display');
+        const mainContainer = document.getElementById('main-container');
+        const expiredContainer = document.getElementById('expired-container');
+        const statusHeader = document.getElementById('status-header');
+        const statusBadge = document.getElementById('status-badge');
+        const pulseElement = document.getElementById('pulse-element');
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                showExpiredState();
+            }
+
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Visual Urgency
+            if (timeLeft <= 10) {
+                timerDisplay.classList.add('text-error');
+                timerDisplay.classList.remove('text-primary');
+                pulseElement.classList.add('border-error');
+                pulseElement.classList.remove('border-secondary');
+            }
+        }, 1000);
+
+        function showExpiredState() {
+            mainContainer.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+            setTimeout(() => {
+                mainContainer.classList.add('hidden');
+                expiredContainer.classList.remove('hidden');
+                expiredContainer.classList.add('flex', 'flex-col');
+            }, 500);
+        }
+
+        // Simulating external approval (for demo visual transitions)
+        // In a real app, this would be a WebSocket listener
+        window.simulateApproval = function() {
+            statusHeader.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+            statusHeader.classList.add('bg-on-tertiary-container', 'text-on-secondary');
+            statusBadge.textContent = 'APPROVED • REDIRECTING...';
+            document.getElementById('messaging-area').innerHTML = `
+                <h1 class="text-headline-lg font-headline-lg text-primary mb-4">Identity Verified</h1>
+                <p class="text-body-md font-body-md text-on-surface-variant max-w-md mx-auto">
+                    Welcome, Moderator. You are being redirected to Ring 4 Control Panel.
+                </p>
+                <div class="mt-8 flex justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-secondary"></div>
+                </div>
+            `;
+        }
+    </script>
+</body></html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Ring Flow | Event Selection</title>
+<!-- Google Fonts: Inter & JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Shared Components Logic & Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "primary-fixed": "#dae2fd",
+                "tertiary": "#000000",
+                "outline-variant": "#c6c6cd",
+                "on-primary-container": "#7c839b",
+                "surface-variant": "#e0e3e5",
+                "secondary-container": "#316bf3",
+                "primary": "#000000",
+                "secondary-fixed": "#dbe1ff",
+                "on-secondary-fixed-variant": "#003ea8",
+                "surface-bright": "#f7f9fb",
+                "inverse-primary": "#bec6e0",
+                "surface-tint": "#565e74",
+                "secondary": "#0051d5",
+                "tertiary-fixed-dim": "#dec29a",
+                "surface-dim": "#d8dadc",
+                "secondary-fixed-dim": "#b4c5ff",
+                "on-tertiary": "#ffffff",
+                "on-surface-variant": "#45464d",
+                "outline": "#76777d",
+                "inverse-surface": "#2d3133",
+                "error": "#ba1a1a",
+                "on-tertiary-container": "#98805d",
+                "on-tertiary-fixed": "#271901",
+                "on-primary": "#ffffff",
+                "on-error": "#ffffff",
+                "on-secondary": "#ffffff",
+                "surface-container-high": "#e6e8ea",
+                "surface-container-lowest": "#ffffff",
+                "on-secondary-container": "#fefcff",
+                "on-surface": "#191c1e",
+                "tertiary-container": "#271901",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed": "#00174b",
+                "surface-container-highest": "#e0e3e5",
+                "primary-fixed-dim": "#bec6e0",
+                "on-background": "#191c1e",
+                "surface": "#f7f9fb",
+                "on-primary-fixed-variant": "#3f465c",
+                "inverse-on-surface": "#eff1f3",
+                "tertiary-fixed": "#fcdeb5",
+                "background": "#f7f9fb",
+                "on-tertiary-fixed-variant": "#574425",
+                "surface-container-low": "#f2f4f6",
+                "surface-container": "#eceef0",
+                "on-error-container": "#93000a",
+                "on-primary-fixed": "#131b2e",
+                "primary-container": "#131b2e"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "margin-desktop": "32px",
+                "gutter": "16px",
+                "card-padding": "20px",
+                "unit": "4px",
+                "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                "display-lg": ["Inter"],
+                "body-md": ["Inter"],
+                "label-caps": ["Inter"],
+                "body-sm": ["Inter"],
+                "headline-sm": ["Inter"],
+                "headline-lg": ["Inter"],
+                "data-mono": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                "headline-sm": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                "data-mono": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .event-card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0px 10px 20px -5px rgba(15, 23, 42, 0.1);
+        }
+        .hero-overlay {
+            background: linear-gradient(to right, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.4) 100%);
+        }
+        .tatami-texture {
+            background-color: #f7f9fb;
+            background-image: radial-gradient(#e0e3e5 0.5px, transparent 0.5px);
+            background-size: 8px 8px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- TopAppBar Section -->
+<header class="w-full top-0 sticky z-50 bg-white border-b border-outline-variant flex justify-between items-center h-16 px-margin-desktop w-full max-w-full mx-auto">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+
+<span class="text-headline-sm font-bold text-primary tracking-tight">Ring Flow</span>
+</div>
+
+</div>
+<div class="flex items-center gap-4">
+
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+
+</button>
+
+</div>
+</header>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative h-[500px] overflow-hidden">
+<img alt="Tournament Atmosphere" class="absolute inset-0 w-full h-full object-cover" src="hero-section.png">
+<div class="absolute inset-0 hero-overlay flex items-center">
+<div class="max-w-7xl mx-auto px-margin-desktop w-full">
+<div class="max-w-2xl">
+<h1 class="font-display-lg text-display-lg mb-4 text-white">Find Your Next Tournament</h1>
+<p class="text-white/90 font-body-md mb-8 text-xl max-w-xl">
+                            Browse upcoming karate competitions, kata events, and kumite championships.
+                        </p>
+<div class="flex flex-wrap gap-4">
+<button class="px-8 py-3 bg-secondary-container text-on-secondary-container font-headline-sm rounded-lg hover:bg-opacity-90 transition-all shadow-lg">
+                                View Events
+                            </button>
+
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Bar -->
+<section class="bg-primary text-white py-6 border-b border-white/10">
+<div class="max-w-7xl mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="flex items-center justify-center md:justify-start gap-4">
+<span class="text-headline-lg font-data-mono text-secondary-fixed">28</span>
+<span class="font-label-caps opacity-70 uppercase tracking-widest">Upcoming Events</span>
+</div>
+<div class="flex items-center justify-center gap-4 border-y md:border-y-0 md:border-x border-white/10 py-4 md:py-0">
+<span class="text-headline-lg font-data-mono text-secondary-fixed">12</span>
+<span class="font-label-caps opacity-70 uppercase tracking-widest">Active Cities</span>
+</div>
+<div class="flex items-center justify-center md:justify-end gap-4">
+<span class="text-headline-lg font-data-mono text-secondary-fixed">4</span>
+<span class="font-label-caps opacity-70 uppercase tracking-widest">Participating Countries</span>
+</div>
+</div>
+</section>
+<!-- Events Filter & Grid Section -->
+<section class="max-w-7xl mx-auto px-margin-desktop py-12">
+<div class="mb-10">
+<h2 class="font-headline-lg text-headline-lg text-primary mb-6">Active &amp; Upcoming Events</h2>
+<!-- Search & Filters -->
+<div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center bg-white p-4 rounded-xl shadow-sm border border-outline-variant">
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent" placeholder="Search by name or keyword..." type="text">
+</div>
+<div class="flex flex-col sm:flex-row gap-4 lg:w-1/2">
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">location_on</span>
+<select class="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:ring-2 focus:ring-secondary">
+<option>All Locations</option>
+<option>Chicago, IL</option>
+<option>Los Angeles, CA</option>
+<option>London, UK</option>
+</select>
+</div>
+<div class="relative flex-grow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">calendar_today</span>
+<select class="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:ring-2 focus:ring-secondary">
+<option>All Dates</option>
+<option>This Month</option>
+<option>Next Month</option>
+<option>Later This Year</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Event Card 1: LIVE -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group">
+<div class="relative h-56 overflow-hidden">
+<img alt="Elite Championship 2024" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9fRQSELpQkUiV4EuGE7sVNEbhuZCraWZ9JoQ6PKPna0p_DWgF-grXoBgzh1ZkrPYcIAZXSP0OJNPkNLIfIG5PyKXV4dSZaAqdGDZtMjRBCopdtRqw3aoc94hCy9fXNq-7rlbbr-NRSDf7PBSLbVRGZLO0LSX4YiYlWLkUde1CH6dXn7a8eJi2NpZKPU2s94ltgjL2TKyANiRguMcc7sMBlchtfp8UNbaMKXfpbN5ydNqHeVJ8EdIyHyoGyVulxBKkG28JfnFc_Ic">
+<div class="absolute top-4 left-4 bg-error text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
+<span class="block w-2 h-2 bg-white rounded-full animate-pulse"></span>
+<span class="font-label-caps text-[10px] uppercase font-black">LIVE</span>
+</div>
+</div>
+<div class="p-6 flex-grow tatami-texture">
+<h3 class="font-headline-sm text-primary mb-4">Elite Championship 2024</h3>
+<div class="space-y-4 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="calendar_today">calendar_today</span>
+<span class="text-body-sm font-medium">Oct 12 - Oct 15, 2024</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="location_on">location_on</span>
+<span class="text-body-sm font-medium">Grand Arena, Chicago</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="sports_martial_arts">sports_martial_arts</span>
+<span class="text-body-sm font-medium">Kata, Kumite (U18, Senior)</span>
+</div>
+</div>
+<button class="w-full bg-secondary text-white py-3 rounded-lg font-headline-sm hover:bg-secondary/90 transition-colors shadow-md group-hover:shadow-lg">
+                            Enter Arena
+                        </button>
+</div>
+</div>
+<!-- Event Card 2: UPCOMING -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group">
+<div class="relative h-56 overflow-hidden">
+<img alt="National Kumite Trials" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBkh_oGMI2RyVCWaLo-WZrKzoUmEGqeBsxtCUhderMHEl_URLnqN8fmoXNmTA-M3xt_Gqh4EcWnh1g8VOvch8tg837sR0bBtMnnFMrWdeFi0h2HxgnQjblObV9wtwKI5ecAd8sf89F3GV2xwDqIyU9FSgkbOkM9DLW6HSCIh-VSWa6-zQALKTYx2ORC30I0-55wkDW1SVX2b-FRpICm7GBF9GYr4zq8EMLYl4xsgcIqDU2TSoKLmEYOQCaRiSJMxYIFJwydclITkc">
+<div class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
+<span class="font-label-caps text-[10px] uppercase font-black">UPCOMING</span>
+</div>
+</div>
+<div class="p-6 flex-grow tatami-texture">
+<h3 class="font-headline-sm text-primary mb-4">National Kumite Trials</h3>
+<div class="space-y-4 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="calendar_today">calendar_today</span>
+<span class="text-body-sm font-medium">Nov 04, 2024</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="location_on">location_on</span>
+<span class="text-body-sm font-medium">Pacific Sports Center, LA</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="check_circle">check_circle</span>
+<span class="text-body-sm font-medium">Elite Kumite Qualifiers</span>
+</div>
+</div>
+<button class="w-full border-2 border-secondary text-secondary py-3 rounded-lg font-headline-sm hover:bg-secondary hover:text-white transition-all">Enter Arena</button>
+</div>
+</div>
+<!-- Event Card 3: UPCOMING -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group">
+<div class="relative h-56 overflow-hidden">
+<img alt="Global Masters Open" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYvf9sKBUJ9Ir2usgcZZthNjp6EAHkUqUfxv8jnfIwVaQbcMlNjlgFN1cdXpZ2GkYE0Bi0zbUQyPwM9Ib8KnSkfdS5HXt30zaVtaYnxFllHBikSPVZpPHZccgwgoJ-Q6uiERnHzxWcAtuFO0Ew_hDCccCx71SiATIBdDdvf6PMlbR2nQ9yT4ruTzetD0qggbPO75PkbtCN9T_gpuXR6isDrI9_ZYnqp76XVHXc_-989_XMUr65tkgR9H24vM0itDVZPovoCYP1sVA">
+<div class="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
+<span class="font-label-caps text-[10px] uppercase font-black">UPCOMING</span>
+</div>
+</div>
+<div class="p-6 flex-grow tatami-texture">
+<h3 class="font-headline-sm text-primary mb-4">Global Masters Open</h3>
+<div class="space-y-4 mb-8">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="calendar_today">calendar_today</span>
+<span class="text-body-sm font-medium">Dec 18, 2024</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="location_on">location_on</span>
+<span class="text-body-sm font-medium">The Dome, London</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary" data-icon="public">public</span>
+<span class="text-body-sm font-medium">All International Divisions</span>
+</div>
+</div>
+<button class="w-full border-2 border-secondary text-secondary py-3 rounded-lg font-headline-sm hover:bg-secondary hover:text-white transition-all">
+                            Enter Arena</button>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center">
+
+</div>
+</section>
+</main>
+<!-- Footer Section -->
+<footer class="w-full py-12 mt-auto bg-primary text-white border-t border-white/10 px-margin-desktop">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+<div class="flex flex-col items-start">
+<div class="flex items-center gap-3 mb-4">
+
+<span class="text-headline-sm font-bold tracking-tight">Ring Flow</span>
+</div>
+<p class="text-white/60 font-body-sm max-w-sm">
+                    The next generation of martial arts tournament management. Real-time scoring, dynamic scheduling, and professional athlete tracking.
+                </p>
+<p class="text-white/40 font-body-sm mt-6">© 2024 Ring Flow Systems. OSS Project.</p>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-6">
+<div class="flex flex-col gap-3">
+<span class="font-label-caps text-secondary-fixed uppercase tracking-widest text-[10px]">Platform</span>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Tournaments</a>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Pricing</a>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">API Docs</a>
+</div>
+<div class="flex flex-col gap-3">
+<span class="font-label-caps text-secondary-fixed uppercase tracking-widest text-[10px]">Support</span>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Help Center</a>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Contact Us</a>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Tutorials</a>
+</div>
+<div class="flex flex-col gap-3">
+<span class="font-label-caps text-secondary-fixed uppercase tracking-widest text-[10px]">Legal</span>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Privacy</a>
+<a class="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Terms</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Simple interactivity for the buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.97)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = '';
+            });
+        });
+    </script>
+
+
+</body></html>
