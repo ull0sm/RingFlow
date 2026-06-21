@@ -1,8 +1,18 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/server";
 
-export default function PublicHome() {
+export default async function PublicHome() {
+  const supabase = await createClient();
+  const { data: tournaments } = await supabase
+    .from("tournaments")
+    .select("*")
+    .order("event_date", { ascending: true });
+
+  const activeTournaments = tournaments?.filter(t => t.status === "active") || [];
+  const upcomingTournaments = tournaments?.filter(t => t.status === "draft") || [];
+
   return (
     <>
       {/* TopAppBar Section */}
@@ -92,96 +102,60 @@ export default function PublicHome() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Event Card 1: LIVE */}
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group cursor-pointer">
-              <div className="relative h-56 overflow-hidden bg-primary-container">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-80 transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute top-4 left-4 bg-error text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
-                  <span className="block w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                  <span className="font-label-caps text-[10px] uppercase font-black">LIVE</span>
-                </div>
-              </div>
-              <div className="p-6 flex-grow tatami-texture">
-                <h3 className="font-headline-sm text-primary mb-4">Elite Championship 2024</h3>
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">calendar_today</span>
-                    <span className="text-body-sm font-medium">Oct 12 - Oct 15, 2024</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">location_on</span>
-                    <span className="text-body-sm font-medium">Grand Arena, Chicago</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">sports_martial_arts</span>
-                    <span className="text-body-sm font-medium">Kata, Kumite (U18, Senior)</span>
+            {activeTournaments.map(t => (
+              <Link key={t.id} href={`/public/event/${t.id}`} className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group cursor-pointer">
+                <div className="relative h-56 overflow-hidden bg-primary-container">
+                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-80 transition-transform duration-500 group-hover:scale-110" />
+                  <div className="absolute top-4 left-4 bg-error text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
+                    <span className="block w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    <span className="font-label-caps text-[10px] uppercase font-black">LIVE</span>
                   </div>
                 </div>
-                <button className="w-full bg-secondary text-white py-3 rounded-lg font-headline-sm hover:bg-secondary/90 transition-colors shadow-md group-hover:shadow-lg">
-                  Enter Arena
-                </button>
-              </div>
-            </div>
+                <div className="p-6 flex-grow tatami-texture">
+                  <h3 className="font-headline-sm text-primary mb-4">{t.name}</h3>
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-center gap-3 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-secondary">calendar_today</span>
+                      <span className="text-body-sm font-medium">{t.event_date ? new Date(t.event_date).toLocaleDateString() : 'TBD'}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-secondary">location_on</span>
+                      <span className="text-body-sm font-medium">{t.venue || t.city || 'TBD'}</span>
+                    </div>
+                  </div>
+                  <button className="w-full bg-secondary text-white py-3 rounded-lg font-headline-sm hover:bg-secondary/90 transition-colors shadow-md group-hover:shadow-lg">
+                    Enter Arena
+                  </button>
+                </div>
+              </Link>
+            ))}
 
-            {/* Event Card 2: UPCOMING */}
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group cursor-pointer">
-              <div className="relative h-56 overflow-hidden bg-primary-container">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1595078475328-1ab05d0a6a0e?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-80 transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
-                  <span className="font-label-caps text-[10px] uppercase font-black">UPCOMING</span>
-                </div>
-              </div>
-              <div className="p-6 flex-grow tatami-texture">
-                <h3 className="font-headline-sm text-primary mb-4">National Kumite Trials</h3>
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">calendar_today</span>
-                    <span className="text-body-sm font-medium">Nov 04, 2024</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">location_on</span>
-                    <span className="text-body-sm font-medium">Pacific Sports Center, LA</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">check_circle</span>
-                    <span className="text-body-sm font-medium">Elite Kumite Qualifiers</span>
+            {upcomingTournaments.map(t => (
+              <Link key={t.id} href={`/public/event/${t.id}`} className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group cursor-pointer">
+                <div className="relative h-56 overflow-hidden bg-primary-container">
+                  <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1595078475328-1ab05d0a6a0e?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-80 transition-transform duration-500 group-hover:scale-110" />
+                  <div className="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
+                    <span className="font-label-caps text-[10px] uppercase font-black">UPCOMING</span>
                   </div>
                 </div>
-                <button className="w-full border-2 border-secondary text-secondary py-3 rounded-lg font-headline-sm hover:bg-secondary hover:text-white transition-all">
-                  Enter Arena
-                </button>
-              </div>
-            </div>
-
-            {/* Event Card 3: UPCOMING */}
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden event-card-hover transition-all duration-300 flex flex-col group cursor-pointer">
-              <div className="relative h-56 overflow-hidden bg-primary-container">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop')] bg-cover bg-center opacity-80 transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute top-4 left-4 bg-secondary text-white px-3 py-1 rounded-full flex items-center gap-2 shadow-lg border border-white/20">
-                  <span className="font-label-caps text-[10px] uppercase font-black">UPCOMING</span>
+                <div className="p-6 flex-grow tatami-texture">
+                  <h3 className="font-headline-sm text-primary mb-4">{t.name}</h3>
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-center gap-3 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-secondary">calendar_today</span>
+                      <span className="text-body-sm font-medium">{t.event_date ? new Date(t.event_date).toLocaleDateString() : 'TBD'}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-secondary">location_on</span>
+                      <span className="text-body-sm font-medium">{t.venue || t.city || 'TBD'}</span>
+                    </div>
+                  </div>
+                  <button className="w-full border-2 border-secondary text-secondary py-3 rounded-lg font-headline-sm hover:bg-secondary hover:text-white transition-all">
+                    View Details
+                  </button>
                 </div>
-              </div>
-              <div className="p-6 flex-grow tatami-texture">
-                <h3 className="font-headline-sm text-primary mb-4">Global Masters Open</h3>
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">calendar_today</span>
-                    <span className="text-body-sm font-medium">Dec 18, 2024</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">location_on</span>
-                    <span className="text-body-sm font-medium">The Dome, London</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-secondary">public</span>
-                    <span className="text-body-sm font-medium">All International Divisions</span>
-                  </div>
-                </div>
-                <button className="w-full border-2 border-secondary text-secondary py-3 rounded-lg font-headline-sm hover:bg-secondary hover:text-white transition-all">
-                  Enter Arena
-                </button>
-              </div>
-            </div>
+              </Link>
+            ))}
           </div>
         </section>
       </main>

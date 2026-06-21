@@ -36,6 +36,14 @@ export default async function AdminDashboard({ params }: { params: Promise<{ id:
 
   const ringIds = rings?.map(r => r.id) || [];
 
+  // Fetch Category Assignments
+  const { data: assignments } = await supabase
+    .from("category_assignments")
+    .select("*, categories(name, expected_matches)")
+    .in("ring_id", ringIds)
+    .in("status", ["running", "paused", "pending"])
+    .order("queue_order", { ascending: true });
+
   // 4. Fetch Moderator Requests
   let modRequests: any[] = [];
   if (ringIds.length > 0) {
@@ -116,13 +124,31 @@ export default async function AdminDashboard({ params }: { params: Promise<{ id:
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-              {rings?.map((ring) => (
-                 <RingCard 
-                   key={ring.id}
-                   name={ring.name} 
-                   status="Empty" 
-                 />
-              ))}
+              {rings?.map((ring) => {
+                 const ringAssignments = assignments?.filter(a => a.ring_id === ring.id) || [];
+                 const activeAssignment = ringAssignments.find(a => a.status === "running" || a.status === "paused");
+                 const nextAssignment = ringAssignments.find(a => a.status === "pending");
+                 
+                 const assignment = activeAssignment || nextAssignment;
+                 
+                 const status = activeAssignment ? (activeAssignment.status === "running" ? "Running" : "Paused") : "Empty";
+                 const categoryName = assignment?.categories?.name || "Pending Next Category";
+                 const totalMatches = assignment?.categories?.expected_matches || 0;
+                 const currentMatch = assignment?.matches_completed || 0;
+                 const progressPercent = totalMatches > 0 ? (currentMatch / totalMatches) * 100 : 0;
+
+                 return (
+                   <RingCard 
+                     key={ring.id}
+                     name={ring.name} 
+                     status={status as any}
+                     categoryName={categoryName}
+                     currentMatch={currentMatch}
+                     totalMatches={totalMatches}
+                     progressPercent={progressPercent}
+                   />
+                 );
+              })}
               
               {/* Add Ring Placeholder */}
               <button className="bg-surface-container border border-dashed border-outline-variant rounded flex flex-col items-center justify-center p-card-padding hover:bg-surface-container-high transition-colors group">
