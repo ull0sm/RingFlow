@@ -28,6 +28,9 @@ export default function CategoriesClient({ tournamentId, initialCategories }: Pr
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Preview State
+  const [previewCategories, setPreviewCategories] = useState<any[]>([]);
+
   const [addForm, setAddForm] = useState<CategoryInput>({
     name: "",
     age_bracket: "",
@@ -99,34 +102,71 @@ export default function CategoriesClient({ tournamentId, initialCategories }: Pr
 
     setIsUploading(true);
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet) as any[];
+      let parsedCategories: any[] = [];
 
-      // Map rows (expects 'category' and 'participants' columns)
-      const parsedCategories: CategoryInput[] = json.map(row => ({
-        name: String(row.category || row.Category || row.name || "Unknown"),
-        age_bracket: "",
-        weight_class: "",
-        athletes_count: parseInt(row.participants || row.Participants || row.count || 0) || 0
-      })).filter(c => c.name !== "Unknown");
+      if (file.name.endsWith(".json")) {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Expected format: { merged: [ { category_name, belt, age: {min, max}, sex, day, total_rows } ] }
+        if (data.merged && Array.isArray(data.merged)) {
+          parsedCategories = data.merged.map((c: any) => ({
+            name: c.category_name,
+            belt: c.belt,
+            age_min: c.age?.min,
+            age_max: c.age?.max,
+            sex: c.sex,
+            day: c.day || data.day,
+            athletes_count: c.total_rows || 0,
+            age_bracket: c.age ? `${c.age.min}-${c.age.max}` : "",
+            weight_class: "",
+          }));
+        } else {
+          alert("Invalid JSON format. Expected { merged: [...] }");
+          return;
+        }
+      } else {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet) as any[];
+
+        // Map rows (expects 'category' and 'participants' columns)
+        parsedCategories = json.map(row => ({
+          name: String(row.category || row.Category || row.name || "Unknown"),
+          age_bracket: "",
+          weight_class: "",
+          athletes_count: parseInt(row.participants || row.Participants || row.count || 0) || 0
+        })).filter(c => c.name !== "Unknown");
+      }
 
       if (parsedCategories.length === 0) {
-        alert("No valid categories found in Excel. Expected column 'category'.");
+        alert("No valid categories found in file.");
         return;
       }
 
-      await bulkAddCategories(tournamentId, parsedCategories);
-      alert(`Successfully uploaded ${parsedCategories.length} categories.`);
+      setPreviewCategories(parsedCategories);
       
     } catch (err) {
       console.error(err);
-      alert("Error parsing Excel file.");
+      alert("Error parsing file.");
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleApproveUpload = async () => {
+    setIsUploading(true);
+    try {
+      await bulkAddCategories(tournamentId, previewCategories);
+      setPreviewCategories([]);
+    } catch (err) {
+      console.error(err);
+      alert("Error saving to database.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -140,7 +180,7 @@ export default function CategoriesClient({ tournamentId, initialCategories }: Pr
         <div className="flex gap-4">
           <input 
             type="file" 
-            accept=".xlsx, .xls, .csv" 
+            accept=".xlsx, .xls, .csv, .json" 
             className="hidden" 
             ref={fileInputRef} 
             onChange={handleFileUpload} 
@@ -150,7 +190,7 @@ export default function CategoriesClient({ tournamentId, initialCategories }: Pr
             disabled={isUploading || isAdding}
             className="px-4 py-2 border border-outline text-primary font-label-caps text-label-caps rounded flex items-center gap-2 hover:bg-surface-container-low disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-[18px]">upload</span> {isUploading ? "UPLOADING..." : "BULK UPLOAD"}
+            <span className="material-symbols-outlined text-[18px]">upload</span> {isUploading ? "UPLOADING..." : "UPLOAD JSON/EXCEL"}
           </button>
           <button 
             onClick={handleStartAdd}
@@ -236,6 +276,65 @@ export default function CategoriesClient({ tournamentId, initialCategories }: Pr
           </tbody>
         </table>
       </div>
+
+      {/* Preview Modal */}
+      {previewCategories.length > 0 && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-surface-container-lowest w-full max-w-4xl max-h-[80vh] flex flex-col rounded-2xl shadow-2xl overflow-hidden">
+            <div className="p-6 border-b border-outline-variant flex justify-between items-center bg-surface-container-low shrink-0">
+              <div>
+                <h2 className="text-xl font-bold text-primary mb-1">Preview Upload</h2>
+                <p className="text-xs text-on-surface-variant">Review the {previewCategories.length} categories extracted from your file.</p>
+              </div>
+              <button onClick={() => setPreviewCategories([])} className="material-symbols-outlined text-outline hover:text-error transition-colors">close</button>
+            </div>
+            
+            <div className="flex-1 overflow-auto p-6 bg-surface-container-lowest">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-outline-variant text-[10px] font-label-caps text-on-surface-variant uppercase tracking-wider">
+                    <th className="py-2">Category Name</th>
+                    <th className="py-2">Belt</th>
+                    <th className="py-2">Age Range</th>
+                    <th className="py-2">Sex</th>
+                    <th className="py-2">Day</th>
+                    <th className="py-2">Count</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm font-body-md text-on-surface">
+                  {previewCategories.map((cat, i) => (
+                    <tr key={i} className="border-b border-outline-variant/30 hover:bg-surface-container-highest/30 transition-colors">
+                      <td className="py-2 font-bold text-primary">{cat.name}</td>
+                      <td className="py-2">{cat.belt || "-"}</td>
+                      <td className="py-2">{cat.age_min}-{cat.age_max}</td>
+                      <td className="py-2">{cat.sex || "-"}</td>
+                      <td className="py-2">{cat.day || "-"}</td>
+                      <td className="py-2 font-data-mono">{cat.athletes_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="p-6 border-t border-outline-variant bg-surface-container-low flex justify-between items-center shrink-0">
+              <button 
+                onClick={() => setPreviewCategories([])}
+                className="px-6 py-2 rounded font-bold text-primary hover:bg-surface-container transition-colors disabled:opacity-50"
+                disabled={isUploading}
+              >
+                CANCEL
+              </button>
+              <button 
+                onClick={handleApproveUpload}
+                disabled={isUploading}
+                className="px-6 py-2 rounded font-bold bg-secondary text-on-secondary hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+              >
+                {isUploading ? <><span className="material-symbols-outlined animate-spin text-[18px]">sync</span> PUSHING...</> : "APPROVE & UPLOAD"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -41,11 +41,7 @@ CREATE POLICY "Public can view assignments" ON public.category_assignments FOR S
 
 -- 6. Athletes
 CREATE POLICY "Admins can manage athletes" ON public.athletes FOR ALL USING (
-    EXISTS (
-        SELECT 1 FROM public.categories c
-        JOIN public.tournaments t ON t.id = c.tournament_id
-        WHERE c.id = athletes.category_id AND t.admin_id = auth.uid()
-    )
+    EXISTS (SELECT 1 FROM public.tournaments t WHERE t.id = athletes.tournament_id AND t.admin_id = auth.uid())
 );
 CREATE POLICY "Public can view athletes" ON public.athletes FOR SELECT USING (true);
 

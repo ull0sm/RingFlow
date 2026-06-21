@@ -41,7 +41,7 @@ export async function addCategory(tournamentId: string, input: CategoryInput) {
   return data;
 }
 
-export async function bulkAddCategories(tournamentId: string, categories: CategoryInput[]) {
+export async function bulkAddCategories(tournamentId: string, categories: any[]) {
   const adminId = await ensureAdmin();
   const supabase = await createClient();
 
@@ -63,9 +63,15 @@ export async function bulkAddCategories(tournamentId: string, categories: Catego
     athletes_count: cat.athletes_count,
     expected_matches: (2 * (cat.athletes_count > 0 ? cat.athletes_count : 1)) - 1,
     has_full_roster: false,
+    belt: cat.belt || null,
+    age_min: cat.age_min || null,
+    age_max: cat.age_max || null,
+    sex: cat.sex || null,
+    day: cat.day || null,
   }));
 
   if (toInsert.length > 0) {
+    // Break into chunks if necessary, but Supabase handles up to a few thousand easily
     const { error } = await supabase.from("categories").insert(toInsert);
     if (error) throw new Error(error.message);
   }

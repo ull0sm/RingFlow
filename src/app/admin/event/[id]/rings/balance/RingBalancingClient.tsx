@@ -11,6 +11,11 @@ type Category = {
   weight_class: string | null;
   athletes_count: number;
   expected_matches: number;
+  belt?: string | null;
+  age_min?: number | null;
+  age_max?: number | null;
+  sex?: string | null;
+  day?: string | null;
 };
 
 type Ring = {
@@ -40,6 +45,14 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   const [ringQueues, setRingQueues] = useState<Record<string, Category[]>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
+
+  // Filter & Sort State
+  const [search, setSearch] = useState("");
+  const [beltFilter, setBeltFilter] = useState("");
+  const [sexFilter, setSexFilter] = useState("");
+  const [dayFilter, setDayFilter] = useState("");
+  const [sortBy, setSortBy] = useState<"name" | "athletes">("athletes");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Initialize state from props
   useEffect(() => {
@@ -73,39 +86,37 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   }, [initialCategories, initialRings, initialAssignments]);
 
   const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
-
+    const { source, destination, draggableId } = result;
     if (!destination) return;
+    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    if (source.droppableId === destination.droppableId && source.index === destination.index) {
-      return;
+    // Find the item
+    let movedItem: Category | undefined;
+    if (source.droppableId === "unassigned") {
+      movedItem = unassigned.find(c => c.id === draggableId);
+    } else {
+      movedItem = ringQueues[source.droppableId].find(c => c.id === draggableId);
     }
 
-    let sourceList = source.droppableId === "unassigned" ? [...unassigned] : [...ringQueues[source.droppableId]];
-    let destList = destination.droppableId === "unassigned" ? [...unassigned] : [...ringQueues[destination.droppableId]];
+    if (!movedItem) return;
 
-    const [movedItem] = sourceList.splice(source.index, 1);
-
-    if (source.droppableId === destination.droppableId) {
-      sourceList.splice(destination.index, 0, movedItem);
-      if (source.droppableId === "unassigned") {
-        setUnassigned(sourceList);
-      } else {
-        setRingQueues({ ...ringQueues, [source.droppableId]: sourceList });
-      }
+    // Remove from source
+    if (source.droppableId === "unassigned") {
+      setUnassigned(prev => prev.filter(c => c.id !== draggableId));
     } else {
-      destList.splice(destination.index, 0, movedItem);
-      if (source.droppableId === "unassigned") {
-        setUnassigned(sourceList);
-      } else {
-        setRingQueues({ ...ringQueues, [source.droppableId]: sourceList });
-      }
+      const newList = [...ringQueues[source.droppableId]];
+      newList.splice(source.index, 1);
+      setRingQueues(prev => ({ ...prev, [source.droppableId]: newList }));
+    }
 
-      if (destination.droppableId === "unassigned") {
-        setUnassigned(destList);
-      } else {
-        setRingQueues({ ...ringQueues, [destination.droppableId]: destList });
-      }
+    // Add to destination
+    if (destination.droppableId === "unassigned") {
+      // Just put it at the top of unassigned
+      setUnassigned(prev => [movedItem, ...prev]);
+    } else {
+      const newList = [...(ringQueues[destination.droppableId] || [])];
+      newList.splice(destination.index, 0, movedItem);
+      setRingQueues(prev => ({ ...prev, [destination.droppableId]: newList }));
     }
   };
 
@@ -152,6 +163,29 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     return totalMatches * 3 > 360; // > 6 hours
   };
 
+  // Derive visible unassigned
+  const visibleUnassigned = unassigned
+    .filter(cat => {
+      if (search && !cat.name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (beltFilter && cat.belt !== beltFilter) return false;
+      if (sexFilter && cat.sex !== sexFilter) return false;
+      if (dayFilter && cat.day !== dayFilter) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      let result = 0;
+      if (sortBy === "athletes") {
+        result = a.athletes_count - b.athletes_count;
+      } else {
+        result = a.name.localeCompare(b.name);
+      }
+      return sortOrder === "asc" ? result : -result;
+    });
+
+  const uniqueBelts = Array.from(new Set(initialCategories.map(c => c.belt).filter(Boolean)));
+  const uniqueSexes = Array.from(new Set(initialCategories.map(c => c.sex).filter(Boolean)));
+  const uniqueDays = Array.from(new Set(initialCategories.map(c => c.day).filter(Boolean)));
+
   return (
     <div className="flex flex-col h-full overflow-hidden w-full">
       {/* TopNavBar */}
@@ -193,10 +227,73 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
         <div className="flex-1 flex overflow-hidden w-full">
           
           {/* Persistent Left Sidebar: Unassigned */}
-          <section className="w-80 flex flex-col bg-surface-container-lowest border-r border-outline-variant shrink-0">
-            <div className="p-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-              <h3 className="font-label-caps text-label-caps text-primary">Unassigned Categories</h3>
-              <span className="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-data-mono text-[10px]">{unassigned.length} ITEMS</span>
+          <section className="w-80 flex flex-col bg-surface-container-lowest border-r border-outline-variant shrink-0 z-10 relative">
+            <div className="p-4 border-b border-outline-variant bg-surface-container-low flex flex-col gap-3">
+              <div className="flex justify-between items-center">
+                <h3 className="font-label-caps text-label-caps text-primary">Unassigned ({visibleUnassigned.length})</h3>
+                <button 
+                  onClick={() => {
+                    setSearch(""); setBeltFilter(""); setSexFilter(""); setDayFilter("");
+                  }}
+                  className="text-[10px] text-secondary hover:underline"
+                >Clear Filters</button>
+              </div>
+
+              {/* Search */}
+              <input 
+                type="text" 
+                placeholder="Search categories..." 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full bg-white border border-outline-variant rounded p-2 text-xs outline-none focus:border-secondary"
+              />
+
+              {/* Filters */}
+              <div className="flex gap-2 flex-wrap">
+                <select 
+                  value={beltFilter} 
+                  onChange={e => setBeltFilter(e.target.value)}
+                  className="flex-1 min-w-[70px] bg-white border border-outline-variant rounded p-1 text-[10px] outline-none"
+                >
+                  <option value="">All Belts</option>
+                  {uniqueBelts.map(b => <option key={b as string} value={b as string}>{b}</option>)}
+                </select>
+
+                <select 
+                  value={sexFilter} 
+                  onChange={e => setSexFilter(e.target.value)}
+                  className="min-w-[60px] bg-white border border-outline-variant rounded p-1 text-[10px] outline-none"
+                >
+                  <option value="">Sex</option>
+                  {uniqueSexes.map(s => <option key={s as string} value={s as string}>{s}</option>)}
+                </select>
+
+                <select 
+                  value={dayFilter} 
+                  onChange={e => setDayFilter(e.target.value)}
+                  className="min-w-[60px] bg-white border border-outline-variant rounded p-1 text-[10px] outline-none"
+                >
+                  <option value="">Day</option>
+                  {uniqueDays.map(d => <option key={d as string} value={d as string}>{d}</option>)}
+                </select>
+
+                <div className="w-full flex gap-2">
+                  <select 
+                    value={sortBy} 
+                    onChange={e => setSortBy(e.target.value as any)}
+                    className="flex-1 bg-white border border-outline-variant rounded p-1 text-[10px] outline-none"
+                  >
+                    <option value="name">Sort: Name</option>
+                    <option value="athletes">Sort: Athletes</option>
+                  </select>
+                  <button
+                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                    className="bg-white border border-outline-variant rounded p-1 text-[10px] flex items-center justify-center min-w-[40px] hover:bg-surface-container"
+                  >
+                    {sortOrder === "asc" ? "ASC" : "DESC"}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <Droppable droppableId="unassigned">
@@ -206,7 +303,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                   {...provided.droppableProps}
                   className={`flex-1 overflow-y-auto p-4 space-y-4 bg-surface-container-lowest ${snapshot.isDraggingOver ? 'bg-secondary/5' : ''}`}
                 >
-                  {unassigned.map((cat, index) => (
+                  {visibleUnassigned.map((cat, index) => (
                     <Draggable key={cat.id} draggableId={cat.id} index={index}>
                       {(provided, snapshot) => (
                         <div
@@ -216,9 +313,16 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                           className={`p-4 bg-white border ${snapshot.isDragging ? 'border-secondary shadow-lg' : 'border-outline-variant shadow-sm'} rounded-xl cursor-grab active:cursor-grabbing`}
                         >
                           <div className="flex justify-between items-start mb-2">
-                            <span className="px-2 py-0.5 bg-surface-container text-on-surface rounded font-label-caps text-[10px] font-bold">
-                              {cat.age_bracket || "OPEN"} | {cat.weight_class || "OPEN"}
-                            </span>
+                            <div className="flex gap-1 flex-wrap">
+                              {cat.belt && <span className="px-1.5 py-0.5 bg-surface-container-high text-on-surface rounded text-[9px] font-bold uppercase">{cat.belt}</span>}
+                              {cat.sex && <span className="px-1.5 py-0.5 bg-surface-container-high text-on-surface rounded text-[9px] font-bold uppercase">{cat.sex}</span>}
+                              {(cat.age_min !== null || cat.age_max !== null) && (
+                                <span className="px-1.5 py-0.5 bg-surface-container-high text-on-surface rounded text-[9px] font-bold uppercase">
+                                  {cat.age_min}-{cat.age_max}
+                                </span>
+                              )}
+                              {cat.day && <span className="px-1.5 py-0.5 bg-surface-container-high text-on-surface rounded text-[9px] font-bold uppercase">{cat.day}</span>}
+                            </div>
                             <span className="material-symbols-outlined text-outline-variant text-sm">drag_indicator</span>
                           </div>
                           <h4 className="font-headline-sm text-sm text-primary mb-3">{cat.name}</h4>
