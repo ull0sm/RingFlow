@@ -46,18 +46,7 @@ export default function RingsClient({ tournamentId, initialRings }: Props) {
     }
   };
 
-  const handleDelete = async (ringId: string) => {
-    if (!confirm("Are you sure you want to delete this ring? Categories assigned to it will be unassigned.")) return;
-    
-    setLoadingAction(`${ringId}-delete`);
-    try {
-      await deleteRing(ringId, tournamentId);
-    } catch (err) {
-      alert("Failed to delete ring.");
-    } finally {
-      setLoadingAction(null);
-    }
-  };
+
 
   // Sync state with props
   React.useEffect(() => {
@@ -103,13 +92,6 @@ export default function RingsClient({ tournamentId, initialRings }: Props) {
               >
                 <span className="material-symbols-outlined text-[14px]">refresh</span> 
                 {loadingAction === `${ring.id}-regen` ? "..." : "REGENERATE"}
-              </button>
-              <button 
-                onClick={() => handleDelete(ring.id)}
-                disabled={loadingAction === `${ring.id}-delete`}
-                className="px-3 py-2 border border-error/50 text-error hover:bg-error/10 rounded transition-colors flex justify-center items-center disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[14px]">delete</span>
               </button>
             </div>
           </div>

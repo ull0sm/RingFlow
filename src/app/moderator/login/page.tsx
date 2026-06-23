@@ -3,9 +3,31 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { requestModeratorAccess } from "@/actions/moderator";
+import { v4 as uuidv4 } from "uuid";
+
+// Simple user-agent parser
+function parseUserAgent(ua: string) {
+  let browser = "Unknown";
+  let os = "Unknown";
+  let deviceType = /Mobile|Android|iP(ad|hone)/.test(ua) ? "Mobile" : "Desktop";
+
+  if (ua.includes("Chrome")) browser = "Chrome";
+  else if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+  else if (ua.includes("Edge")) browser = "Edge";
+
+  if (ua.includes("Win")) os = "Windows";
+  else if (ua.includes("Mac")) os = "MacOS";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iOS") || ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Linux")) os = "Linux";
+
+  return { browser, os, deviceType };
+}
 
 export default function ModeratorLogin() {
   const [accessCode, setAccessCode] = useState("");
+  const [moderatorName, setModeratorName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -25,11 +47,50 @@ export default function ModeratorLogin() {
     }
 
     setLoading(true);
-    const result = await requestModeratorAccess(accessCode);
-    if (result.success && result.requestId) {
-      router.push(`/moderator/waiting/${result.requestId}`);
-    } else {
-      setError(result.error || "Failed to request access");
+
+    try {
+      // 1. Get or create persistent device ID
+      let deviceId = localStorage.getItem("ringflow_mod_device_id");
+      if (!deviceId) {
+        deviceId = uuidv4();
+        localStorage.setItem("ringflow_mod_device_id", deviceId);
+      }
+
+      // 2. Parse User Agent
+      const { browser, os, deviceType } = parseUserAgent(navigator.userAgent);
+
+      // 3. Fetch approx location and IP
+      let ip = "Unknown";
+      let location = "Unknown";
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        if (res.ok) {
+          const data = await res.json();
+          ip = data.ip;
+          location = `${data.city}, ${data.region}`;
+        }
+      } catch (e) {
+        console.error("Failed to fetch IP info", e);
+      }
+
+      const deviceInfo = {
+        deviceId,
+        browser,
+        os,
+        deviceType,
+        ip,
+        location,
+      };
+
+      const result = await requestModeratorAccess(accessCode, moderatorName, deviceInfo);
+      if (result.success && result.requestId) {
+        router.push(`/moderator/waiting/${result.requestId}`);
+      } else {
+        setError(result.error || "Failed to request access");
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred");
+    } finally {
       setLoading(false);
     }
   };
@@ -65,7 +126,18 @@ export default function ModeratorLogin() {
 
             <form className="w-full space-y-8" onSubmit={handleSubmit}>
               <div className="space-y-4">
-                <div className="relative group">
+                <div className="relative">
+                  <label className="font-label-caps text-label-caps text-on-surface-variant mb-1 block">Your Name (Optional)</label>
+                  <input 
+                    type="text"
+                    className="w-full bg-surface-container border border-outline-variant text-on-surface px-4 py-3 rounded-lg focus:outline-none focus:border-secondary transition-all"
+                    placeholder="E.g., Rahul"
+                    value={moderatorName}
+                    onChange={e => setModeratorName(e.target.value)}
+                  />
+                </div>
+
+                <div className="relative group pt-2">
                   <input 
                     autoComplete="off" 
                     className="w-full bg-surface-container-lowest border border-outline-variant text-center font-data-mono tracking-[0.5em] px-4 rounded-lg focus:outline-none focus:border-secondary transition-all uppercase placeholder:opacity-20 text-headline-lg py-5" 

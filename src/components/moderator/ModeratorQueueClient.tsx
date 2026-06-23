@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { startCategory } from "@/actions/moderator";
+import { startCategory, reorderCategory } from "@/actions/moderator";
 
 export default function ModeratorQueueClient({ ringId, initialAssignments }: { ringId: string, initialAssignments: any[] }) {
   const [assignments, setAssignments] = useState(initialAssignments);
@@ -49,6 +49,18 @@ export default function ModeratorQueueClient({ ringId, initialAssignments }: { r
     } catch (e) {
       console.error(e);
       alert("Failed to start category");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReorder = async (assignmentId: string, direction: "up" | "down") => {
+    setLoading(true);
+    try {
+      await reorderCategory(assignmentId, ringId, direction);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to reorder");
     } finally {
       setLoading(false);
     }
@@ -130,6 +142,22 @@ export default function ModeratorQueueClient({ ringId, initialAssignments }: { r
                     <p className="font-body-md font-medium text-on-surface">{assignment.categories?.name}</p>
                     <p className="text-on-surface-variant text-sm">{assignment.categories?.expected_matches || 0} Matches</p>
                   </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <button 
+                    disabled={loading || index === 0} 
+                    onClick={() => handleReorder(assignment.id, "up")}
+                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-on-surface-variant disabled:opacity-30 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm">keyboard_arrow_up</span>
+                  </button>
+                  <button 
+                    disabled={loading || index === pendingAssignments.length - 1} 
+                    onClick={() => handleReorder(assignment.id, "down")}
+                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-on-surface-variant disabled:opacity-30 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+                  </button>
                 </div>
               </div>
             ))}

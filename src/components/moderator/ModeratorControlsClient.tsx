@@ -23,8 +23,15 @@ export default function ModeratorControlsClient({ ringId }: { ringId: string }) 
   const requestAssistance = async (type: string) => {
     setLoading(true);
     try {
-      await logRingEvent(ringId, "PAUSE_RING", { reason: type, assistance_requested: true });
-      alert(`Requested assistance: ${type}. Ring has been paused.`);
+      if (type === "Doctor") {
+        const { pauseCurrentRingAssignment } = await import('@/actions/moderator');
+        await pauseCurrentRingAssignment(ringId);
+        await logRingEvent(ringId, "REQUEST_ASSISTANCE", { message: `Requested: ${type}`, type });
+        alert(`Requested assistance: ${type}. Ring has been paused.`);
+      } else {
+        await logRingEvent(ringId, "REQUEST_ASSISTANCE", { message: `Requested: ${type}`, type });
+        alert(`Requested assistance: ${type}.`);
+      }
     } catch (e) {
       console.error(e);
       alert("Failed to request assistance.");
@@ -41,22 +48,6 @@ export default function ModeratorControlsClient({ ringId }: { ringId: string }) 
           <p className="text-on-surface-variant font-body-sm">Tournament Control Center</p>
         </div>
       </div>
-
-      <section className="space-y-4">
-        <div className="bg-error-container border border-error/20 rounded-xl p-card-padding">
-          <button 
-            disabled={loading}
-            onClick={handleEmergency}
-            className="w-full bg-error text-on-error font-headline-lg text-headline-lg py-12 rounded-xl flex flex-col items-center justify-center gap-4 hover:brightness-95 active:scale-95 transition-all shadow-lg ring-4 ring-error/20 disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-5xl" style={{fontVariationSettings: '"FILL" 1'}}>emergency_home</span>
-            EMERGENCY
-          </button>
-          <p className="text-on-error-container text-body-sm text-center mt-4 font-medium italic opacity-80">
-            This action notifies the Event Director, Medical Lead, and Security immediately.
-          </p>
-        </div>
-      </section>
 
       <section className="space-y-4">
         <h2 className="font-headline-sm text-headline-sm text-on-surface px-1">Request Assistance</h2>
@@ -79,6 +70,17 @@ export default function ModeratorControlsClient({ ringId }: { ringId: string }) 
           </button>
         </div>
       </section>
+
+      <div className="mt-16 flex justify-center">
+        <button 
+          onClick={handleEmergency}
+          disabled={loading}
+          className="text-error font-label-caps text-xs opacity-70 hover:opacity-100 flex items-center gap-1 transition-opacity"
+        >
+          <span className="material-symbols-outlined text-[14px]">warning</span>
+          TRIGGER EMERGENCY
+        </button>
+      </div>
     </div>
   );
 }

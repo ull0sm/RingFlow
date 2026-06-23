@@ -9,7 +9,8 @@ interface ModRequest {
   ring_id: string;
   status: string;
   created_at: string;
-  device_info: string;
+  device_info: any; // JSON
+  moderator_name?: string;
   rings?: { name: string };
 }
 
@@ -78,13 +79,26 @@ export default function ModeratorRequestsWidget({ tournamentId, initialRequests 
         {pendingRequests.map(req => (
           <div key={req.id} className="p-3 border border-outline-variant rounded-lg bg-surface flex flex-col gap-3 shadow-sm">
             <div className="flex justify-between items-start">
-              <div>
-                <span className="font-label-caps text-[10px] text-secondary font-bold block mb-1">
-                  {req.rings?.name || "Unknown Ring"}
-                </span>
-                <span className="text-xs text-on-surface-variant font-data-mono">{req.device_info}</span>
+              <div className="w-full">
+                <div className="flex justify-between items-start w-full">
+                  <span className="font-label-caps text-[10px] text-secondary font-bold block mb-1">
+                    {req.rings?.name || "Unknown Ring"}
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant">{new Date(req.created_at).toLocaleTimeString()}</span>
+                </div>
+                {req.moderator_name && req.moderator_name !== "Unknown" && (
+                  <p className="font-body-sm font-semibold mb-1 text-primary">{req.moderator_name}</p>
+                )}
+                {req.device_info && typeof req.device_info === 'object' ? (
+                  <div className="text-[11px] text-on-surface-variant font-data-mono space-y-0.5 bg-surface-container-lowest p-2 rounded border border-outline-variant mt-1">
+                    <p><span className="text-outline">Device:</span> {req.device_info.browser} on {req.device_info.os} ({req.device_info.deviceType})</p>
+                    <p><span className="text-outline">Location:</span> {req.device_info.location}</p>
+                    <p><span className="text-outline">IP:</span> {req.device_info.ip}</p>
+                  </div>
+                ) : (
+                  <span className="text-xs text-on-surface-variant font-data-mono">No details</span>
+                )}
               </div>
-              <span className="text-[10px] text-on-surface-variant">{new Date(req.created_at).toLocaleTimeString()}</span>
             </div>
             <div className="flex gap-2">
               <button 

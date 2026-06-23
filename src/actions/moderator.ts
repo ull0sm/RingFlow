@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { ensureAdmin } from "./admin";
 
 export async function approveModeratorRequest(requestId: string, ringId: string, tournamentId: string) {
@@ -42,8 +42,24 @@ export async function rejectModeratorRequest(requestId: string, tournamentId: st
   revalidatePath(`/admin/event/${tournamentId}/dashboard`);
 }
 
-export async function requestModeratorAccess(accessCode: string) {
+export async function requestModeratorAccess(accessCode: string, moderatorName?: string, deviceInfo?: any) {
   const supabase = await createClient();
+
+  // Try to get IP
+  const headersList = await headers();
+  const forwardedFor = headersList.get('x-forwarded-for');
+  let ip = "Unknown";
+  if (forwardedFor) {
+    ip = forwardedFor.split(',')[0];
+  } else {
+    ip = headersList.get('x-real-ip') || "Unknown";
+  }
+
+  // Merge IP if not set by client
+  const finalDeviceInfo = {
+    ...deviceInfo,
+    ip: deviceInfo?.ip && deviceInfo.ip !== "Unknown" ? deviceInfo.ip : ip
+  };
 
   // 1. Find the ring by access code
   const { data: ring, error: ringError } = await supabase
@@ -63,6 +79,8 @@ export async function requestModeratorAccess(accessCode: string) {
       ring_id: ring.id,
       access_code_used: accessCode,
       status: "pending",
+      moderator_name: moderatorName || "Unknown",
+      device_info: finalDeviceInfo,
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
     })
     .select("id")
@@ -95,19 +113,30 @@ export async function checkModeratorStatus(requestId: string) {
 
 export async function validateModeratorSession(ringId: string, token: string) {
   const supabase = await createClient();
-  const { data: request } = await supabase
+  
+  const { data: latestRequest } = await supabase
     .from("moderator_requests")
-    .select("status, ring_id")
-    .eq("session_token", token)
+    .select("session_token, status")
+    .eq("ring_id", ringId)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(1)
     .single();
 
-  if (request && request.status === "approved" && request.ring_id === ringId) {
-    return true;
-  }
-  return false;
+  if (!latestRequest) return false;
+  
+  // Exclusivity: 1 ring = 1 active moderator. 
+  // Must match the *latest* approved session token.
+  return latestRequest.session_token === token;
 }
 
 export async function startCategory(assignmentId: string, ringId: string) {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
   const supabase = await createClient();
   
   const { data: assignment } = await supabase
@@ -125,9 +154,6 @@ export async function startCategory(assignmentId: string, ringId: string) {
 
   if (updateError) throw new Error("Update failed: " + updateError.message);
 
-  const cookieStore = await cookies();
-  const modToken = cookieStore.get("mod_token")?.value;
-
   await supabase
     .from("event_log")
     .insert({
@@ -140,6 +166,12 @@ export async function startCategory(assignmentId: string, ringId: string) {
 }
 
 export async function adjustMatchCount(assignmentId: string, ringId: string, delta: number) {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
   const supabase = await createClient();
   
   const { data: assignment } = await supabase
@@ -159,9 +191,6 @@ export async function adjustMatchCount(assignmentId: string, ringId: string, del
 
   if (updateError) throw new Error("Update failed: " + updateError.message);
 
-  const cookieStore = await cookies();
-  const modToken = cookieStore.get("mod_token")?.value;
-
   await supabase
     .from("event_log")
     .insert({
@@ -175,6 +204,12 @@ export async function adjustMatchCount(assignmentId: string, ringId: string, del
 }
 
 export async function finishCategory(assignmentId: string, ringId: string) {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
   const supabase = await createClient();
   
   const { data: assignment } = await supabase
@@ -192,9 +227,6 @@ export async function finishCategory(assignmentId: string, ringId: string) {
 
   if (updateError) throw new Error("Update failed: " + updateError.message);
 
-  const cookieStore = await cookies();
-  const modToken = cookieStore.get("mod_token")?.value;
-
   await supabase
     .from("event_log")
     .insert({
@@ -207,6 +239,12 @@ export async function finishCategory(assignmentId: string, ringId: string) {
 }
 
 export async function setRingStatus(assignmentId: string, ringId: string, isPaused: boolean) {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
   const supabase = await createClient();
   
   const { data: assignment } = await supabase
@@ -224,8 +262,7 @@ export async function setRingStatus(assignmentId: string, ringId: string, isPaus
 
   if (updateError) throw new Error("Update failed: " + updateError.message);
 
-  const cookieStore = await cookies();
-  const modToken = cookieStore.get("mod_token")?.value;
+
 
   await supabase
     .from("event_log")
@@ -238,10 +275,36 @@ export async function setRingStatus(assignmentId: string, ringId: string, isPaus
     });
 }
 
-export async function logRingEvent(ringId: string, actionName: "EMERGENCY_ALERT" | "PAUSE_RING", metadata?: any) {
-  const supabase = await createClient();
+export async function pauseCurrentRingAssignment(ringId: string) {
   const cookieStore = await cookies();
   const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
+  const supabase = await createClient();
+  
+  const { data: assignment } = await supabase
+    .from("category_assignments")
+    .select("*")
+    .eq("ring_id", ringId)
+    .in("status", ["running"])
+    .maybeSingle();
+
+  if (assignment) {
+    // Re-use setRingStatus to pause it
+    await setRingStatus(assignment.id, ringId, true);
+  }
+}
+
+export async function logRingEvent(ringId: string, actionName: "EMERGENCY_ALERT" | "PAUSE_RING" | "REQUEST_ASSISTANCE", metadata?: any) {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
+  const supabase = await createClient();
 
   const { data: ring } = await supabase.from("rings").select("tournament_id").eq("id", ringId).single();
   if (!ring) return;
@@ -255,4 +318,75 @@ export async function logRingEvent(ringId: string, actionName: "EMERGENCY_ALERT"
       metadata: metadata || null,
       moderator_session_id: modToken?.includes("-") ? modToken : null
     });
+}
+
+export async function returnCategoryToQueue(assignmentId: string, ringId: string) {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
+  const supabase = await createClient();
+  
+  const { data: assignment } = await supabase
+    .from("category_assignments")
+    .select("*")
+    .eq("id", assignmentId)
+    .single();
+    
+  if (!assignment) throw new Error("Assignment not found");
+
+  const { error: updateError } = await supabase
+    .from("category_assignments")
+    .update({ status: "pending", queue_order: 0 })
+    .eq("id", assignmentId);
+
+  if (updateError) throw new Error("Update failed: " + updateError.message);
+
+  await supabase
+    .from("event_log")
+    .insert({
+      tournament_id: assignment.tournament_id,
+      ring_id: ringId,
+      category_id: assignment.category_id,
+      action: "RETURNED_TO_QUEUE",
+      moderator_session_id: modToken?.includes("-") ? modToken : null
+    });
+}
+
+export async function reorderCategory(assignmentId: string, ringId: string, direction: "up" | "down") {
+  const cookieStore = await cookies();
+  const modToken = cookieStore.get("mod_token")?.value;
+  if (!modToken || !(await validateModeratorSession(ringId, modToken))) {
+    throw new Error("Unauthorized: Session is not the active moderator.");
+  }
+
+  const supabase = await createClient();
+
+  const { data: assignments } = await supabase
+    .from("category_assignments")
+    .select("*")
+    .eq("ring_id", ringId)
+    .eq("status", "pending")
+    .order("queue_order", { ascending: true });
+
+  if (!assignments || assignments.length === 0) return;
+
+  const currentIndex = assignments.findIndex(a => a.id === assignmentId);
+  if (currentIndex === -1) return;
+
+  if (direction === "up" && currentIndex > 0) {
+    const prev = assignments[currentIndex - 1];
+    const curr = assignments[currentIndex];
+    
+    await supabase.from("category_assignments").update({ queue_order: prev.queue_order }).eq("id", curr.id);
+    await supabase.from("category_assignments").update({ queue_order: curr.queue_order }).eq("id", prev.id);
+  } else if (direction === "down" && currentIndex < assignments.length - 1) {
+    const next = assignments[currentIndex + 1];
+    const curr = assignments[currentIndex];
+    
+    await supabase.from("category_assignments").update({ queue_order: next.queue_order }).eq("id", curr.id);
+    await supabase.from("category_assignments").update({ queue_order: curr.queue_order }).eq("id", next.id);
+  }
 }

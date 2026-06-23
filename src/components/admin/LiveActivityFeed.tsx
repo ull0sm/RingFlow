@@ -6,12 +6,13 @@ import { createClient } from "@/utils/supabase/client";
 interface LogEvent {
   id: string;
   ring_id: string | null;
-  action_type: string;
-  description: string;
+  category_id: string | null;
+  action: string;
+  metadata: any;
   created_at: string;
 }
 
-export default function LiveActivityFeed({ tournamentId, initialLogs }: { tournamentId: string, initialLogs: LogEvent[] }) {
+export default function LiveActivityFeed({ tournamentId, initialLogs, rings }: { tournamentId: string, initialLogs: LogEvent[], rings: any[] }) {
   const [logs, setLogs] = useState<LogEvent[]>(initialLogs);
   const supabase = createClient();
 
@@ -40,17 +41,41 @@ export default function LiveActivityFeed({ tournamentId, initialLogs }: { tourna
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
       </div>
       <div className="p-4 flex-1 overflow-y-auto space-y-4">
-        {logs.map((log) => (
-          <div key={log.id} className="flex gap-3 text-sm">
-            <span className="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">
-              {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-            </span>
-            <p className="text-on-surface text-body-sm leading-tight">
-              <span className="font-bold text-primary mr-1">{log.action_type}:</span> 
-              {log.description}
-            </p>
-          </div>
-        ))}
+        {logs.map((log) => {
+          let color = "text-primary";
+          let bg = "";
+          let icon = "info";
+          
+          if (log.action === "EMERGENCY_ALERT") {
+            color = "text-error font-extrabold";
+            bg = "bg-error-container border border-error p-2 rounded";
+            icon = "emergency";
+          } else if (log.action === "START_CATEGORY" || log.action === "RESUME_RING") {
+            color = "text-[#2e7d32]";
+            icon = "play_circle";
+          } else if (log.action === "FINISH_CATEGORY") {
+            color = "text-secondary";
+            icon = "check_circle";
+          } else if (log.action === "PAUSE_RING") {
+            color = "text-amber-600";
+            icon = "pause_circle";
+          }
+
+          const ringName = rings.find(r => r.id === log.ring_id)?.name || "Unknown Ring";
+
+          return (
+            <div key={log.id} className={`flex gap-3 text-sm ${bg}`}>
+              <span className="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">
+                {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </span>
+              <span className={`material-symbols-outlined text-[16px] ${color}`} style={{fontVariationSettings: '"FILL" 1'}}>{icon}</span>
+              <p className="text-on-surface text-body-sm leading-tight flex-1">
+                <span className={`font-bold mr-1 ${color}`}>[{ringName}] {log.action.replace(/_/g, ' ')}:</span> 
+                {log.metadata?.message || log.metadata?.delta ? `Match updated by ${log.metadata.delta}` : "Event logged"}
+              </p>
+            </div>
+          );
+        })}
         {logs.length === 0 && (
           <p className="text-body-sm text-on-surface-variant italic">No activity yet. Logs will appear here in real-time.</p>
         )}

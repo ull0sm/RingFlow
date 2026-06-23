@@ -122,7 +122,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
 
   const handleSave = async () => {
     setIsSaving(true);
-    const payload = [];
+    const payload: { category_id: string; ring_id: string | null; queue_order: number }[] = [];
 
     // Process unassigned
     unassigned.forEach((cat, idx) => {
@@ -150,17 +150,18 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   const calculateRingWorkload = (ringId: string) => {
     const categories = ringQueues[ringId] || [];
     const totalMatches = categories.reduce((sum, cat) => sum + cat.expected_matches, 0);
-    // Rough estimate: 3 mins per match
-    const minutes = totalMatches * 3;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
+    // 109 seconds per match (1 min 49 secs)
+    const totalSeconds = totalMatches * 109;
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
     return `${hours}h ${mins}m`;
   };
 
   const isOverloaded = (ringId: string) => {
     const categories = ringQueues[ringId] || [];
     const totalMatches = categories.reduce((sum, cat) => sum + cat.expected_matches, 0);
-    return totalMatches * 3 > 360; // > 6 hours
+    const totalSeconds = totalMatches * 109;
+    return totalSeconds > 360 * 60; // > 6 hours
   };
 
   // Derive visible unassigned
@@ -330,7 +331,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                             <div className="flex items-center gap-3">
                               <span className="flex items-center gap-1 font-data-mono text-[11px]"><span className="material-symbols-outlined text-[14px] text-outline">group</span> {cat.athletes_count}</span>
                             </div>
-                            <span className="font-data-mono text-xs font-bold px-2 py-0.5 bg-primary text-on-primary rounded">{cat.expected_matches * 3}m</span>
+                            <span className="font-data-mono text-xs font-bold px-2 py-0.5 bg-primary text-on-primary rounded">{Math.ceil((cat.expected_matches * 109) / 60)}m</span>
                           </div>
                         </div>
                       )}
@@ -379,7 +380,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                               >
                                 <div className="flex justify-between items-center mb-1">
                                   <span className="text-[9px] font-bold text-secondary uppercase tracking-wider">{cat.age_bracket} | {cat.weight_class}</span>
-                                  <span className="font-data-mono text-[10px] font-bold">{cat.expected_matches * 3}m</span>
+                                  <span className="font-data-mono text-[10px] font-bold">{Math.ceil((cat.expected_matches * 109) / 60)}m</span>
                                 </div>
                                 <h5 className="text-xs font-bold text-primary mb-2">{cat.name}</h5>
                                 <div className="flex gap-4 text-[10px] font-data-mono text-outline">
