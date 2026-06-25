@@ -31,18 +31,6 @@ export async function ensureAdmin() {
     return admin.id;
   }
 
-  // Auto-insert for MVP
-  const { error: insertError } = await supabase
-    .from("admins")
-    .insert({
-      id: user.id,
-      email: user.email,
-    });
-
-  if (insertError) {
-    console.error("Error creating admin record:", insertError);
-    throw new Error(`Failed to provision admin account. Reason: ${insertError.message || insertError.details || JSON.stringify(insertError)}`);
-  }
-
-  return user.id;
+  // If the authenticated user is not in the admins table, throw an error
+  throw new Error("Unauthorized: Your account does not have administrator privileges.");
 }

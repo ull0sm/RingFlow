@@ -23,9 +23,7 @@ export default async function PublicHome() {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Link href="/login/admin" className="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors flex items-center gap-2 font-label-caps">
-            <span className="material-symbols-outlined">shield_person</span> Admin
-          </Link>
+          {/* Admin link removed from public visibility */}
         </div>
       </header>
       
