@@ -42,7 +42,18 @@ export async function rejectModeratorRequest(requestId: string, tournamentId: st
   revalidatePath(`/admin/event/${tournamentId}/dashboard`);
 }
 
-export async function requestModeratorAccess(accessCode: string, moderatorName?: string, deviceInfo?: any) {
+export async function requestModeratorAccess(accessCode: string, moderatorName?: string, deviceInfo?: any, turnstileToken?: string) {
+  if (!turnstileToken) {
+    return { success: false, error: "Security check is required." };
+  }
+
+  const { verifyTurnstileToken } = await import("./turnstile");
+  const verification = await verifyTurnstileToken(turnstileToken);
+  
+  if (!verification.success) {
+    return { success: false, error: verification.error || "Security check failed." };
+  }
+
   const supabase = await createClient();
 
   // Try to get IP
