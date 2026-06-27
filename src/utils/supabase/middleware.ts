@@ -38,8 +38,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/admin')
   ) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login/admin'
-    return NextResponse.redirect(url)
+    url.pathname = '/404'
+    return NextResponse.rewrite(url)
   }
 
   // If user is logged in and visits login page, redirect to admin
