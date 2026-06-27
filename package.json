@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@marsidev/react-turnstile": "^1.5.3",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
     "@types/uuid": "^10.0.0",

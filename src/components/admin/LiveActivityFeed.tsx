@@ -64,14 +64,16 @@ export default function LiveActivityFeed({ tournamentId, initialLogs, rings }: {
           const ringName = rings.find(r => r.id === log.ring_id)?.name || "Unknown Ring";
 
           return (
-            <div key={log.id} className={`flex gap-3 text-sm ${bg}`}>
-              <span className="font-data-mono text-[10px] text-on-surface-variant shrink-0 mt-0.5">
-                {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </span>
-              <span className={`material-symbols-outlined text-[16px] ${color}`} style={{fontVariationSettings: '"FILL" 1'}}>{icon}</span>
-              <p className="text-on-surface text-body-sm leading-tight flex-1">
+            <div key={log.id} className={`flex flex-col gap-1 text-sm ${bg}`}>
+              <div className="flex items-center gap-2">
+                <span className={`material-symbols-outlined text-[14px] ${color}`} style={{fontVariationSettings: '"FILL" 1'}}>{icon}</span>
+                <span className="font-data-mono text-[10px] text-on-surface-variant font-medium">
+                  {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </div>
+              <p className="text-on-surface text-body-sm leading-snug">
                 <span className={`font-bold mr-1 ${color}`}>[{ringName}] {log.action.replace(/_/g, ' ')}:</span> 
-                {log.metadata?.message || log.metadata?.delta ? `Match updated by ${log.metadata.delta}` : "Event logged"}
+                {log.metadata?.message ? log.metadata.message : (log.metadata?.delta ? `Match updated by ${log.metadata.delta}` : "Event logged")}
               </p>
             </div>
           );

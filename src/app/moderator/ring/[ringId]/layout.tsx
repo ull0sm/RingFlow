@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { validateModeratorSession } from "@/actions/moderator";
 import { createClient } from "@/utils/supabase/server";
 import ModeratorBottomNav from "@/components/moderator/ModeratorBottomNav";
+import ModeratorProfileMenu from "@/components/moderator/ModeratorProfileMenu";
 
 export default async function ModeratorRingLayout({
   children,
@@ -22,8 +23,8 @@ export default async function ModeratorRingLayout({
     redirect("/moderator/login");
   }
 
-  const isValid = await validateModeratorSession(ringId, token);
-  if (!isValid) {
+  const moderatorSession = await validateModeratorSession(ringId, token);
+  if (!moderatorSession) {
     redirect("/moderator/login");
   }
 
@@ -48,10 +49,8 @@ export default async function ModeratorRingLayout({
           <div className="h-6 w-[1px] bg-outline-variant hidden md:block"></div>
           <h1 className="font-body-md font-bold text-on-surface uppercase">{ring.name}</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
-            <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
-          </div>
+        <div className="flex items-center gap-4">
+          <ModeratorProfileMenu moderator={moderatorSession} />
         </div>
       </header>
 

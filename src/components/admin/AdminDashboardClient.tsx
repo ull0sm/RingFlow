@@ -197,8 +197,8 @@ export default function AdminDashboardClient({
 
           {/* Sidebar Widgets */}
           <div className="space-y-8">
-            <ModeratorRequestsWidget tournamentId={tournament.id} initialRequests={initialModRequests} />
             <LiveActivityFeed tournamentId={tournament.id} initialLogs={logs} rings={rings} />
+            <ModeratorRequestsWidget tournamentId={tournament.id} initialRequests={initialModRequests} />
           </div>
         </div>
       </div>

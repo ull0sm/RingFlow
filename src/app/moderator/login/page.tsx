@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { requestModeratorAccess } from "@/actions/moderator";
 import { v4 as uuidv4 } from "uuid";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 // Simple user-agent parser
 function parseUserAgent(ua: string) {
@@ -28,6 +29,7 @@ function parseUserAgent(ua: string) {
 export default function ModeratorLogin() {
   const [accessCode, setAccessCode] = useState("");
   const [moderatorName, setModeratorName] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -43,6 +45,10 @@ export default function ModeratorLogin() {
     e.preventDefault();
     if (accessCode.length < 6) {
       setError("Please enter a 6-digit access code.");
+      return;
+    }
+    if (!turnstileToken) {
+      setError("Please complete the security check.");
       return;
     }
 
@@ -82,7 +88,7 @@ export default function ModeratorLogin() {
         location,
       };
 
-      const result = await requestModeratorAccess(accessCode, moderatorName, deviceInfo);
+      const result = await requestModeratorAccess(accessCode, moderatorName, deviceInfo, turnstileToken);
       if (result.success && result.requestId) {
         router.push(`/moderator/waiting/${result.requestId}`);
       } else {
@@ -159,9 +165,22 @@ export default function ModeratorLogin() {
                 </div>
               </div>
 
+              <div className="flex justify-center min-h-[65px]">
+                <Turnstile 
+                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""} 
+                  onSuccess={(token) => {
+                    setTurnstileToken(token);
+                    setError("");
+                  }}
+                  options={{
+                    theme: "light",
+                  }}
+                />
+              </div>
+
               <div className="space-y-4 pt-4">
                 <button 
-                  disabled={loading}
+                  disabled={loading || !turnstileToken}
                   className="w-full bg-primary-container text-on-secondary font-headline-sm py-5 rounded-lg hover:bg-black disabled:opacity-50 transition-all flex items-center justify-center gap-2 group" 
                   type="submit"
                 >

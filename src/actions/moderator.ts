@@ -42,7 +42,18 @@ export async function rejectModeratorRequest(requestId: string, tournamentId: st
   revalidatePath(`/admin/event/${tournamentId}/dashboard`);
 }
 
-export async function requestModeratorAccess(accessCode: string, moderatorName?: string, deviceInfo?: any) {
+export async function requestModeratorAccess(accessCode: string, moderatorName?: string, deviceInfo?: any, turnstileToken?: string) {
+  if (!turnstileToken) {
+    return { success: false, error: "Security check is required." };
+  }
+
+  const { verifyTurnstileToken } = await import("./turnstile");
+  const verification = await verifyTurnstileToken(turnstileToken);
+  
+  if (!verification.success) {
+    return { success: false, error: verification.error || "Security check failed." };
+  }
+
   const supabase = await createClient();
 
   // Try to get IP
@@ -116,7 +127,7 @@ export async function validateModeratorSession(ringId: string, token: string) {
   
   const { data: latestRequest } = await supabase
     .from("moderator_requests")
-    .select("session_token, status")
+    .select("id, session_token, status, moderator_name")
     .eq("ring_id", ringId)
     .eq("status", "approved")
     .order("created_at", { ascending: false })
@@ -127,7 +138,10 @@ export async function validateModeratorSession(ringId: string, token: string) {
   
   // Exclusivity: 1 ring = 1 active moderator. 
   // Must match the *latest* approved session token.
-  return latestRequest.session_token === token;
+  if (latestRequest.session_token === token) {
+    return latestRequest;
+  }
+  return false;
 }
 
 export async function startCategory(assignmentId: string, ringId: string) {
@@ -388,5 +402,23 @@ export async function reorderCategory(assignmentId: string, ringId: string, dire
     
     await supabase.from("category_assignments").update({ queue_order: next.queue_order }).eq("id", curr.id);
     await supabase.from("category_assignments").update({ queue_order: curr.queue_order }).eq("id", next.id);
+  }
+}
+
+export async function logoutModerator() {
+  const cookieStore = await cookies();
+  cookieStore.delete("mod_token");
+}
+
+export async function updateModeratorName(requestId: string, newName: string) {
+  const supabase = await createClient();
+  
+  const { error } = await supabase
+    .from("moderator_requests")
+    .update({ moderator_name: newName })
+    .eq("id", requestId);
+    
+  if (error) {
+    throw new Error(error.message);
   }
 }
