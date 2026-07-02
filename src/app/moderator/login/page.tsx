@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { requestModeratorAccess } from "@/actions/moderator";
 import { v4 as uuidv4 } from "uuid";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { verifyTurnstileToken } from "@/actions/turnstile";
 
 // Simple user-agent parser
 function parseUserAgent(ua: string) {
@@ -79,6 +80,14 @@ export default function ModeratorLogin() {
         console.error("Failed to fetch IP info", e);
       }
 
+      const verification = await verifyTurnstileToken(turnstileToken);
+      
+      if (!verification.success) {
+        setError(verification.error || "Security check failed.");
+        setLoading(false);
+        return;
+      }
+
       const deviceInfo = {
         deviceId,
         browser,
@@ -88,7 +97,7 @@ export default function ModeratorLogin() {
         location,
       };
 
-      const result = await requestModeratorAccess(accessCode, moderatorName, deviceInfo, turnstileToken);
+      const result = await requestModeratorAccess(accessCode, moderatorName, deviceInfo);
       if (result.success && result.requestId) {
         router.push(`/moderator/waiting/${result.requestId}`);
       } else {
