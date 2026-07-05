@@ -30,6 +30,7 @@ type Assignment = {
   queue_order: number;
   status?: string;
   created_at?: string;
+  completed_at?: string | null;
 };
 
 interface Props {
