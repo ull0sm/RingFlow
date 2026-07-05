@@ -6,6 +6,8 @@ export type AssignmentInput = {
   category_id: string;
   ring_id: string | null; // null means unassigned
   queue_order: number;
+  status?: string;
+  completed_at?: string | null;
 };
 
 export async function saveAssignments(tournamentId: string, assignments: AssignmentInput[]) {
@@ -48,7 +50,8 @@ export async function saveAssignments(tournamentId: string, assignments: Assignm
           ring_id: a.ring_id,
           category_id: a.category_id,
           queue_order: a.queue_order,
-          status: "pending", // default status
+          status: a.status || "pending",
+          completed_at: a.completed_at || null,
         }))
       );
 

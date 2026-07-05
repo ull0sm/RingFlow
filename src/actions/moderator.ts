@@ -236,7 +236,10 @@ export async function finishCategory(assignmentId: string, ringId: string) {
 
   const { error: updateError } = await supabase
     .from("category_assignments")
-    .update({ status: "completed" })
+    .update({ 
+      status: "completed",
+      completed_at: new Date().toISOString()
+    })
     .eq("id", assignmentId);
 
   if (updateError) throw new Error("Update failed: " + updateError.message);
@@ -353,7 +356,10 @@ export async function returnCategoryToQueue(assignmentId: string, ringId: string
 
   const { error: updateError } = await supabase
     .from("category_assignments")
-    .update({ status: "pending", queue_order: 0 })
+    .update({ 
+      status: "pending", 
+      completed_at: null 
+    })
     .eq("id", assignmentId);
 
   if (updateError) throw new Error("Update failed: " + updateError.message);
@@ -394,14 +400,16 @@ export async function reorderCategory(assignmentId: string, ringId: string, dire
     const prev = assignments[currentIndex - 1];
     const curr = assignments[currentIndex];
     
-    await supabase.from("category_assignments").update({ queue_order: prev.queue_order }).eq("id", curr.id);
+    await supabase.from("category_assignments").update({ queue_order: -1 }).eq("id", curr.id);
     await supabase.from("category_assignments").update({ queue_order: curr.queue_order }).eq("id", prev.id);
+    await supabase.from("category_assignments").update({ queue_order: prev.queue_order }).eq("id", curr.id);
   } else if (direction === "down" && currentIndex < assignments.length - 1) {
     const next = assignments[currentIndex + 1];
     const curr = assignments[currentIndex];
     
-    await supabase.from("category_assignments").update({ queue_order: next.queue_order }).eq("id", curr.id);
+    await supabase.from("category_assignments").update({ queue_order: -1 }).eq("id", curr.id);
     await supabase.from("category_assignments").update({ queue_order: curr.queue_order }).eq("id", next.id);
+    await supabase.from("category_assignments").update({ queue_order: next.queue_order }).eq("id", curr.id);
   }
 }
 

@@ -24,6 +24,7 @@ export default async function RingBalancingPage({ params }: { params: Promise<{ 
   // Fetch assignments for these rings
   const ringIds = rings?.map(r => r.id) || [];
   let assignments: any[] = [];
+  let completedTimes: Record<string, string> = {};
   
   if (ringIds.length > 0) {
     const { data: assignmentData } = await supabase
@@ -32,6 +33,21 @@ export default async function RingBalancingPage({ params }: { params: Promise<{ 
       .in("ring_id", ringIds);
       
     if (assignmentData) assignments = assignmentData;
+
+    // Fetch completion times from event_log
+    const { data: eventLogData } = await supabase
+      .from("event_log")
+      .select("category_id, created_at")
+      .eq("action", "FINISH_CATEGORY")
+      .in("ring_id", ringIds);
+      
+    if (eventLogData) {
+      eventLogData.forEach(log => {
+        if (log.category_id) {
+          completedTimes[log.category_id] = log.created_at;
+        }
+      });
+    }
   }
 
   return (
@@ -41,6 +57,7 @@ export default async function RingBalancingPage({ params }: { params: Promise<{ 
       initialCategories={categories || []}
       initialRings={rings || []}
       initialAssignments={assignments}
+      completedTimes={completedTimes}
     />
   );
 }

@@ -28,6 +28,8 @@ type Assignment = {
   category_id: string;
   ring_id: string;
   queue_order: number;
+  status?: string;
+  created_at?: string;
 };
 
 interface Props {
@@ -36,15 +38,24 @@ interface Props {
   initialCategories: Category[];
   initialRings: Ring[];
   initialAssignments: Assignment[];
+  completedTimes: Record<string, string>;
 }
 
-export default function RingBalancingClient({ tournamentId, tournamentName, initialCategories, initialRings, initialAssignments }: Props) {
+export default function RingBalancingClient({ tournamentId, tournamentName, initialCategories, initialRings, initialAssignments, completedTimes }: Props) {
   // State structure:
   // We need a list for "unassigned" and a list for each ring.
   const [unassigned, setUnassigned] = useState<Category[]>([]);
   const [ringQueues, setRingQueues] = useState<Record<string, Category[]>>({});
+  const [ringCompletedQueues, setRingCompletedQueues] = useState<Record<string, Category[]>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
+  
+  // Drag confirmation state
+  const [pendingDragResult, setPendingDragResult] = useState<DropResult | null>(null);
+  const [confirmText, setConfirmText] = useState("");
+
+  // History popover state
+  const [historyOpenForRing, setHistoryOpenForRing] = useState<string | null>(null);
 
   // Filter & Sort State
   const [search, setSearch] = useState("");
@@ -57,8 +68,10 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   // Initialize state from props
   useEffect(() => {
     const ringMap: Record<string, Category[]> = {};
+    const ringMapHistory: Record<string, Category[]> = {};
     initialRings.forEach(r => {
       ringMap[r.id] = [];
+      ringMapHistory[r.id] = [];
     });
 
     const unassignedList: Category[] = [];
@@ -66,7 +79,11 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     initialCategories.forEach(cat => {
       const assignment = initialAssignments.find(a => a.category_id === cat.id);
       if (assignment && ringMap[assignment.ring_id]) {
-        ringMap[assignment.ring_id].push(cat);
+        if (assignment.status === "completed") {
+          ringMapHistory[assignment.ring_id].push(cat);
+        } else {
+          ringMap[assignment.ring_id].push(cat);
+        }
       } else {
         unassignedList.push(cat);
       }
@@ -83,9 +100,10 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
 
     setUnassigned(unassignedList);
     setRingQueues(ringMap);
+    setRingCompletedQueues(ringMapHistory);
   }, [initialCategories, initialRings, initialAssignments]);
 
-  const onDragEnd = (result: DropResult) => {
+  const executeDrag = (result: DropResult) => {
     const { source, destination, draggableId } = result;
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
@@ -112,7 +130,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     // Add to destination
     if (destination.droppableId === "unassigned") {
       // Just put it at the top of unassigned
-      setUnassigned(prev => [movedItem, ...prev]);
+      setUnassigned(prev => [movedItem!, ...prev]);
     } else {
       const newList = [...(ringQueues[destination.droppableId] || [])];
       newList.splice(destination.index, 0, movedItem);
@@ -120,9 +138,23 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     }
   };
 
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    
+    // Check if it's moving from one ring to another ring, or from a ring to unassigned
+    if (source.droppableId !== "unassigned" && source.droppableId !== destination.droppableId) {
+      setPendingDragResult(result);
+      setConfirmText("");
+      return;
+    }
+
+    executeDrag(result);
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
-    const payload: { category_id: string; ring_id: string | null; queue_order: number }[] = [];
+    const payload: { category_id: string; ring_id: string | null; queue_order: number; status?: string; completed_at?: string | null }[] = [];
 
     // Process unassigned
     unassigned.forEach((cat, idx) => {
@@ -132,7 +164,27 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     // Process rings
     Object.keys(ringQueues).forEach(ringId => {
       ringQueues[ringId].forEach((cat, idx) => {
-        payload.push({ category_id: cat.id, ring_id: ringId, queue_order: idx });
+        const originalAssignment = initialAssignments.find(a => a.category_id === cat.id);
+        let status = "pending";
+        // Only preserve running/paused status if it's still in the same ring
+        if (originalAssignment && originalAssignment.ring_id === ringId) {
+          status = originalAssignment.status || "pending";
+        }
+        payload.push({ category_id: cat.id, ring_id: ringId, queue_order: idx, status });
+      });
+    });
+
+    // Process completed categories (keep them assigned and completed)
+    Object.keys(ringCompletedQueues).forEach(ringId => {
+      ringCompletedQueues[ringId].forEach((cat, idx) => {
+        const originalAssignment = initialAssignments.find(a => a.category_id === cat.id);
+        payload.push({ 
+          category_id: cat.id, 
+          ring_id: ringId, 
+          queue_order: (ringQueues[ringId]?.length || 0) + idx, 
+          status: "completed",
+          completed_at: originalAssignment?.completed_at || new Date().toISOString()
+        });
       });
     });
 
@@ -155,6 +207,11 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     const hours = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     return `${hours}h ${mins}m`;
+  };
+
+  const calculateRingAthletes = (ringId: string) => {
+    const categories = ringQueues[ringId] || [];
+    return categories.reduce((sum, cat) => sum + cat.athletes_count, 0);
   };
 
   const isOverloaded = (ringId: string) => {
@@ -347,7 +404,68 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
           <section className="flex-1 overflow-x-auto bg-surface-container-low flex p-6 gap-6 items-start">
             {initialRings.map(ring => {
               const overloaded = isOverloaded(ring.id);
+              const isHistoryView = historyOpenForRing === ring.id;
               
+              if (isHistoryView) {
+                return (
+                  <div key={ring.id} className="w-72 shrink-0 flex flex-col bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm h-full">
+                    <div className="sticky top-0 z-10 p-4 flex justify-between items-start shrink-0 bg-surface-container-highest text-on-surface">
+                      <div className="flex items-start gap-2">
+                        <span className="material-symbols-outlined text-[20px] text-primary mt-1">history</span>
+                        <div>
+                          <h4 className="font-headline-sm text-lg tracking-tight leading-none mb-1">{ring.name} History</h4>
+                          <div className="flex gap-3 text-[10px] font-bold text-on-surface-variant uppercase">
+                            <span>{ringCompletedQueues[ring.id]?.length || 0} Categories</span>
+                            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">group</span> {ringCompletedQueues[ring.id]?.reduce((sum, cat) => sum + cat.athletes_count, 0) || 0} Athletes</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        className="p-1 rounded hover:bg-black/10 transition-colors flex items-center justify-center text-primary"
+                        onClick={() => setHistoryOpenForRing(null)}
+                        title="Back to Current"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">close</span>
+                      </button>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                      {(!ringCompletedQueues[ring.id] || ringCompletedQueues[ring.id].length === 0) ? (
+                        <div className="flex flex-col items-center justify-center h-full text-outline opacity-70">
+                          <span className="material-symbols-outlined text-4xl mb-2">inbox</span>
+                          <span className="text-sm">No completed categories</span>
+                        </div>
+                      ) : (
+                        ringCompletedQueues[ring.id].map(cat => {
+                          const assignment = initialAssignments.find(a => a.category_id === cat.id);
+                          const fallbackTime = assignment?.completed_at || assignment?.created_at;
+                          const rawTime = completedTimes[cat.id] || fallbackTime;
+                          const timeStr = rawTime ? new Date(rawTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Completed";
+                          return (
+                            <div key={cat.id} className="p-3 bg-white border border-outline-variant rounded-lg flex flex-col gap-1 shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
+                              <div className="flex justify-between items-center ml-2">
+                                <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{cat.age_bracket} | {cat.weight_class}</span>
+                                <span className="text-[10px] font-bold text-green-600 bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[12px]">done_all</span>
+                                  {timeStr}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center ml-2">
+                                <h5 className="text-xs font-bold text-primary">{cat.name}</h5>
+                                <span className="flex items-center gap-1 text-[10px] font-data-mono font-bold text-outline">
+                                  <span className="material-symbols-outlined text-[12px]">group</span> {cat.athletes_count}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <Droppable key={ring.id} droppableId={ring.id}>
                   {(provided, snapshot) => (
@@ -361,11 +479,26 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                           <h4 className="font-headline-sm text-lg tracking-tight leading-none mb-1">{ring.name}</h4>
                           <span className="text-[9px] font-label-caps opacity-80">{overloaded ? "OVERLOADED" : "OPTIMUM CAPACITY"}</span>
                         </div>
+                        <div className="relative">
+                          <button 
+                            className="p-1 rounded hover:bg-white/20 transition-colors flex items-center justify-center"
+                            onClick={() => setHistoryOpenForRing(ring.id)}
+                            title="View Completed Categories"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">history</span>
+                          </button>
+                        </div>
                       </div>
                       
                       <div className={`p-4 border-b border-outline-variant flex flex-col items-center ${overloaded ? 'bg-error/5' : 'bg-secondary/5'}`}>
                         <span className={`text-[10px] font-label-caps font-bold mb-1 ${overloaded ? 'text-error' : 'text-secondary'}`}>CURRENT WORKLOAD</span>
-                        <span className={`font-data-mono text-3xl font-black leading-none ${overloaded ? 'text-error' : 'text-secondary'}`}>{calculateRingWorkload(ring.id)}</span>
+                        <div className="flex items-center gap-4">
+                          <span className={`font-data-mono text-3xl font-black leading-none ${overloaded ? 'text-error' : 'text-secondary'}`}>{calculateRingWorkload(ring.id)}</span>
+                          <div className="h-6 w-[1px] bg-outline-variant/50"></div>
+                          <span className={`flex items-center gap-1 font-data-mono text-xl font-black ${overloaded ? 'text-error' : 'text-secondary'}`}>
+                            <span className="material-symbols-outlined text-[18px]">group</span> {calculateRingAthletes(ring.id)}
+                          </span>
+                        </div>
                       </div>
                       
                       <div className={`flex-1 overflow-y-auto p-3 space-y-3 ${snapshot.isDraggingOver ? 'bg-secondary/5' : ''}`}>
@@ -416,6 +549,55 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
           </div>
         </div>
       </footer>
+
+      {/* Confirmation Modal */}
+      {pendingDragResult && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col border border-outline-variant">
+            <div className="p-6 bg-surface-container-low border-b border-outline-variant">
+              <h3 className="font-headline-sm text-xl font-bold text-error flex items-center gap-2">
+                <span className="material-symbols-outlined">warning</span>
+                Confirm Move
+              </h3>
+            </div>
+            <div className="p-6 flex flex-col gap-4">
+              <p className="text-sm text-on-surface-variant">
+                You are about to move a category that was already assigned to a ring. Are you sure you want to proceed?
+              </p>
+              <div className="bg-error/10 p-4 rounded-lg border border-error/20">
+                <label className="text-xs font-bold text-error block mb-2">Type "confirm" to proceed</label>
+                <input 
+                  type="text" 
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="confirm"
+                  className="w-full bg-white border border-error/30 rounded p-2 text-sm outline-none focus:border-error focus:ring-1 focus:ring-error"
+                />
+              </div>
+            </div>
+            <div className="p-4 bg-surface-container flex justify-end gap-3 border-t border-outline-variant">
+              <button 
+                onClick={() => setPendingDragResult(null)}
+                className="px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-container-high rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  if (pendingDragResult) {
+                    executeDrag(pendingDragResult);
+                    setPendingDragResult(null);
+                  }
+                }}
+                disabled={confirmText.toLowerCase() !== "confirm"}
+                className="px-4 py-2 bg-error text-white text-sm font-bold rounded hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Proceed with Move
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
