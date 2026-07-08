@@ -49,7 +49,9 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   const [ringQueues, setRingQueues] = useState<Record<string, Category[]>>({});
   const [ringCompletedQueues, setRingCompletedQueues] = useState<Record<string, Category[]>>({});
   const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   // Drag confirmation state
   const [pendingDragResult, setPendingDragResult] = useState<DropResult | null>(null);
@@ -66,8 +68,13 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   const [sortBy, setSortBy] = useState<"name" | "athletes">("athletes");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  // Initialize state from props
+  // Initialize state from props (once on mount)
   useEffect(() => {
+    if (isInitialized) return;
+    setIsInitialized(true);
+    setIsMounted(true);
+    setLastSaved(new Date());
+
     const ringMap: Record<string, Category[]> = {};
     const ringMapHistory: Record<string, Category[]> = {};
     initialRings.forEach(r => {
@@ -102,41 +109,47 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
     setUnassigned(unassignedList);
     setRingQueues(ringMap);
     setRingCompletedQueues(ringMapHistory);
-  }, [initialCategories, initialRings, initialAssignments]);
+  }, [initialCategories, initialRings, initialAssignments, isInitialized]);
 
   const executeDrag = (result: DropResult) => {
-    const { source, destination, draggableId } = result;
+    const { source, destination } = result;
     if (!destination) return;
     if (source.droppableId === destination.droppableId && source.index === destination.index) return;
 
-    // Find the item
+    // 1. Create shallow copies of active queues to avoid stale state mutations
+    const nextUnassigned = [...unassigned];
+    const nextRingQueues = { ...ringQueues };
+    Object.keys(ringQueues).forEach(key => {
+      nextRingQueues[key] = [...ringQueues[key]];
+    });
+
+    // 2. Find and extract the category from the source position
     let movedItem: Category | undefined;
     if (source.droppableId === "unassigned") {
-      movedItem = unassigned.find(c => c.id === draggableId);
+      movedItem = nextUnassigned[source.index];
+      nextUnassigned.splice(source.index, 1);
     } else {
-      movedItem = ringQueues[source.droppableId].find(c => c.id === draggableId);
+      const sourceQueue = nextRingQueues[source.droppableId];
+      if (sourceQueue) {
+        movedItem = sourceQueue[source.index];
+        sourceQueue.splice(source.index, 1);
+      }
     }
 
     if (!movedItem) return;
 
-    // Remove from source
-    if (source.droppableId === "unassigned") {
-      setUnassigned(prev => prev.filter(c => c.id !== draggableId));
+    // 3. Insert the category into the destination position
+    if (destination.droppableId === "unassigned") {
+      nextUnassigned.splice(destination.index, 0, movedItem);
     } else {
-      const newList = [...ringQueues[source.droppableId]];
-      newList.splice(source.index, 1);
-      setRingQueues(prev => ({ ...prev, [source.droppableId]: newList }));
+      const destQueue = nextRingQueues[destination.droppableId] || [];
+      destQueue.splice(destination.index, 0, movedItem);
+      nextRingQueues[destination.droppableId] = destQueue;
     }
 
-    // Add to destination
-    if (destination.droppableId === "unassigned") {
-      // Just put it at the top of unassigned
-      setUnassigned(prev => [movedItem!, ...prev]);
-    } else {
-      const newList = [...(ringQueues[destination.droppableId] || [])];
-      newList.splice(destination.index, 0, movedItem);
-      setRingQueues(prev => ({ ...prev, [destination.droppableId]: newList }));
-    }
+    // 4. Update state atomically in a single render pass
+    setUnassigned(nextUnassigned);
+    setRingQueues(nextRingQueues);
   };
 
   const onDragEnd = (result: DropResult) => {
@@ -545,7 +558,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-[14px] text-outline">sync</span>
             <span className="font-label-caps text-[10px] text-on-surface-variant">
-              {lastSaved ? `Last saved at ${lastSaved.toLocaleTimeString()}` : "Not saved yet"}
+              {isMounted && lastSaved ? `Last saved at ${lastSaved.toLocaleTimeString()}` : "Not saved yet"}
             </span>
           </div>
         </div>
