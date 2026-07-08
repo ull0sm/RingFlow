@@ -74,7 +74,7 @@ export default function ModeratorQueueClient({ ringId, initialAssignments }: { r
             <span className="material-symbols-outlined text-4xl text-outline" style={{fontVariationSettings: '"FILL" 1'}}>event_busy</span>
           </div>
           <h2 className="font-headline-sm text-headline-sm mb-2">No category running</h2>
-          <p className="text-on-surface-variant mb-8 max-w-sm">There is currently no active competition on this ring. Please initialize the first category to begin.</p>
+          <p className="text-on-surface-variant mb-8 max-w-sm">There is currently no active competition on this tatami. Please initialize the first category to begin.</p>
           <button 
             disabled={loading}
             onClick={() => handleStartCategory(pendingAssignments[0].id)}
@@ -167,7 +167,7 @@ export default function ModeratorQueueClient({ ringId, initialAssignments }: { r
 
       {!activeAssignment && pendingAssignments.length === 0 && (
         <div className="text-center p-12 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface-variant">
-          No categories assigned to this ring yet.
+          No categories assigned to this tatami yet.
         </div>
       )}
     </div>

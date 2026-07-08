@@ -167,7 +167,7 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
     <div className="space-y-0">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">Ring Controls</h1>
+          <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">Tatami Controls</h1>
           <p className="font-body-sm text-body-sm text-on-surface-variant">Moderator Dashboard</p>
         </div>
         <div className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-sm ${isPaused ? 'bg-error-container text-on-error-container border-error/20 border' : 'bg-success/10 text-emerald-700 border border-emerald-500/20'}`}>
@@ -256,7 +256,7 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
           }`}
         >
           <span className="material-symbols-outlined" style={{fontVariationSettings: '"FILL" 1'}}>{isPaused ? 'play_circle' : 'pause_circle'}</span>
-          {isPaused ? 'Resume Ring' : 'Pause Ring'}
+          {isPaused ? 'Resume Tatami' : 'Pause Tatami'}
         </button>
       </div>
 
@@ -266,7 +266,7 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
           <div className="flex-1">
             <h4 className="font-label-caps text-label-caps text-on-surface-variant opacity-70">CURRENTLY LIVE TO PUBLIC</h4>
             <p className="font-body-sm text-body-sm text-on-surface">
-              Ring Status: <span className={`${isPaused ? 'text-error' : 'text-emerald-600'} font-semibold uppercase`}>{isPaused ? 'Paused' : 'Active'} - {activeAssignment.categories?.name}</span>
+              Tatami Status: <span className={`${isPaused ? 'text-error' : 'text-emerald-600'} font-semibold uppercase`}>{isPaused ? 'Paused' : 'Active'} - {activeAssignment.categories?.name}</span>
             </p>
           </div>
         </div>
@@ -292,7 +292,7 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-surface-container-lowest p-6 rounded-xl max-w-sm w-full space-y-4">
             <h3 className="font-headline-sm text-primary font-bold">Request Assistance</h3>
-            <p className="text-body-sm text-on-surface-variant">Select the type of assistance needed for this ring. Admin will be notified softly.</p>
+            <p className="text-body-sm text-on-surface-variant">Select the type of assistance needed for this tatami. Admin will be notified softly.</p>
             <div className="grid grid-cols-1 gap-2">
               {['Doctor / Medical', 'Technical Support', 'Security', 'General Assistance'].map(type => (
                 <button 
@@ -313,7 +313,7 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="bg-surface-container-lowest p-6 rounded-xl max-w-sm w-full space-y-4">
             <h3 className="font-headline-sm text-error font-bold">Return to Queue</h3>
-            <p className="text-body-sm text-on-surface-variant">Are you sure? This will remove the category from the live ring.</p>
+            <p className="text-body-sm text-on-surface-variant">Are you sure? This will remove the category from the live tatami.</p>
             <div>
               <label className="text-[10px] font-bold text-on-surface-variant mb-1 block uppercase tracking-wider">Type CONFIRM to proceed</label>
               <input 

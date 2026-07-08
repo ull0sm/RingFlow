@@ -179,12 +179,12 @@ export default function EventCreationWizard() {
               <div className="p-8 flex-grow">
                 <div className="mb-8">
                   <h1 className="font-headline-lg text-headline-lg mb-2">Arena Configuration</h1>
-                  <p className="font-body-md text-body-md text-on-surface-variant">Designate the number of active rings.</p>
+                  <p className="font-body-md text-body-md text-on-surface-variant">Designate the number of active tatamis.</p>
                 </div>
                 <div className="flex flex-col gap-8">
                   <div className="flex items-center gap-6 p-6 bg-surface-container-low border border-outline-variant rounded">
                     <div className="flex flex-col gap-2">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant">Total Mats / Rings</label>
+                      <label className="font-label-caps text-label-caps text-on-surface-variant">Total Mats / Tatamis</label>
                       <div className="flex items-center gap-3">
                         <button className="w-10 h-10 border border-outline rounded flex items-center justify-center hover:bg-surface-container-highest transition-colors" onClick={() => setRingCount(Math.max(1, ringCount - 1))}>-</button>
                         <input className="w-16 h-10 border border-outline rounded text-center font-bold text-headline-sm bg-transparent outline-none" type="number" value={ringCount} readOnly />
@@ -197,7 +197,7 @@ export default function EventCreationWizard() {
                     {Array.from({ length: ringCount }).map((_, i) => (
                       <div key={i} className="border border-outline-variant rounded p-5 bg-surface-container-lowest">
                         <div className="flex justify-between items-center mb-4">
-                          <span className="font-label-caps text-label-caps text-secondary">RING {i + 1}</span>
+                          <span className="font-label-caps text-label-caps text-secondary">TATAMI {i + 1}</span>
                         </div>
                         <div className="space-y-3">
                           <div className="p-2 bg-surface-container rounded border border-outline-variant/30 text-xs font-medium text-on-surface-variant/50 italic text-center py-4">Will be created on finish</div>

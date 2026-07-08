@@ -266,7 +266,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
           <span className="font-headline-lg text-headline-lg font-black text-primary tracking-tighter">Ring Flow</span>
           <div className="h-8 w-[1px] bg-outline-variant"></div>
           <div className="flex items-center gap-2">
-            <h2 className="font-headline-sm text-headline-sm text-primary">Ring Balancing</h2>
+            <h2 className="font-headline-sm text-headline-sm text-primary">Tatami Balancing</h2>
             <span className="text-outline-variant">/</span>
             <span className="text-on-surface-variant font-label-caps text-label-caps opacity-70">{tournamentName}</span>
           </div>
@@ -277,7 +277,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
       <div className="bg-primary text-on-primary px-8 py-3 flex items-center justify-between shrink-0 shadow-lg z-10 w-full">
         <div className="flex items-center gap-10">
           <div className="flex flex-col">
-            <span className="text-[10px] font-label-caps opacity-60">TOTAL RINGS</span>
+            <span className="text-[10px] font-label-caps opacity-60">TOTAL TATAMIS</span>
             <span className="font-data-mono text-lg font-bold">{initialRings.length} ACTIVE</span>
           </div>
           <div className="h-6 w-[1px] bg-white/20"></div>
@@ -427,7 +427,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                       <div className="flex items-start gap-2">
                         <span className="material-symbols-outlined text-[20px] text-primary mt-1">history</span>
                         <div>
-                          <h4 className="font-headline-sm text-lg tracking-tight leading-none mb-1">{ring.name} History</h4>
+                          <h4 className="font-headline-sm text-lg tracking-tight leading-none mb-1">{ring.name.replace(/Ring/i, "Tatami")} History</h4>
                           <div className="flex gap-3 text-[10px] font-bold text-on-surface-variant uppercase">
                             <span>{ringCompletedQueues[ring.id]?.length || 0} Categories</span>
                             <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">group</span> {ringCompletedQueues[ring.id]?.reduce((sum, cat) => sum + cat.athletes_count, 0) || 0} Athletes</span>
@@ -490,7 +490,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
                     >
                       <div className={`sticky top-0 z-10 p-4 flex justify-between items-center shrink-0 ${overloaded ? 'bg-error text-on-error' : 'bg-primary text-on-primary'}`}>
                         <div>
-                          <h4 className="font-headline-sm text-lg tracking-tight leading-none mb-1">{ring.name}</h4>
+                          <h4 className="font-headline-sm text-lg tracking-tight leading-none mb-1">{ring.name.replace(/Ring/i, "Tatami")}</h4>
                           <span className="text-[9px] font-label-caps opacity-80">{overloaded ? "OVERLOADED" : "OPTIMUM CAPACITY"}</span>
                         </div>
                         <div className="relative">
@@ -576,7 +576,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
             </div>
             <div className="p-6 flex flex-col gap-4">
               <p className="text-sm text-on-surface-variant">
-                You are about to move a category that was already assigned to a ring. Are you sure you want to proceed?
+                You are about to move a category that was already assigned to a tatami. Are you sure you want to proceed?
               </p>
               <div className="bg-error/10 p-4 rounded-lg border border-error/20">
                 <label className="text-xs font-bold text-error block mb-2">Type "confirm" to proceed</label>

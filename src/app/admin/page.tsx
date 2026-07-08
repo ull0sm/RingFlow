@@ -53,7 +53,7 @@ export default async function EventSelectionPage() {
                 </div>
                 <h2 className="font-headline-sm text-headline-sm mb-2">Create New Tournament</h2>
                 <p className="font-body-sm text-body-sm text-primary-fixed-dim max-w-xs opacity-80">
-                  Configure categories, and set up rings for a new event.
+                  Configure categories, and set up tatamis for a new event.
                 </p>
               </div>
               <div className="mt-8 flex items-center gap-2 font-label-caps text-label-caps uppercase tracking-widest text-secondary-fixed">
