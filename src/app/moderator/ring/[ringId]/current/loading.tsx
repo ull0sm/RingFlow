@@ -34,6 +34,23 @@ export default function ModeratorCurrentLoading() {
         </div>
       </div>
 
+      {/* Timer Skeleton */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden mb-10">
+        <div className="flex justify-between items-center px-5 pt-5 pb-3">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-4 h-4 rounded-full" />
+            <Skeleton className="w-24 h-3" />
+          </div>
+          <Skeleton className="w-8 h-8 rounded-full" />
+        </div>
+        <div className="px-5 pb-5 space-y-4">
+          <div className="flex flex-col items-center py-4 gap-2">
+            <Skeleton className="w-36 h-12 rounded" />
+          </div>
+          <Skeleton className="w-full h-2 rounded-full" />
+        </div>
+      </div>
+
       {/* Match Adjustment Grid Skeleton */}
       <section className="space-y-4 mb-10">
         <Skeleton className="w-36 h-3 px-1" />
@@ -46,6 +63,7 @@ export default function ModeratorCurrentLoading() {
       </section>
 
       {/* Pause/Resume Button Skeleton */}
+
       <div className="pt-4 mb-10">
         <Skeleton className="w-full h-14 rounded-xl" />
       </div>
