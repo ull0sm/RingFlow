@@ -158,39 +158,6 @@ export default async function PublicHome() {
         </section>
       </main>
 
-      {/* Footer Section */}
-      <footer className="w-full py-12 mt-auto bg-primary text-white border-t border-white/10 px-margin-desktop">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div className="flex flex-col items-start">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-headline-sm font-bold tracking-tight">Ring Flow</span>
-            </div>
-            <p className="text-white/60 font-body-sm max-w-sm">
-              The next generation of martial arts tournament management. Real-time scoring, dynamic scheduling, and professional athlete tracking.
-            </p>
-            <p className="text-white/40 font-body-sm mt-6">© 2024 Ring Flow Systems. OSS Project.</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-12 gap-y-6">
-            <div className="flex flex-col gap-3">
-              <span className="font-label-caps text-secondary-fixed uppercase tracking-widest text-[10px]">Platform</span>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Tournaments</a>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Pricing</a>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">API Docs</a>
-            </div>
-            <div className="flex flex-col gap-3">
-              <span className="font-label-caps text-secondary-fixed uppercase tracking-widest text-[10px]">Support</span>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Help Center</a>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Contact Us</a>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Tutorials</a>
-            </div>
-            <div className="flex flex-col gap-3">
-              <span className="font-label-caps text-secondary-fixed uppercase tracking-widest text-[10px]">Legal</span>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Privacy</a>
-              <a className="text-body-sm hover:text-secondary-fixed transition-colors" href="#">Terms</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </>
   );
 }

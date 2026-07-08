@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RingFlow
 
-## Getting Started
+**Real-Time Tournament Floor Management Platform**
 
-First, run the development server:
+RingFlow is a real-time event floor operations platform designed specifically for multi-ring martial arts competitions (Karate, Taekwondo, etc.). It acts as the command center for tournament directors, provides a zero-training mobile interface for ring operators, and offers live status updates to athletes and spectators via shareable links.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## The Problem
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Traditional tournament software manages registrations, brackets, and static schedules. However, during large events, organizers struggle to:
+1. **Balance Workloads**: Distribute categories evenly across rings to avoid bottlenecks.
+2. **Monitor Progress**: Keep track of which rings are running, paused, or finished.
+3. **Coordinate Officials**: Keep track of volunteer staff without requiring complex training or accounts.
+4. **Communicate Live**: Inform athletes and parents when their division will start, preventing ring crowding and missed slots.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+RingFlow solves these challenges by centralizing live mat operations on a single unified platform.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Core Principles
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+* **Coarse Progress Tracking**: We track completed-match counts per division, not individual match scores, points, or winners.
+* **Zero Training for Ring Staff**: The operator's layout is mobile-first and optimized for high-stress environments.
+* **No Apps/Logins for the Public**: Spectators can view live status and search for athletes simply by scanning a QR code.
+* **Event-Sourced Architecture**: Every state change (start, increment progress, pause, resume, complete) is recorded as an immutable event. Dashboards compile these events dynamically so data never drifts.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## User Roles & Access
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Role | Access Model | Primary Capabilities |
+| :--- | :--- | :--- |
+| **Admin** | Google OAuth + Email Allow-List | Create/manage tournaments, assign categories to rings, live-monitor all mats, approve moderator access requests. |
+| **Moderator** | EPHEMERAL Session (Code-based) | Enter ring-side access code, request admin approval, track match progress (`+1`/`-1`/`+5`), pause/resume ring. |
+| **Public** | Public Read-Only URL / QR Code | Scan to view live mat updates, check estimated category start times, search athletes by name or chest number. |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Tech Stack
+
+* **Frontend**: Next.js (App Router), TypeScript, Tailwind CSS
+* **Backend**: Supabase (PostgreSQL database, authentication, and Realtime replication)
+* **Security**: Cloudflare Turnstile (spam/bot protection for login flows)
+
+---
+
+## Quick Navigation
+
+* **Local Installation & Setup**: Follow the [QUICKSTART.md](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/QUICKSTART.md) guide to configure environment variables, databases, and OAuth.
+* **Contribution & Coding Guidelines**: Review [CONTRIBUTING.md](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/CONTRIBUTING.md) to understand project conventions, branching strategies, and architecture guidelines.
