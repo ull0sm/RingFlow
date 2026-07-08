@@ -79,7 +79,7 @@ export async function createTournament(input: TournamentInput) {
     
     return {
       tournament_id: tournamentId,
-      name: `Ring ${String(i + 1).padStart(2, "0")}`,
+      name: `Tatami ${String(i + 1).padStart(2, "0")}`,
       ring_order: i + 1,
       access_code: accessCode,
     };

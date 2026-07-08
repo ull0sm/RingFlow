@@ -82,7 +82,7 @@ export default function ModeratorRequestsWidget({ tournamentId, initialRequests 
               <div className="w-full">
                 <div className="flex justify-between items-start w-full">
                   <span className="font-label-caps text-[10px] text-secondary font-bold block mb-1">
-                    {req.rings?.name || "Unknown Ring"}
+                    {req.rings?.name || "Unknown Tatami"}
                   </span>
                   <span className="text-[10px] text-on-surface-variant">{new Date(req.created_at).toLocaleTimeString()}</span>
                 </div>

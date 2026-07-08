@@ -61,7 +61,7 @@ export default function LiveActivityFeed({ tournamentId, initialLogs, rings }: {
             icon = "pause_circle";
           }
 
-          const ringName = rings.find(r => r.id === log.ring_id)?.name || "Unknown Ring";
+          const ringName = rings.find(r => r.id === log.ring_id)?.name || "Unknown Tatami";
 
           return (
             <div key={log.id} className={`flex flex-col gap-1 text-sm ${bg}`}>
@@ -72,7 +72,7 @@ export default function LiveActivityFeed({ tournamentId, initialLogs, rings }: {
                 </span>
               </div>
               <p className="text-on-surface text-body-sm leading-snug">
-                <span className={`font-bold mr-1 ${color}`}>[{ringName}] {log.action.replace(/_/g, ' ')}:</span> 
+                <span className={`font-bold mr-1 ${color}`}>[{ringName}] {log.action.replace(/_/g, ' ').replace('RING', 'TATAMI')}:</span> 
                 {log.metadata?.message ? log.metadata.message : (log.metadata?.delta ? `Match updated by ${log.metadata.delta}` : "Event logged")}
               </p>
             </div>

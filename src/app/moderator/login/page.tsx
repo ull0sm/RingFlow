@@ -127,7 +127,7 @@ export default function ModeratorLogin() {
 
             <div className="text-center mb-10">
               <h1 className="text-headline-lg font-headline-lg text-primary mb-2">Access Portal</h1>
-              <p className="text-body-md text-on-surface-variant">Enter your Ring Access Code to begin</p>
+              <p className="text-body-md text-on-surface-variant">Enter your Tatami Access Code to begin</p>
             </div>
 
             <form className="w-full space-y-8" onSubmit={handleSubmit}>

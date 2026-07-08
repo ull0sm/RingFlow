@@ -138,7 +138,7 @@ export default function PublicEventClient({
                             {ringInfo ? (
                               <div className="flex flex-col items-end gap-1">
                                 <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-caps text-xs">
-                                  {ringInfo.ring ? ringInfo.ring.name.toUpperCase() : "UNASSIGNED"}
+                                  {ringInfo.ring ? ringInfo.ring.name.toUpperCase().replace("RING", "TATAMI") : "UNASSIGNED"}
                                 </span>
                                 <span className={`text-[10px] font-label-caps tracking-widest ${
                                   ringInfo.assignment.status === 'running' ? 'text-secondary font-bold animate-pulse' :
@@ -180,7 +180,7 @@ export default function PublicEventClient({
                   'bg-surface-container-highest text-on-surface'
                 } px-5 py-3 flex justify-between items-center transition-colors`}>
                   <div className="flex items-center gap-3">
-                    <span className="font-headline-sm text-headline-sm uppercase">{ring.name}</span>
+                    <span className="font-headline-sm text-headline-sm uppercase">{ring.name.replace(/Ring/i, "Tatami")}</span>
                     {ring.mat_name && (
                       <span className="bg-black/10 px-2 py-0.5 rounded font-label-caps text-[10px]">{ring.mat_name}</span>
                     )}
@@ -230,7 +230,7 @@ export default function PublicEventClient({
                     </>
                   ) : (
                     <div className="text-center py-6 text-on-surface-variant italic">
-                      No active category. Ring is idle.
+                      No active category. Tatami is idle.
                     </div>
                   )}
 
@@ -251,7 +251,7 @@ export default function PublicEventClient({
           
           {rings.length === 0 && (
             <div className="text-center p-12 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface-variant">
-              No rings have been configured for this tournament yet.
+              No tatamis have been configured for this tournament yet.
             </div>
           )}
         </div>

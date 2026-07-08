@@ -20,7 +20,7 @@ export default function AdminDashboardLoading() {
           {/* Rings Grid Overview */}
           <div className="xl:col-span-3 space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="font-headline-sm text-headline-sm text-primary font-bold">Live Ring Status</h3>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-bold">Live Tatami Status</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">

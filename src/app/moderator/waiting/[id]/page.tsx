@@ -79,7 +79,7 @@ export default function WaitingRoom() {
               </div>
               <h1 className="text-display-sm font-headline-lg text-primary mb-4 tracking-tight">Waiting for Admin</h1>
               <p className="text-body-lg text-on-surface-variant max-w-xs mx-auto mb-10">
-                Your request to control this ring has been sent. Please wait for the tournament administrator to approve your access.
+                Your request to control this tatami has been sent. Please wait for the tournament administrator to approve your access.
               </p>
               <div className="w-full max-w-xs bg-surface-container-lowest border border-outline-variant rounded-lg p-4 flex items-center gap-3">
                 <span className="material-symbols-outlined text-outline">info</span>
@@ -94,7 +94,7 @@ export default function WaitingRoom() {
                 <span className="material-symbols-outlined text-green-700 text-5xl" style={{fontVariationSettings: '"FILL" 1'}}>check_circle</span>
               </div>
               <h1 className="text-display-sm font-headline-lg text-green-800 mb-4 tracking-tight">Access Granted</h1>
-              <p className="text-body-lg text-green-700 mb-10">Entering ring controls...</p>
+              <p className="text-body-lg text-green-700 mb-10">Entering tatami controls...</p>
             </>
           )}
 

@@ -92,7 +92,7 @@ export default function AdminDashboardClient({
                 {activeAlert.action === 'EMERGENCY_ALERT' ? 'EMERGENCY ASSISTANCE' : 'ASSISTANCE REQUESTED'}
               </h2>
               <span className={`font-label-caps text-[10px] ${activeAlert.action === 'EMERGENCY_ALERT' ? 'text-error' : 'text-amber-700'} font-bold mb-2 block uppercase tracking-wider`}>
-                {rings.find(r => r.id === activeAlert.ring_id)?.name || "Unknown Ring"}
+                {rings.find(r => r.id === activeAlert.ring_id)?.name || "Unknown Tatami"}
               </span>
               <p className="text-body-sm font-body-sm mb-4 leading-snug">
                 {activeAlert.metadata?.message || "Assistance requested"}
@@ -154,7 +154,7 @@ export default function AdminDashboardClient({
           {/* Rings Grid Overview */}
           <div className="xl:col-span-3 space-y-6">
             <div className="flex items-center justify-between">
-              <h3 className="font-headline-sm text-headline-sm text-primary font-bold">Live Ring Status</h3>
+              <h3 className="font-headline-sm text-headline-sm text-primary font-bold">Live Tatami Status</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
@@ -182,7 +182,7 @@ export default function AdminDashboardClient({
                  return (
                    <RingCard 
                      key={ring.id}
-                     name={ring.name} 
+                     name={ring.name.replace(/Ring/i, "Tatami")} 
                      status={status as any}
                      categoryName={categoryName}
                      currentMatch={currentMatch}

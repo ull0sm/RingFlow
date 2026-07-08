@@ -47,7 +47,7 @@ export default async function ModeratorRingLayout({
         <div className="flex items-center gap-6">
           <span className="font-headline-sm text-headline-sm font-black text-primary tracking-tighter hidden md:inline">Ring Flow</span>
           <div className="h-6 w-[1px] bg-outline-variant hidden md:block"></div>
-          <h1 className="font-body-md font-bold text-on-surface uppercase">{ring.name}</h1>
+          <h1 className="font-body-md font-bold text-on-surface uppercase">{ring.name.replace(/Ring/i, "Tatami")}</h1>
         </div>
         <div className="flex items-center gap-4">
           <ModeratorProfileMenu moderator={moderatorSession} />

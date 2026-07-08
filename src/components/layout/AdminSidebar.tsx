@@ -11,10 +11,10 @@ export default function AdminSidebar() {
 
   const navItems = [
     { name: "Dashboard", href: `/admin/event/${id}/dashboard`, icon: "dashboard" },
-    { name: "Ring Balancing", href: `/admin/event/${id}/rings/balance`, icon: "balance" },
+    { name: "Tatami Balancing", href: `/admin/event/${id}/rings/balance`, icon: "balance" },
     { name: "Categories", href: `/admin/event/${id}/categories`, icon: "category" },
     { name: "Athletes", href: `/admin/event/${id}/athletes`, icon: "groups" },
-    { name: "Rings", href: `/admin/event/${id}/rings`, icon: "grid_view" },
+    { name: "Tatamis", href: `/admin/event/${id}/rings`, icon: "grid_view" },
     { name: "Settings", href: `/admin/event/${id}/settings`, icon: "settings" },
   ];
 

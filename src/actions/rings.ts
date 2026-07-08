@@ -29,7 +29,7 @@ export async function addRing(tournamentId: string) {
     .eq("tournament_id", tournamentId);
 
   const newOrder = (count || 0) + 1;
-  const newName = `Ring ${String(newOrder).padStart(2, "0")}`;
+  const newName = `Tatami ${String(newOrder).padStart(2, "0")}`;
 
   const { data, error } = await supabase
     .from("rings")
