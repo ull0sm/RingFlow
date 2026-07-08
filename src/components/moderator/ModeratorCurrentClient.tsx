@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { adjustMatchCount, finishCategory, setRingStatus, returnCategoryToQueue, logRingEvent } from "@/actions/moderator";
+import MatchTimer from "@/components/moderator/MatchTimer";
 
 export default function ModeratorCurrentClient({ ringId, initialAssignments, allAthletes }: { ringId: string, initialAssignments: any[], allAthletes: any[] }) {
   const [assignments, setAssignments] = useState(initialAssignments);
@@ -224,6 +225,9 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
           </div>
         </div>
       </div>
+
+      {/* Persistent Match Timer */}
+      <MatchTimer ringId={ringId} isPaused={isPaused} />
 
       <section className="space-y-4 mb-10">
         <h3 className="font-label-caps text-label-caps text-on-surface-variant px-1">MATCH ADJUSTMENT</h3>
