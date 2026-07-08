@@ -55,19 +55,11 @@ You can set up your database either on a hosted Supabase project (recommended) o
 
 ### Option A: Cloud Supabase Project (Recommended)
 1. **Create a project**: Log in to [Supabase](https://supabase.com) and create a new project.
-2. **Apply Migrations**:
+2. **Apply Schema**:
    * Navigate to the **SQL Editor** in the Supabase Dashboard.
-   * Run the SQL scripts found in `supabase/migrations/` sequentially. The files are ordered chronologically:
-     1. [20240620000000_initial_schema.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240620000000_initial_schema.sql)
-     2. [20240620000001_enable_rls.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240620000001_enable_rls.sql)
-     3. [20240620000002_enable_realtime.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240620000002_enable_realtime.sql)
-     4. [20240620000003_add_metadata_columns.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240620000003_add_metadata_columns.sql)
-     5. [20240621000001_add_realtime_tables.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000001_add_realtime_tables.sql)
-     6. [20240621000002_moderator_rls_fix.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000002_moderator_rls_fix.sql)
-     7. [20240621000003_add_matches_completed.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000003_add_matches_completed.sql)
-     8. [20240621000004_add_completed_at.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000004_add_completed_at.sql)
-     9. [20240621000004_moderator_metadata.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000004_moderator_metadata.sql)
-     10. [20240621000005_add_event_actions.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000005_add_event_actions.sql)
+   * Open the consolidated schema file [master.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/master.sql).
+   * Copy the entire contents of [master.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/master.sql), paste it into the SQL Editor, and click **Run**.
+   * *(Alternatively, if you prefer to apply changes step-by-step, you can run the SQL scripts found in `supabase/migrations/` sequentially: [20240620000000_initial_schema.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240620000000_initial_schema.sql) through [20240621000005_add_event_actions.sql](file:///d:/Programming/RingFlowDevelopment/docs/RingFlow/supabase/migrations/20240621000005_add_event_actions.sql)).*
 3. **Copy Keys**: Grab the `Project URL` and `anon public` key from **Settings > API** and paste them into your `.env.local`.
 
 ### Option B: Local Supabase Setup
