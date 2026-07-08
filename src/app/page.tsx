@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/utils/supabase/server";
+import PublicStats from "@/components/public/PublicStats";
 
 export default async function PublicHome() {
   const supabase = await createClient();
@@ -30,7 +31,7 @@ export default async function PublicHome() {
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative h-[500px] overflow-hidden bg-primary-container">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay opacity-50" />
+          <div className="absolute inset-0 bg-[url('/hero-section.png')] bg-cover bg-center" />
           <div className="absolute inset-0 hero-overlay flex items-center">
             <div className="max-w-7xl mx-auto px-margin-desktop w-full">
               <div className="max-w-2xl">
@@ -39,9 +40,9 @@ export default async function PublicHome() {
                   Browse upcoming martial arts competitions, kata events, and kumite championships.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <button className="px-8 py-3 bg-secondary-container text-on-secondary-container font-headline-sm rounded-lg hover:bg-opacity-90 transition-all shadow-lg">
+                  <Link href="#events" className="px-8 py-3 bg-secondary-container text-on-secondary-container font-headline-sm rounded-lg hover:bg-opacity-90 transition-all shadow-lg inline-block">
                     View Events
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -49,54 +50,12 @@ export default async function PublicHome() {
         </section>
 
         {/* Stats Bar */}
-        <section className="bg-primary text-white py-6 border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex items-center justify-center md:justify-start gap-4">
-              <span className="text-headline-lg font-data-mono text-secondary-fixed">28</span>
-              <span className="font-label-caps opacity-70 uppercase tracking-widest">Upcoming Events</span>
-            </div>
-            <div className="flex items-center justify-center gap-4 border-y md:border-y-0 md:border-x border-white/10 py-4 md:py-0">
-              <span className="text-headline-lg font-data-mono text-secondary-fixed">12</span>
-              <span className="font-label-caps opacity-70 uppercase tracking-widest">Active Cities</span>
-            </div>
-            <div className="flex items-center justify-center md:justify-end gap-4">
-              <span className="text-headline-lg font-data-mono text-secondary-fixed">4</span>
-              <span className="font-label-caps opacity-70 uppercase tracking-widest">Participating Countries</span>
-            </div>
-          </div>
-        </section>
+        <PublicStats />
 
         {/* Events Filter & Grid Section */}
-        <section className="max-w-7xl mx-auto px-margin-desktop py-12">
+        <section id="events" className="max-w-7xl mx-auto px-margin-desktop py-12 scroll-mt-20">
           <div className="mb-10">
             <h2 className="font-headline-lg text-headline-lg text-primary mb-6">Active &amp; Upcoming Events</h2>
-            {/* Search & Filters */}
-            <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center bg-white p-4 rounded-xl shadow-sm border border-outline-variant">
-              <div className="relative flex-grow">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                <input className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent outline-none" placeholder="Search by name or keyword..." type="text" />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 lg:w-1/2">
-                <div className="relative flex-grow">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">location_on</span>
-                  <select className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:ring-2 focus:ring-secondary outline-none">
-                    <option>All Locations</option>
-                    <option>Chicago, IL</option>
-                    <option>Los Angeles, CA</option>
-                    <option>London, UK</option>
-                  </select>
-                </div>
-                <div className="relative flex-grow">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">calendar_today</span>
-                  <select className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:ring-2 focus:ring-secondary outline-none">
-                    <option>All Dates</option>
-                    <option>This Month</option>
-                    <option>Next Month</option>
-                    <option>Later This Year</option>
-                  </select>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

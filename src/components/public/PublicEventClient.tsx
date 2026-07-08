@@ -258,8 +258,6 @@ export default function PublicEventClient({
 
         {/* Footer Info */}
         <div className="mt-8 text-center p-6 border-t border-outline-variant">
-          <p className="text-on-surface-variant font-body-sm">All match times are estimates based on current ring speed.</p>
-          <p className="text-outline font-label-caps text-[10px] mt-2 tracking-widest">POWERED BY RING FLOW V2.4</p>
         </div>
       </main>
     </div>
