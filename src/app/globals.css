@@ -7,12 +7,13 @@
 }
 
 :root {
-  --background: #F8FAFC; /* Slate Tint as per DESIGN.md */
-  --foreground: #191c1e;
+  --background: #F5F3EC;
+  --foreground: #1B1815;
+  --bg: #F5F3EC;
 }
 
 body {
-  background-color: var(--background);
+  background-color: #F5F3EC;
   color: var(--foreground);
   font-family: 'Inter', sans-serif;
 }

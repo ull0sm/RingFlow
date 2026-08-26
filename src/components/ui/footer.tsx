@@ -1,5 +1,6 @@
 import React from "react"
 import { cn } from "@/lib/utils"
+import { RingFlowLogo } from "./ringflow-logo"
 
 interface SocialLink {
   icon: React.ReactNode
@@ -13,17 +14,14 @@ interface NavLink {
 }
 
 interface FooterProps {
-  /** The product/app name shown in the brand row. No logo here — RingFlow has none. */
   brandName: string
   socialLinks?: SocialLink[]
   mainLinks?: NavLink[]
   legalLinks?: NavLink[]
   copyright: {
     year: number
-    /** Node rendered in the "Built by" attribution slot — pass the studio logo + name */
     builtBy?: React.ReactNode
   }
-  /** Martial-arts background image URL; overlaid with primary-container tint */
   backgroundImageUrl?: string
   className?: string
 }
@@ -39,45 +37,48 @@ export function Footer({
 }: FooterProps) {
   return (
     <footer className={cn("w-full", className)}>
-      <div
-        className="relative w-full bg-primary-container"
-        style={
-          backgroundImageUrl
-            ? {
+      <div className="relative w-full bg-[#F5F3EC] border-t border-[#E1DDCF] overflow-hidden min-h-[300px] flex flex-col justify-end">
+        {/* Karate Fighters Artwork in Full View */}
+        {backgroundImageUrl && (
+          <>
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{
                 backgroundImage: `url(${backgroundImageUrl})`,
                 backgroundSize: "cover",
-                backgroundPosition: "center 40%",
-              }
-            : undefined
-        }
-      >
-        {/* Overlay: primary-container colour at high opacity keeps the card legible */}
-        {backgroundImageUrl && (
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-primary-container/85"
-          />
+                backgroundPosition: "center 42%",
+                opacity: 0.92,
+              }}
+            />
+            {/* Smooth Top Gradient Blend from Page Background */}
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to bottom, #F5F3EC 0%, rgba(245, 243, 236, 0.45) 25%, rgba(245, 243, 236, 0.1) 60%, rgba(245, 243, 236, 0.5) 100%)",
+              }}
+            />
+          </>
         )}
 
-        <div className="relative max-w-7xl mx-auto px-margin-desktop py-10">
-          {/*
-           * Card: Level 1 surface in the dark context.
-           * Uses border rather than shadow per DESIGN.md elevation rules.
-           */}
-          <div className="border border-white/[0.07] rounded-lg overflow-hidden">
-
-            {/* ── Row 1: app name  ·  social icons ── */}
-            <div className="flex items-center justify-between px-card-padding py-[18px]">
+        <div className="relative max-w-7xl mx-auto w-full px-4 md:px-8 py-8 z-10">
+          {/* Card: Translucent frosted glass allowing the fighters to be visible while keeping text crystal clear */}
+          <div className="bg-[#F5F3EC]/80 backdrop-blur-md border border-[#E1DDCF]/90 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(27,24,21,0.06)]">
+            {/* ── Row 1: Brand & Social Links ── */}
+            <div className="flex items-center justify-between px-6 py-3.5">
               <a
                 href="/"
                 aria-label={brandName}
-                className="font-semibold text-[18px] leading-none tracking-tight text-inverse-on-surface hover:text-white transition-colors duration-150"
+                className="font-bold text-[19px] leading-none tracking-tight text-[#1B1815] hover:text-black transition-colors duration-150 flex items-center gap-2.5"
               >
-                {brandName}
+                <RingFlowLogo className="h-[18px] w-auto text-[#1B1815]" />
+                <span className="font-black tracking-tight">{brandName}</span>
               </a>
 
               {socialLinks.length > 0 && (
-                <ul className="flex items-center gap-1 list-none m-0 p-0">
+                <ul className="flex items-center gap-3 list-none m-0 p-0">
                   {socialLinks.map((link, i) => (
                     <li key={i}>
                       <a
@@ -85,7 +86,7 @@ export function Footer({
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={link.label}
-                        className="flex items-center justify-center w-8 h-8 rounded-lg text-on-primary-container hover:bg-white/10 hover:text-inverse-on-surface transition-all duration-150"
+                        className="flex items-center justify-center text-[#1B1815] hover:text-black hover:opacity-75 transition-all duration-150"
                       >
                         {link.icon}
                       </a>
@@ -96,33 +97,34 @@ export function Footer({
             </div>
 
             {/* 1px separator */}
-            <div className="h-px bg-white/[0.07] mx-card-padding" />
+            <div className="h-px bg-[#E1DDCF]/80 mx-6" />
 
-            {/* ── Row 2: copyright + attribution  ·  nav links ── */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-card-padding py-[18px]">
-
-              {/* Left: copyright + "Built by CruxStudios" */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[13px] text-on-primary-container leading-none">
-                  © {copyright.year}
+            {/* ── Row 2: Copyright + Attribution · Nav Links ── */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-3.5">
+              {/* Left: copyright + Built by */}
+              <div className="flex flex-col gap-1">
+                <span className="text-[13px] text-[#68645A] leading-none font-medium">
+                  © {copyright.year} {brandName}. All rights reserved.
                 </span>
                 {copyright.builtBy && (
-                  <div className="flex items-center gap-1.5 text-[16px] text-on-primary-container/60">
-                    <span className="font-data-mono uppercase tracking-widest text-[12px]">Built by</span>
+                  <div className="flex items-center gap-1.5 text-[14px] text-[#68645A]">
+                    <span className="font-mono uppercase tracking-widest text-[11px] text-[#8C877C]">
+                      Built by
+                    </span>
                     {copyright.builtBy}
                   </div>
                 )}
               </div>
 
-              {/* Right: main links  +  legal links stacked */}
-              <div className="flex flex-col items-start sm:items-end gap-1.5">
+              {/* Right: Main links + Legal links */}
+              <div className="flex flex-col items-start sm:items-end gap-1">
                 {mainLinks.length > 0 && (
                   <nav className="flex flex-wrap gap-x-5 gap-y-1 sm:justify-end">
                     {mainLinks.map((link, i) => (
                       <a
                         key={i}
                         href={link.href}
-                        className="text-[13px] font-medium text-inverse-on-surface hover:text-white transition-colors duration-150"
+                        className="text-[13.5px] font-bold text-[#1B1815] hover:text-black transition-colors duration-150"
                       >
                         {link.label}
                       </a>
@@ -135,7 +137,7 @@ export function Footer({
                       <a
                         key={i}
                         href={link.href}
-                        className="text-[12px] text-on-primary-container/55 hover:text-on-primary-container transition-colors duration-150"
+                        className="text-[12px] font-medium text-[#68645A] hover:text-[#1B1815] transition-colors duration-150"
                       >
                         {link.label}
                       </a>
@@ -143,7 +145,6 @@ export function Footer({
                   </nav>
                 )}
               </div>
-
             </div>
           </div>
         </div>
