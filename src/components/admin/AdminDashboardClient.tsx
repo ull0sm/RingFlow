@@ -75,7 +75,104 @@ export default function AdminDashboardClient({
     }
   });
 
+  const completedCategories = assignments.filter(a => a.status === "completed").length;
+  const totalCategories = categoryCount || assignments.length || 0;
   const progressPercent = totalMatches > 0 ? (completedMatches / totalMatches) * 100 : 0;
+
+  const [currentTime, setCurrentTime] = useState<number>(() => Date.now());
+
+  // Live timer interval to update elapsed times every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Helper to calculate time took vs expected for each tatami
+  const getRingTiming = (ringId: string, ringAssignments: any[]) => {
+    const ringLogs = logs.filter((l: any) => l.ring_id === ringId);
+    const startLogs = ringLogs.filter((l: any) => l.action === "START_CATEGORY");
+    const finishLogs = ringLogs.filter((l: any) => l.action === "FINISH_CATEGORY");
+
+    let startTime: number | null = null;
+    if (startLogs.length > 0) {
+      startTime = Math.min(...startLogs.map((l: any) => new Date(l.created_at).getTime()));
+    } else {
+      const activeOrDone = ringAssignments.find(
+        (a: any) => a.status === "running" || a.status === "paused" || a.status === "completed"
+      );
+      if (activeOrDone && activeOrDone.created_at) {
+        startTime = new Date(activeOrDone.created_at).getTime();
+      }
+    }
+
+    const hasAssignments = ringAssignments.length > 0;
+    const isAllCompleted = hasAssignments && ringAssignments.every((a: any) => a.status === "completed");
+
+    let endTime: number | null = null;
+    if (isAllCompleted && finishLogs.length > 0) {
+      endTime = Math.max(...finishLogs.map((l: any) => new Date(l.created_at).getTime()));
+    } else if (isAllCompleted && ringAssignments[ringAssignments.length - 1]?.completed_at) {
+      endTime = new Date(ringAssignments[ringAssignments.length - 1].completed_at).getTime();
+    }
+
+    let actualSeconds = 0;
+    let isRunning = false;
+    if (startTime) {
+      if (isAllCompleted && endTime) {
+        actualSeconds = Math.max(0, Math.floor((endTime - startTime) / 1000));
+      } else {
+        actualSeconds = Math.max(0, Math.floor((currentTime - startTime) / 1000));
+        isRunning = true;
+      }
+    }
+
+    // Sum all expected category durations for this tatami (standard 109s per match)
+    let expectedSeconds = 0;
+    ringAssignments.forEach((a: any) => {
+      const matches = a.categories?.expected_matches || a.categories?.athletes_count || 4;
+      expectedSeconds += matches * 109;
+    });
+
+    if (expectedSeconds === 0 && hasAssignments) {
+      expectedSeconds = 15 * 60;
+    }
+
+    const diffSeconds = actualSeconds - expectedSeconds;
+
+    return {
+      startTime,
+      isStarted: startTime !== null,
+      isRunning,
+      isAllCompleted,
+      actualSeconds,
+      expectedSeconds,
+      diffSeconds,
+    };
+  };
+
+  const formatTimeTook = (totalSeconds: number) => {
+    if (totalSeconds <= 0) return "00m 00s";
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes.toString().padStart(2, "0")}m ${seconds.toString().padStart(2, "0")}s`;
+    }
+    return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
+  };
+
+  const formatTimeExpected = (totalSeconds: number) => {
+    if (totalSeconds <= 0) return "--";
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes > 0 ? `${minutes}m` : ""}`;
+    }
+    return `${minutes}m`;
+  };
 
   return (
     <>
@@ -113,12 +210,18 @@ export default function AdminDashboardClient({
         <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
           <div className="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-lg flex flex-col justify-between shadow-sm hover:shadow transition-shadow">
             <div className="flex justify-between items-start">
-              <span className="font-label-caps text-label-caps text-on-surface-variant">Total Categories</span>
+              <span className="font-label-caps text-label-caps text-on-surface-variant">Completed Categories</span>
               <span className="material-symbols-outlined text-secondary">category</span>
             </div>
             <div className="mt-4">
-              <span className="font-headline-lg text-headline-lg font-bold">{categoryCount || 0}</span>
-              <p className="text-body-sm text-on-surface-variant mt-1">Configured for tournament</p>
+              <span className="font-headline-lg text-headline-lg font-bold">
+                {completedCategories} / {totalCategories}
+              </span>
+              <p className="text-body-sm text-on-surface-variant mt-1">
+                {totalCategories > 0 && completedCategories === totalCategories
+                  ? "All divisions finished"
+                  : `${Math.max(0, totalCategories - completedCategories)} divisions remaining`}
+              </p>
             </div>
           </div>
           
@@ -147,6 +250,133 @@ export default function AdminDashboardClient({
                 <span className="font-data-mono text-data-mono text-on-surface-variant">{Math.max(0, totalMatches - completedMatches)} Remaining</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Tatami Time Took vs Time Expected Section */}
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-label-caps text-label-caps text-on-surface-variant font-bold">
+              Tatami Duration & Schedule Pace
+            </h3>
+            <div className="flex items-center gap-1.5 text-[11px] font-label-caps text-on-surface-variant">
+              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              <span>Realtime Pace Tracking</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            {rings.map((ring) => {
+              const ringAssignments = assignments.filter((a) => a.ring_id === ring.id) || [];
+              const timing = getRingTiming(ring.id, ringAssignments);
+              const activeAssign = ringAssignments.find((a) => a.status === "running" || a.status === "paused");
+              const currentCatName =
+                activeAssign?.categories?.name || ringAssignments[0]?.categories?.name || "No divisions assigned";
+              const totalExpectedMatches = ringAssignments.reduce(
+                (acc, a) => acc + (a.categories?.expected_matches || 0),
+                0
+              );
+
+              return (
+                <div
+                  key={ring.id}
+                  className="bg-surface-container-lowest p-card-padding border border-outline-variant rounded-lg flex flex-col justify-between shadow-sm hover:shadow transition-shadow"
+                >
+                  <div>
+                    {/* Header */}
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-headline-sm text-headline-sm font-bold text-primary">
+                        {ring.name.replace(/Ring/i, "Tatami")}
+                      </span>
+                      {timing.isAllCompleted ? (
+                        <span className="px-2 py-0.5 rounded font-label-caps text-[10px] uppercase font-bold bg-blue-100 text-blue-800">
+                          Completed
+                        </span>
+                      ) : timing.isRunning ? (
+                        <span className="px-2 py-0.5 rounded font-label-caps text-[10px] uppercase font-bold bg-green-100 text-green-800 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
+                          Running
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded font-label-caps text-[10px] uppercase font-bold bg-surface-container-highest text-on-surface-variant">
+                          Idle
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="text-body-sm text-on-surface-variant truncate mb-5" title={currentCatName}>
+                      {currentCatName}
+                    </p>
+
+                    {/* Time Elapsed / Expected */}
+                    <div className="space-y-1 mb-4">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[11px] font-label-caps text-on-surface-variant uppercase tracking-wider">
+                          Time Elapsed / Expected
+                        </span>
+                        {timing.isStarted && (
+                          <span
+                            className={`font-label-caps text-[11px] font-bold ${
+                              timing.diffSeconds > 60
+                                ? "text-amber-700"
+                                : timing.diffSeconds < -60
+                                ? "text-green-700"
+                                : "text-secondary"
+                            }`}
+                          >
+                            {timing.diffSeconds > 60
+                              ? `+${Math.ceil(timing.diffSeconds / 60)}m Behind`
+                              : timing.diffSeconds < -60
+                              ? `${Math.floor(Math.abs(timing.diffSeconds) / 60)}m Ahead`
+                              : "On Pace"}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-baseline gap-2">
+                        <span
+                          className="font-data-mono text-2xl font-bold text-primary"
+                          suppressHydrationWarning
+                        >
+                          {timing.isStarted ? formatTimeTook(timing.actualSeconds) : "-- : --"}
+                        </span>
+                        <span className="font-data-mono text-sm text-on-surface-variant">
+                          / {timing.expectedSeconds > 0 ? formatTimeExpected(timing.expectedSeconds) : "--"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Track & Details */}
+                  <div>
+                    <div className="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden mb-2">
+                      <div
+                        className={`h-full transition-all duration-1000 ease-out ${
+                          timing.diffSeconds > 60
+                            ? "bg-amber-500"
+                            : timing.isAllCompleted
+                            ? "bg-blue-600"
+                            : "bg-secondary"
+                        }`}
+                        style={{
+                          width: `${
+                            timing.expectedSeconds > 0
+                              ? Math.min(100, (timing.actualSeconds / timing.expectedSeconds) * 100)
+                              : 0
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[11px] text-on-surface-variant font-data-mono">
+                      <span>
+                        {ringAssignments.length} {ringAssignments.length === 1 ? "division" : "divisions"}
+                      </span>
+                      <span>{totalExpectedMatches} matches total</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 

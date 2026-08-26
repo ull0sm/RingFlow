@@ -72,7 +72,7 @@ export default function RingCard({
       </div>
       
       <div className="flex justify-between items-center mt-4 pt-4 border-t border-outline-variant">
-        <span className="font-body-sm text-on-surface-variant italic">
+        <span className="font-body-sm text-on-surface-variant italic" suppressHydrationWarning>
           {status === "Empty" ? "Waiting for Assign" : `Est. Finish: ${estimatedFinish}`}
         </span>
         <button className="material-symbols-outlined text-outline hover:text-primary transition-colors">
