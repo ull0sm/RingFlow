@@ -1,42 +1,45 @@
 import React from "react";
-import { PublicRingCardSkeleton, Skeleton } from "@/components/ui/Skeleton";
+
+function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse bg-[#E1DDCF]/80 rounded-md ${className}`} />;
+}
 
 export default function PublicEventLoading() {
   return (
-    <div className="font-body-md text-on-background min-h-screen bg-surface">
-      {/* Top Navigation Shell */}
-      <header className="bg-surface-container-lowest border-b border-outline-variant fixed top-0 w-full z-50 flex justify-between items-center h-16 px-4 md:px-margin-desktop">
-        <div className="flex items-center gap-3 py-2">
-          <span className="font-headline-lg text-headline-lg font-black text-primary tracking-tighter select-none">Ring Flow</span>
+    <div className="min-h-screen bg-[#F5F3EC] py-10 px-4 md:px-8 max-w-7xl mx-auto">
+      {/* Header Skeleton */}
+      <div className="mb-8 border-b border-[#E1DDCF] pb-6">
+        <Skeleton className="w-24 h-4 mb-4" />
+        <Skeleton className="w-3/4 max-w-md h-9 mb-3" />
+        <div className="flex gap-4">
+          <Skeleton className="w-28 h-4" />
+          <Skeleton className="w-24 h-4" />
         </div>
-      </header>
+      </div>
 
-      <main className="px-4 md:px-margin-desktop max-w-7xl mx-auto py-6 mt-16">
-        {/* Search & Info Bar */}
-        <div className="flex flex-col space-y-4 mb-6 relative">
-          <div className="flex items-center gap-3 py-6">
-            <div className="w-3 h-3 rounded-full bg-secondary animate-pulse"></div>
-            <Skeleton className="w-64 h-8" />
-          </div>
-          
-          <div className="relative">
-            <input 
-              disabled
-              className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-4 pl-12 pr-4 opacity-75 select-none pointer-events-none" 
-              placeholder="Search athlete by name or chest number..." 
-              type="text"
-            />
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-          </div>
-        </div>
+      {/* Search Bar Skeleton */}
+      <Skeleton className="w-full h-12 rounded-xl mb-8 bg-[#E1DDCF]/60" />
 
-        {/* Ring Mat Cards Skeletons */}
-        <div className="space-y-6">
-          <PublicRingCardSkeleton />
-          <PublicRingCardSkeleton />
-          <PublicRingCardSkeleton />
-        </div>
-      </main>
+      {/* Cards Grid Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="bg-white border border-[#E1DDCF] rounded-xl p-5 flex flex-col justify-between h-64 shadow-sm"
+          >
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <Skeleton className="w-20 h-5" />
+                <Skeleton className="w-14 h-5 rounded-full" />
+              </div>
+              <Skeleton className="w-full h-6 mb-2" />
+              <Skeleton className="w-2/3 h-4 mb-6" />
+              <Skeleton className="w-full h-2 rounded-full mb-2" />
+            </div>
+            <Skeleton className="w-full h-10 rounded-lg" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
