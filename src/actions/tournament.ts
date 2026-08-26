@@ -1,12 +1,11 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { ensureAdmin } from "./admin";
 
 export type CategoryInput = {
   name: string;
-  age_bracket: string;
-  weight_class: string;
+  age_bracket?: string;
+  weight_class?: string;
   athletes_count: number;
 };
 
@@ -15,30 +14,36 @@ export type TournamentInput = {
   event_date: string;
   venue: string;
   city: string;
+  num_rings?: number;
+  ringCount?: number;
   categories: CategoryInput[];
-  ringCount: number;
 };
 
-export async function createTournament(input: TournamentInput) {
-  const adminId = await ensureAdmin();
+export async function createTournament(input: TournamentInput): Promise<string> {
   const supabase = await createClient();
+
+  // Get Current Admin User
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
 
   // 1. Create Tournament
   const { data: tournament, error: tournamentError } = await supabase
     .from("tournaments")
     .insert({
-      admin_id: adminId,
+      admin_id: user.id,
       name: input.name,
-      event_date: input.event_date || null,
-      venue: input.venue || null,
-      city: input.city || null,
+      event_date: input.event_date ? input.event_date : null,
+      venue: input.venue,
+      city: input.city,
       status: "draft",
     })
-    .select("id")
+    .select()
     .single();
 
-  if (tournamentError) {
-    console.error("Failed to create tournament:", tournamentError);
+  if (tournamentError || !tournament) {
+    console.error("Error creating tournament:", tournamentError);
     throw new Error("Failed to create tournament");
   }
 
@@ -47,51 +52,54 @@ export async function createTournament(input: TournamentInput) {
   // 2. Create Categories
   if (input.categories.length > 0) {
     const categoriesToInsert = input.categories.map((c) => {
-      // expected_matches = 2n - 1
-      const count = c.athletes_count > 0 ? c.athletes_count : 1;
-      const expectedMatches = (2 * count) - 1;
+      // expected_matches = n - 1
+      const expectedMatches = Math.max(0, c.athletes_count - 1);
 
       return {
         tournament_id: tournamentId,
         name: c.name,
-        age_bracket: c.age_bracket,
-        weight_class: c.weight_class,
+        age_bracket: c.age_bracket || "",
+        weight_class: c.weight_class || "",
         athletes_count: c.athletes_count,
         expected_matches: expectedMatches,
         has_full_roster: false,
       };
     });
 
-    const { error: categoriesError } = await supabase
+    const { error: catError } = await supabase
       .from("categories")
       .insert(categoriesToInsert);
 
-    if (categoriesError) {
-      console.error("Failed to create categories:", categoriesError);
+    if (catError) {
+      console.error("Error creating categories:", catError);
       throw new Error("Failed to create categories");
     }
   }
 
   // 3. Create Rings
-  const ringsToInsert = Array.from({ length: input.ringCount }).map((_, i) => {
-    // Generate a random 6-digit string
-    const accessCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    return {
-      tournament_id: tournamentId,
-      name: `Tatami ${String(i + 1).padStart(2, "0")}`,
-      ring_order: i + 1,
-      access_code: accessCode,
-    };
-  });
+  const ringTotal = input.num_rings || input.ringCount || 0;
+  if (ringTotal > 0) {
+    const ringsToInsert = Array.from({ length: ringTotal }).map(
+      (_, index) => {
+        const ringNumber = index + 1;
+        const accessCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+        return {
+          tournament_id: tournamentId,
+          name: `Tatami ${ringNumber}`,
+          ring_order: ringNumber,
+          access_code: accessCode,
+        };
+      }
+    );
 
-  const { error: ringsError } = await supabase
-    .from("rings")
-    .insert(ringsToInsert);
+    const { error: ringsError } = await supabase
+      .from("rings")
+      .insert(ringsToInsert);
 
-  if (ringsError) {
-    console.error("Failed to create rings:", ringsError);
-    throw new Error("Failed to create rings");
+    if (ringsError) {
+      console.error("Error creating rings:", ringsError);
+      throw new Error("Failed to create rings");
+    }
   }
 
   return tournamentId;
