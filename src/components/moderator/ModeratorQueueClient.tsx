@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
 import { startCategory, reorderCategory } from "@/actions/moderator";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
 export default function ModeratorQueueClient({ ringId, initialAssignments }: { ringId: string, initialAssignments: any[] }) {
   const [assignments, setAssignments] = useState(initialAssignments);
-  const [loading, setLoading] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -18,17 +18,33 @@ export default function ModeratorQueueClient({ ringId, initialAssignments }: { r
         schema: 'public', 
         table: 'category_assignments',
         filter: `ring_id=eq.${ringId}`
-      }, (payload) => {
-        if (payload.eventType === 'UPDATE') {
+      }, async (payload) => {
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+          const newRow = payload.new as any;
+          // Fetch joined category info if missing from raw payload
+          let categoryData = newRow.categories;
+          if (!categoryData && newRow.category_id) {
+            const { data } = await supabase
+              .from('categories')
+              .select('name, expected_matches, belt, age_bracket')
+              .eq('id', newRow.category_id)
+              .single();
+            if (data) categoryData = data;
+          }
+
+          const fullAssignment = { ...newRow, categories: categoryData };
+
           setAssignments(prev => {
-            const idx = prev.findIndex(a => a.id === payload.new.id);
+            const idx = prev.findIndex(a => a.id === fullAssignment.id || a.category_id === fullAssignment.category_id);
             if (idx > -1) {
               const copy = [...prev];
-              copy[idx] = { ...copy[idx], ...payload.new };
+              copy[idx] = { ...copy[idx], ...fullAssignment };
               return copy;
             }
-            return prev;
+            return [...prev, fullAssignment];
           });
+        } else if (payload.eventType === 'DELETE') {
+          setAssignments(prev => prev.filter(a => a.id !== (payload.old as any).id));
         }
       })
       .subscribe();
@@ -38,138 +54,112 @@ export default function ModeratorQueueClient({ ringId, initialAssignments }: { r
     };
   }, [ringId, supabase]);
 
-  const activeAssignment = assignments.find(a => a.status === 'running' || a.status === 'paused');
-  const pendingAssignments = assignments.filter(a => a.status === 'pending').sort((a, b) => a.queue_order - b.queue_order);
+  const pendingAssignments = assignments
+    .filter(a => a.status === 'pending')
+    .sort((a, b) => a.queue_order - b.queue_order);
 
-  const handleStartCategory = async (assignmentId: string) => {
-    setLoading(true);
+  const activeAssignment = assignments.find(a => a.status === 'running' || a.status === 'paused');
+
+  const handleStart = async (id: string) => {
+    setLoadingId(id);
     try {
-      await startCategory(assignmentId, ringId);
+      await startCategory(id, ringId);
       router.push(`/moderator/ring/${ringId}/current`);
     } catch (e) {
       console.error(e);
       alert("Failed to start category");
     } finally {
-      setLoading(false);
+      setLoadingId(null);
     }
   };
 
-  const handleReorder = async (assignmentId: string, direction: "up" | "down") => {
-    setLoading(true);
+  const handleReorder = async (id: string, direction: "up" | "down") => {
     try {
-      await reorderCategory(assignmentId, ringId, direction);
+      await reorderCategory(id, ringId, direction);
     } catch (e) {
       console.error(e);
-      alert("Failed to reorder");
-    } finally {
-      setLoading(false);
+      alert("Failed to reorder queue");
     }
   };
 
   return (
-    <div className="space-y-6">
-      {!activeAssignment && pendingAssignments.length > 0 && (
-        <section className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center mb-6">
-            <span className="material-symbols-outlined text-4xl text-outline" style={{fontVariationSettings: '"FILL" 1'}}>event_busy</span>
-          </div>
-          <h2 className="font-headline-sm text-headline-sm mb-2">No category running</h2>
-          <p className="text-on-surface-variant mb-8 max-w-sm">There is currently no active competition on this tatami. Please initialize the first category to begin.</p>
-          <button 
-            disabled={loading}
-            onClick={() => handleStartCategory(pendingAssignments[0].id)}
-            className="bg-primary text-on-primary px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:opacity-80 transition-opacity disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined" style={{fontVariationSettings: '"FILL" 1'}}>play_arrow</span>
-            Start First Category
-          </button>
-        </section>
-      )}
+    <div className="space-y-6 max-w-lg mx-auto pb-8">
+      <div>
+        <h2 className="font-headline-md text-xl font-black text-primary">Tatami Queue</h2>
+        <p className="text-body-sm text-on-surface-variant">Scheduled upcoming categories in match order.</p>
+      </div>
 
       {activeAssignment && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">CURRENT</h2>
-            <span className={`flex items-center gap-2 px-3 py-1 rounded-full font-label-caps text-label-caps border ${
-              activeAssignment.status === 'running' 
-                ? 'bg-[#e8f5e9] text-[#2e7d32] border-[#c8e6c9]' 
-                : 'bg-error-container text-on-error-container border-error/20'
-            }`}>
-              {activeAssignment.status === 'running' && <span className="w-2 h-2 rounded-full bg-[#2e7d32] animate-pulse"></span>}
-              {activeAssignment.status.toUpperCase()}
-            </span>
+        <div className="p-4 bg-secondary/10 border border-secondary/30 rounded-xl flex justify-between items-center">
+          <div>
+            <span className="text-[10px] font-label-caps font-bold text-secondary uppercase tracking-wider block">CURRENTLY ON MAT</span>
+            <span className="font-bold text-primary text-sm">{activeAssignment.categories?.name}</span>
           </div>
-          <div className="bg-surface-container-lowest border-l-4 border-secondary border-t border-r border-b border-outline-variant rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 p-8">
-            <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-secondary-container rounded-xl flex items-center justify-center">
-                <span className="material-symbols-outlined text-3xl text-on-secondary-container" style={{fontVariationSettings: '"FILL" 1'}}>sports_martial_arts</span>
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-headline-sm text-headline-sm font-semibold">{activeAssignment.categories?.name}</h3>
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1 text-on-surface-variant font-body-sm">
-                    <span className="material-symbols-outlined text-sm">group</span>
-                    {activeAssignment.categories?.expected_matches || 0} Expected Matches
-                  </span>
+          <button 
+            onClick={() => router.push(`/moderator/ring/${ringId}/current`)}
+            className="px-3 py-1.5 bg-secondary text-on-secondary rounded-lg font-bold text-xs hover:opacity-90 transition-opacity"
+          >
+            View Live
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {pendingAssignments.map((a, index) => (
+          <div 
+            key={a.id}
+            className="p-4 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xs flex items-center justify-between gap-4"
+          >
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <span className="font-data-mono font-black text-lg text-outline w-6 text-center">{index + 1}</span>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-primary text-sm truncate">{a.categories?.name}</h4>
+                <div className="flex items-center gap-2 text-[10px] text-on-surface-variant font-data-mono">
+                  <span>{a.categories?.belt || a.categories?.weight_class || "-"}</span>
+                  <span>•</span>
+                  <span>{a.categories?.expected_matches || 0} Matches</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <button 
-                onClick={() => router.push(`/moderator/ring/${ringId}/current`)}
-                className="flex-grow md:flex-grow-0 px-6 py-2.5 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps hover:opacity-80 transition-opacity"
+
+            <div className="flex items-center gap-1.5">
+              <div className="flex flex-col gap-0.5">
+                <button 
+                  onClick={() => handleReorder(a.id, "up")}
+                  disabled={index === 0}
+                  className="p-1 hover:bg-surface-container rounded disabled:opacity-20 text-on-surface-variant"
+                  title="Move Up"
+                >
+                  <span className="material-symbols-outlined text-[14px]">arrow_upward</span>
+                </button>
+                <button 
+                  onClick={() => handleReorder(a.id, "down")}
+                  disabled={index === pendingAssignments.length - 1}
+                  className="p-1 hover:bg-surface-container rounded disabled:opacity-20 text-on-surface-variant"
+                  title="Move Down"
+                >
+                  <span className="material-symbols-outlined text-[14px]">arrow_downward</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => handleStart(a.id)}
+                disabled={loadingId === a.id}
+                className="px-4 py-2.5 bg-primary text-on-primary rounded-lg font-bold text-xs hover:opacity-90 transition-opacity flex items-center gap-1 disabled:opacity-50"
               >
-                GO TO MATCH
+                <span className="material-symbols-outlined text-[16px]">play_arrow</span>
+                {loadingId === a.id ? "Starting..." : "Start"}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        ))}
 
-      {pendingAssignments.length > 0 && (
-        <div className="space-y-4 pt-8">
-          <div className="flex items-center justify-between">
-            <h2 className="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">UP NEXT</h2>
+        {pendingAssignments.length === 0 && (
+          <div className="p-8 text-center border border-dashed border-outline-variant rounded-2xl text-on-surface-variant italic">
+            No categories remaining in this Tatami's queue.
           </div>
-          <div className="space-y-3">
-            {pendingAssignments.map((assignment, index) => (
-              <div key={assignment.id} className="group bg-surface-container-low border border-outline-variant rounded-xl p-5 flex items-center justify-between transition-all">
-                <div className="flex items-center gap-6">
-                  <span className="font-data-mono text-outline text-sm w-4">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div>
-                    <p className="font-body-md font-medium text-on-surface">{assignment.categories?.name}</p>
-                    <p className="text-on-surface-variant text-sm">{assignment.categories?.expected_matches || 0} Matches</p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <button 
-                    disabled={loading || index === 0} 
-                    onClick={() => handleReorder(assignment.id, "up")}
-                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-on-surface-variant disabled:opacity-30 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-sm">keyboard_arrow_up</span>
-                  </button>
-                  <button 
-                    disabled={loading || index === pendingAssignments.length - 1} 
-                    onClick={() => handleReorder(assignment.id, "down")}
-                    className="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container text-on-surface-variant disabled:opacity-30 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {!activeAssignment && pendingAssignments.length === 0 && (
-        <div className="text-center p-12 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface-variant">
-          No categories assigned to this tatami yet.
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

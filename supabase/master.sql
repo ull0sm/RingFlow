@@ -1,4 +1,4 @@
--- RingFlow Database Schema (Consolidated Master SQL)
+-- RingFlow Database Schema (Consolidated Master SQL - Shorinkai Org)
 -- This file contains the complete, up-to-date database schema, security policies, and replication configurations.
 -- =========================================================================
 -- 1. EXTENSIONS & ENUMS
@@ -62,7 +62,7 @@ CREATE TABLE public.categories (
     age_bracket TEXT,
     weight_class TEXT,
     athletes_count INTEGER NOT NULL DEFAULT 0,
-    expected_matches INTEGER NOT NULL DEFAULT 0, -- Calculated as 2n-1, but overridable
+    expected_matches INTEGER NOT NULL DEFAULT 0, -- Calculated as n-1
     has_full_roster BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     belt TEXT,
@@ -71,10 +71,10 @@ CREATE TABLE public.categories (
     sex TEXT,
     day TEXT
 );
--- Athletes Table
+-- Athletes Table (Shorinkai Organization Support)
 CREATE TABLE public.athletes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    category_id UUID REFERENCES public.categories(id) ON DELETE CASCADE, -- Nullable (Mode B support)
+    category_id UUID REFERENCES public.categories(id) ON DELETE CASCADE,
     tournament_id UUID REFERENCES public.tournaments(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     chest_number TEXT,
@@ -83,6 +83,9 @@ CREATE TABLE public.athletes (
     sex TEXT,
     day TEXT,
     dojo TEXT,
+    school TEXT,
+    school_code TEXT,
+    sports_id TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 -- Category Assignments Table (Mapping Categories to Rings)
@@ -96,7 +99,7 @@ CREATE TABLE public.category_assignments (
     completed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (ring_id, queue_order),
-    UNIQUE (category_id) -- A category can only be assigned to one ring at a time
+    UNIQUE (category_id)
 );
 -- Moderator Requests Table
 CREATE TABLE public.moderator_requests (
@@ -104,7 +107,7 @@ CREATE TABLE public.moderator_requests (
     ring_id UUID NOT NULL REFERENCES public.rings(id) ON DELETE CASCADE,
     access_code_used TEXT NOT NULL,
     status request_status NOT NULL DEFAULT 'pending',
-    session_token UUID UNIQUE, -- Generated upon approval
+    session_token UUID UNIQUE,
     device_info JSONB DEFAULT '{}'::jsonb,
     moderator_name TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -118,7 +121,7 @@ CREATE TABLE public.event_log (
     category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
     moderator_session_id UUID REFERENCES public.moderator_requests(session_token) ON DELETE SET NULL,
     action event_action NOT NULL,
-    metadata JSONB, -- Optional extra data (e.g., {"increment": 1}, {"reason": "injury"})
+    metadata JSONB,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 -- =========================================================================
@@ -135,7 +138,6 @@ CREATE INDEX idx_moderator_requests_session ON public.moderator_requests(session
 -- =========================================================================
 -- 4. ROW LEVEL SECURITY (RLS) POLICIES
 -- =========================================================================
--- Enable RLS on all tables
 ALTER TABLE public.admins ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tournaments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.rings ENABLE ROW LEVEL SECURITY;
@@ -144,24 +146,24 @@ ALTER TABLE public.category_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.athletes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.moderator_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.event_log ENABLE ROW LEVEL SECURITY;
--- Admins Table Policies
+
 CREATE POLICY "Admins can view own record" ON public.admins FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Admins can insert own record" ON public.admins FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Admins can update own record" ON public.admins FOR UPDATE USING (auth.uid() = id);
--- Tournaments Table Policies
+
 CREATE POLICY "Admins can manage their tournaments" ON public.tournaments FOR ALL USING (auth.uid() = admin_id);
 CREATE POLICY "Public can view active tournaments" ON public.tournaments FOR SELECT USING (status = 'active' OR status = 'completed');
--- Rings Table Policies
+
 CREATE POLICY "Admins can manage rings" ON public.rings FOR ALL USING (
     EXISTS (SELECT 1 FROM public.tournaments t WHERE t.id = rings.tournament_id AND t.admin_id = auth.uid())
 );
 CREATE POLICY "Public can view rings" ON public.rings FOR SELECT USING (true);
--- Categories Table Policies
+
 CREATE POLICY "Admins can manage categories" ON public.categories FOR ALL USING (
     EXISTS (SELECT 1 FROM public.tournaments t WHERE t.id = categories.tournament_id AND t.admin_id = auth.uid())
 );
 CREATE POLICY "Public can view categories" ON public.categories FOR SELECT USING (true);
--- Category Assignments Table Policies
+
 CREATE POLICY "Admins can manage assignments" ON public.category_assignments FOR ALL USING (
     EXISTS (
         SELECT 1 FROM public.rings r
@@ -171,12 +173,12 @@ CREATE POLICY "Admins can manage assignments" ON public.category_assignments FOR
 );
 CREATE POLICY "Public can view assignments" ON public.category_assignments FOR SELECT USING (true);
 CREATE POLICY "Public can update assignments" ON public.category_assignments FOR UPDATE USING (true);
--- Athletes Table Policies
+
 CREATE POLICY "Admins can manage athletes" ON public.athletes FOR ALL USING (
     EXISTS (SELECT 1 FROM public.tournaments t WHERE t.id = athletes.tournament_id AND t.admin_id = auth.uid())
 );
 CREATE POLICY "Public can view athletes" ON public.athletes FOR SELECT USING (true);
--- Moderator Requests Table Policies
+
 CREATE POLICY "Admins can manage mod requests" ON public.moderator_requests FOR ALL USING (
     EXISTS (
         SELECT 1 FROM public.rings r
@@ -186,16 +188,16 @@ CREATE POLICY "Admins can manage mod requests" ON public.moderator_requests FOR 
 );
 CREATE POLICY "Public can insert mod requests" ON public.moderator_requests FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public can read mod requests" ON public.moderator_requests FOR SELECT USING (true);
--- Event Log Table Policies
+
 CREATE POLICY "Admins can manage event log" ON public.event_log FOR ALL USING (
     EXISTS (SELECT 1 FROM public.tournaments t WHERE t.id = event_log.tournament_id AND t.admin_id = auth.uid())
 );
 CREATE POLICY "Public can view event log" ON public.event_log FOR SELECT USING (true);
 CREATE POLICY "Public can insert event logs" ON public.event_log FOR INSERT WITH CHECK (true);
+
 -- =========================================================================
 -- 5. REALTIME REPLICATION
 -- =========================================================================
--- Recreate Supabase Realtime publication to sync live screens
 DROP PUBLICATION IF EXISTS supabase_realtime;
 CREATE PUBLICATION supabase_realtime;
 ALTER PUBLICATION supabase_realtime ADD TABLE 

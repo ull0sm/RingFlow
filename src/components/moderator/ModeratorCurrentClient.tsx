@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
-import { adjustMatchCount, finishCategory, setRingStatus, returnCategoryToQueue, logRingEvent } from "@/actions/moderator";
+import { adjustMatchCount, finishCategory, setRingStatus, returnCategoryToQueue, logRingEvent, logoutModerator } from "@/actions/moderator";
 import MatchTimer from "@/components/moderator/MatchTimer";
 
 export default function ModeratorCurrentClient({ ringId, initialAssignments, allAthletes }: { ringId: string, initialAssignments: any[], allAthletes: any[] }) {
@@ -14,14 +14,20 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [returnConfirmText, setReturnConfirmText] = useState("");
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [syncErrorModal, setSyncErrorModal] = useState<{ title: string; message: string; isUnauthorized: boolean } | null>(null);
+  const [showAdvancedModalOptions, setShowAdvancedModalOptions] = useState(false);
+  const [isUpdatingMatch, setIsUpdatingMatch] = useState(false);
+  const [activeDelta, setActiveDelta] = useState<number | null>(null);
+  const [clickTimestamps, setClickTimestamps] = useState<number[]>([]);
+  const [spamNotice, setSpamNotice] = useState<string | null>(null);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
     const channel = supabase.channel(`current_${ringId}`)
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
         table: 'category_assignments',
         filter: `ring_id=eq.${ringId}`
       }, (payload) => {
@@ -50,15 +56,15 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
     return (
       <section className="flex flex-col items-center justify-center py-20 text-center">
         <div className="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center mb-6">
-          <span className="material-symbols-outlined text-4xl text-outline" style={{fontVariationSettings: '"FILL" 1'}}>event_busy</span>
+          <span className="material-symbols-outlined text-4xl text-outline" style={{ fontVariationSettings: '"FILL" 1' }}>event_busy</span>
         </div>
         <h2 className="font-headline-sm text-headline-sm mb-2">No category running</h2>
         <p className="text-on-surface-variant mb-8 max-w-sm">Please initialize the next category from the Queue to begin.</p>
-        <button 
+        <button
           onClick={() => router.push(`/moderator/ring/${ringId}/queue`)}
           className="bg-primary text-on-primary px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:opacity-80 transition-opacity"
         >
-          <span className="material-symbols-outlined" style={{fontVariationSettings: '"FILL" 1'}}>queue</span>
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: '"FILL" 1' }}>queue</span>
           Go to Queue
         </button>
       </section>
@@ -66,11 +72,57 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
   }
 
   const handleAdjustMatch = async (delta: number) => {
+    if (isUpdatingMatch || loading) return;
+
+    const now = Date.now();
+    const windowMs = 2500;
+    const recent = clickTimestamps.filter(t => now - t < windowMs);
+
+    if (recent.length >= 2) {
+      setClickTimestamps([]);
+      setSpamNotice("One click = 😎 | 20 clicks = 🤡");
+      setTimeout(() => setSpamNotice(null), 3500);
+      return;
+    }
+
+    setClickTimestamps([...recent, now]);
+    setIsUpdatingMatch(true);
+    setActiveDelta(delta);
+
     try {
-      await adjustMatchCount(activeAssignment.id, ringId, delta);
-    } catch (e) {
+      const res = await adjustMatchCount(activeAssignment.id, ringId, delta);
+      if (res && typeof res.matches_completed === 'number') {
+        setAssignments(prev => {
+          const idx = prev.findIndex(a => a.id === activeAssignment.id);
+          if (idx > -1) {
+            const copy = [...prev];
+            copy[idx] = { ...copy[idx], matches_completed: res.matches_completed };
+            return copy;
+          }
+          return prev;
+        });
+      }
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to update score");
+      if (e?.message?.includes("Too many rapid attempts")) {
+        setSpamNotice("Too many rapid clicks. Action rejected.");
+        setTimeout(() => setSpamNotice(null), 3500);
+      } else if (e?.message?.includes("Unauthorized") || e?.message?.includes("Session")) {
+        setSyncErrorModal({
+          title: "Session Expired",
+          message: "Your moderator session is no longer active. Please re-login with your access code or reload the page.",
+          isUnauthorized: true
+        });
+      } else {
+        setSyncErrorModal({
+          title: "Failed to Update Score",
+          message: "💀 Score update failed. The app and server might be out of sync (or your access changed). Refresh the page, check your match count, and try again.",
+          isUnauthorized: false
+        });
+      }
+    } finally {
+      setIsUpdatingMatch(false);
+      setActiveDelta(null);
     }
   };
 
@@ -97,239 +149,235 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
         }
       }
       await finishCategory(activeAssignment.id, ringId);
+      setShowCompleteModal(false);
       router.push(`/moderator/ring/${ringId}/queue`);
     } catch (e) {
       console.error(e);
       alert("Failed to complete category");
     } finally {
       setLoading(false);
-      setShowCompleteModal(false);
-      setShowSettings(false);
     }
   };
 
   const executeReturnToQueue = async () => {
-    if (returnConfirmText !== "CONFIRM") {
-      alert("Must type CONFIRM exactly to return.");
-      return;
-    }
+    if (returnConfirmText !== "CONFIRM") return;
     setLoading(true);
     try {
       await returnCategoryToQueue(activeAssignment.id, ringId);
+      setShowReturnModal(false);
+      setReturnConfirmText("");
       router.push(`/moderator/ring/${ringId}/queue`);
     } catch (e) {
       console.error(e);
-      alert("Failed to return to queue");
+      alert("Failed to return category to queue");
     } finally {
       setLoading(false);
-      setShowReturnModal(false);
-      setShowSettings(false);
     }
   };
 
   const handleRequestAssistance = async (type: string) => {
-    setShowAssistanceModal(false);
     try {
-      if (type === 'Doctor / Medical') {
-        setLoading(true);
-        try {
-          await setRingStatus(activeAssignment.id, ringId, true); // true = isPaused
-        } catch (e) {
-          console.error("Failed to auto-pause for doctor", e);
-        } finally {
-          setLoading(false);
-        }
-      }
-      await logRingEvent(ringId, "REQUEST_ASSISTANCE", { message: `Requested: ${type}`, type });
-      alert(`Assistance requested: ${type}`);
+      await logRingEvent(ringId, "REQUEST_ASSISTANCE", { assistanceType: type });
+      setShowAssistanceModal(false);
+      alert(`Assistance request sent: ${type}`);
     } catch (e) {
       console.error(e);
-      alert("Failed to request assistance");
+      alert("Failed to send assistance request");
     }
   };
 
   const handleEmergency = async () => {
+    if (!confirm("TRIGGER EMERGENCY ALERT? This alerts all admins.")) return;
     try {
-      await logRingEvent(ringId, "EMERGENCY_ALERT", { message: "Critical Emergency Triggered from UI" });
-      alert("Emergency alert sent to admin.");
+      await logRingEvent(ringId, "EMERGENCY_ALERT", { reason: "Moderator button pressed" });
+      alert("EMERGENCY ALERT BROADCASTED");
     } catch (e) {
       console.error(e);
-      alert("Failed to send emergency alert");
+      alert("Failed to trigger emergency");
     }
   };
 
+  const currentCompleted = activeAssignment.matches_completed || 0;
   const totalMatches = activeAssignment.categories?.expected_matches || 0;
-  const currentCompleted = activeAssignment.matches_completed;
-  const percentage = totalMatches > 0 ? (currentCompleted / totalMatches) * 100 : 0;
   const isPaused = activeAssignment.status === 'paused';
+  const progressPercent = totalMatches > 0 ? (currentCompleted / totalMatches) * 100 : 0;
+  const currentCategoryAthletes = allAthletes.filter(a => a.category_id === activeAssignment.category_id);
 
   return (
-    <div className="space-y-0">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">Tatami Controls</h1>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">Moderator Dashboard</p>
+    <div className="space-y-6 max-w-lg mx-auto pb-8">
+      {/* Category Header Card */}
+      <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-2 h-full bg-secondary"></div>
+        <div className="flex justify-between items-start mb-2">
+          <span className="text-xs font-bold text-secondary tracking-widest uppercase">CURRENT ACTIVE CATEGORY</span>
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-label-caps uppercase flex items-center gap-1.5 ${
+            isPaused ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+          }`}>
+            <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'}`}></span>
+            {isPaused ? 'PAUSED' : 'RUNNING'}
+          </span>
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-full shadow-sm ${isPaused ? 'bg-error-container text-on-error-container border-error/20 border' : 'bg-success/10 text-emerald-700 border border-emerald-500/20'}`}>
-          {!isPaused && (
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-          )}
-          {isPaused && (
-            <span className="flex h-2 w-2 relative">
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-error"></span>
-            </span>
-          )}
-          <span className="font-label-caps text-label-caps">{isPaused ? 'PAUSED' : 'LIVE'}</span>
+        <h2 className="font-headline-md text-2xl font-black text-primary mb-1">{activeAssignment.categories?.name}</h2>
+        <div className="flex items-center gap-3 text-xs text-on-surface-variant font-data-mono">
+          <span>{activeAssignment.categories?.belt || "-"}</span>
+          <span>•</span>
+          <span>{activeAssignment.categories?.age_bracket || "-"}</span>
+          <span>•</span>
+          <span>{currentCategoryAthletes.length} Athletes</span>
         </div>
       </div>
 
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-card-padding shadow-sm relative overflow-hidden mb-10">
-        <div className={`absolute top-0 left-0 w-1 h-full ${isPaused ? 'bg-error' : 'bg-secondary'}`}></div>
-        <div className="flex justify-between items-start mb-4">
+      {/* Spam Notice Toast */}
+      {spamNotice && (
+        <div className="bg-amber-50 border border-amber-300 text-amber-900 p-3 rounded-xl text-center text-xs font-bold shadow-sm animate-bounce">
+          {spamNotice}
+        </div>
+      )}
+
+      {/* Progress & Quick Actions */}
+      <div className="bg-surface-container-lowest p-6 rounded-2xl border border-outline-variant shadow-sm space-y-4">
+        <div className="flex justify-between items-end">
           <div>
-            <span className="font-label-caps text-label-caps text-on-surface-variant block mb-1">CURRENT CATEGORY</span>
-            <h2 className="font-headline-sm text-headline-sm text-primary">{activeAssignment.categories?.name}</h2>
+            <span className="text-[10px] font-label-caps font-bold text-on-surface-variant block mb-1">MATCH PROGRESS</span>
+            <span className="font-data-mono text-4xl font-black text-primary">{currentCompleted} <span className="text-lg text-outline font-normal">/ {totalMatches}</span></span>
           </div>
-          <div className="relative">
-            <button onClick={() => setShowSettings(!showSettings)} className="w-10 h-10 rounded-full bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-            {showSettings && (
-              <div className="absolute top-12 right-0 bg-surface-container-lowest border border-outline-variant shadow-lg rounded-xl w-48 z-10 overflow-hidden">
-                <button disabled={loading} onClick={() => setShowCompleteModal(true)} className="w-full text-left px-4 py-3 text-body-sm font-semibold hover:bg-surface-container flex items-center gap-2 disabled:opacity-50 text-secondary">
-                  <span className="material-symbols-outlined text-xl" style={{fontVariationSettings: '"FILL" 1'}}>check_circle</span>
-                  Complete Category
-                </button>
-                <button disabled={loading} onClick={() => setShowReturnModal(true)} className="w-full text-left px-4 py-3 text-body-sm font-semibold hover:bg-surface-container flex items-center gap-2 disabled:opacity-50 border-t border-outline-variant text-error">
-                  <span className="material-symbols-outlined text-xl">undo</span>
-                  Return to Queue
-                </button>
-              </div>
-            )}
-          </div>
+          <span className="font-data-mono text-xl font-bold text-secondary">{progressPercent.toFixed(0)}%</span>
         </div>
 
-        <div className="space-y-3 mt-6">
-          <div className="flex justify-between items-center font-body-sm text-body-sm">
-            <span className="font-semibold text-primary">{currentCompleted} / {totalMatches} <span className="font-normal text-on-surface-variant">Completed</span></span>
-            <span className="text-secondary font-bold">{percentage.toFixed(0)}% Complete</span>
-          </div>
-          <div className="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
-            <div className={`${isPaused ? 'bg-error/40' : 'bg-secondary'} h-full transition-all duration-500 ease-out`} style={{ width: `${Math.min(100, percentage)}%` }}></div>
-          </div>
-          <div className="flex justify-between text-on-surface-variant font-label-caps text-label-caps pt-1">
-            <span>{percentage > 100 ? 0 : Math.max(0, totalMatches - currentCompleted)} REMAINING</span>
-          </div>
+        {/* Progress Bar */}
+        <div className="w-full bg-surface-container-high h-3 rounded-full overflow-hidden">
+          <div 
+            className="bg-secondary h-full transition-all duration-500 ease-out"
+            style={{ width: `${Math.min(100, progressPercent)}%` }}
+          ></div>
+        </div>
+
+        {/* Quick Increment Controls */}
+        <div className="grid grid-cols-4 gap-2 pt-2">
+          <button 
+            onClick={() => handleAdjustMatch(-1)}
+            disabled={isUpdatingMatch || currentCompleted <= 0}
+            className="py-3 bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all rounded-xl font-data-mono font-bold text-primary disabled:opacity-40"
+          >
+            {activeDelta === -1 ? "..." : "-1"}
+          </button>
+          <button 
+            onClick={() => handleAdjustMatch(1)}
+            disabled={isUpdatingMatch}
+            className="py-3 bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all rounded-xl font-data-mono font-bold text-base shadow-sm col-span-2 disabled:opacity-40"
+          >
+            {activeDelta === 1 ? "Saving..." : "+1 Match"}
+          </button>
+          <button 
+            onClick={() => handleAdjustMatch(5)}
+            disabled={isUpdatingMatch}
+            className="py-3 bg-surface-container hover:bg-surface-container-high active:scale-95 transition-all rounded-xl font-data-mono font-bold text-primary disabled:opacity-40"
+          >
+            {activeDelta === 5 ? "..." : "+5"}
+          </button>
         </div>
       </div>
 
-      {/* Persistent Match Timer */}
+      {/* Match Timer */}
       <MatchTimer ringId={ringId} isPaused={isPaused} />
 
-      <section className="space-y-4 mb-10">
-        <h3 className="font-label-caps text-label-caps text-on-surface-variant px-1">MATCH ADJUSTMENT</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <button onClick={() => handleAdjustMatch(-1)} disabled={isPaused || loading} className="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm disabled:opacity-50">
-            <span className="font-headline-sm text-headline-sm text-primary">-1</span>
-          </button>
-          <button onClick={() => handleAdjustMatch(1)} disabled={isPaused || loading} className="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm disabled:opacity-50">
-            <span className="font-headline-sm text-headline-sm text-primary">+1</span>
-          </button>
-          <button onClick={() => handleAdjustMatch(-5)} disabled={isPaused || loading} className="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm disabled:opacity-50">
-            <span className="font-headline-sm text-headline-sm text-on-surface-variant">-5</span>
-          </button>
-          <button onClick={() => handleAdjustMatch(5)} disabled={isPaused || loading} className="bg-surface-container-lowest border border-outline-variant h-16 rounded-xl flex items-center justify-center active:scale-95 transition-transform hover:bg-surface-container shadow-sm disabled:opacity-50">
-            <span className="font-headline-sm text-headline-sm text-on-surface-variant">+5</span>
-          </button>
-        </div>
-      </section>
-
-      <div className="grid grid-cols-1 gap-4 pt-4 mb-10">
+      {/* Ring Controls */}
+      <div className="grid grid-cols-2 gap-3">
         <button 
-          disabled={loading}
           onClick={handleTogglePause}
-          className={`w-full bg-surface-container-lowest border h-14 rounded-xl font-bold font-body-md flex items-center justify-center gap-2 transition-colors ${
-            isPaused ? 'border-emerald-500 text-emerald-700 active:bg-emerald-50' : 'border-amber-500 text-amber-700 active:bg-amber-50'
+          disabled={loading}
+          className={`py-4 rounded-xl font-bold font-body-sm flex items-center justify-center gap-2 border transition-colors ${
+            isPaused 
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/20' 
+              : 'bg-amber-500/10 border-amber-500/30 text-amber-800 hover:bg-amber-500/20'
           }`}
         >
-          <span className="material-symbols-outlined" style={{fontVariationSettings: '"FILL" 1'}}>{isPaused ? 'play_circle' : 'pause_circle'}</span>
+          <span className="material-symbols-outlined text-[20px]">{isPaused ? 'play_arrow' : 'pause'}</span>
           {isPaused ? 'Resume Tatami' : 'Pause Tatami'}
+        </button>
+
+        <button 
+          onClick={() => setShowCompleteModal(true)}
+          disabled={loading}
+          className="py-4 bg-secondary text-on-secondary rounded-xl font-bold font-body-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
+        >
+          <span className="material-symbols-outlined text-[20px]">check_circle</span>
+          Complete Category
         </button>
       </div>
 
-      <div className="mt-8 bg-surface-container-low p-4 rounded-xl border border-outline-variant flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-secondary opacity-50">visibility</span>
-          <div className="flex-1">
-            <h4 className="font-label-caps text-label-caps text-on-surface-variant opacity-70">CURRENTLY LIVE TO PUBLIC</h4>
-            <p className="font-body-sm text-body-sm text-on-surface">
-              Tatami Status: <span className={`${isPaused ? 'text-error' : 'text-emerald-600'} font-semibold uppercase`}>{isPaused ? 'Paused' : 'Active'} - {activeAssignment.categories?.name}</span>
-            </p>
-          </div>
-        </div>
-        <div className="flex justify-between items-center pt-2 border-t border-outline-variant">
-          <button 
-            onClick={() => setShowAssistanceModal(true)}
-            className="flex items-center gap-2 text-primary font-bold font-label-caps text-xs hover:bg-primary/10 px-3 py-2 rounded transition-colors"
-          >
-            <span className="material-symbols-outlined text-[16px]">support_agent</span> Request Assistance
-          </button>
-          
-          <button 
-            onClick={handleEmergency}
-            className="flex items-center gap-1 text-error font-bold font-label-caps text-[10px] opacity-60 hover:opacity-100 hover:bg-error/10 px-2 py-1 rounded transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">warning</span> EMERGENCY
-          </button>
-        </div>
+      {/* Advanced Drawer / Action Bar */}
+      <div className="flex justify-between items-center pt-4 border-t border-outline-variant">
+        <button 
+          onClick={() => setShowAssistanceModal(true)}
+          className="text-xs font-bold font-label-caps text-on-surface-variant hover:text-primary flex items-center gap-1 py-2 px-3 rounded-lg transition-colors"
+        >
+          <span className="material-symbols-outlined text-[16px]">support_agent</span>
+          Need Assistance
+        </button>
+
+        <button 
+          onClick={() => setShowReturnModal(true)}
+          className="text-xs font-bold font-label-caps text-on-surface-variant hover:text-error flex items-center gap-1 py-2 px-3 rounded-lg transition-colors"
+        >
+          <span className="material-symbols-outlined text-[16px]">keyboard_return</span>
+          Return to Queue
+        </button>
+
+        <button 
+          onClick={handleEmergency}
+          className="text-xs font-bold font-label-caps text-error hover:bg-error/10 flex items-center gap-1 py-2 px-3 rounded-lg transition-colors"
+        >
+          <span className="material-symbols-outlined text-[16px]">emergency</span>
+          Alert
+        </button>
       </div>
 
       {/* Modals */}
       {showAssistanceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-surface-container-lowest p-6 rounded-xl max-w-sm w-full space-y-4">
-            <h3 className="font-headline-sm text-primary font-bold">Request Assistance</h3>
-            <p className="text-body-sm text-on-surface-variant">Select the type of assistance needed for this tatami. Admin will be notified softly.</p>
+          <div className="bg-surface-container-lowest p-6 rounded-2xl max-w-sm w-full space-y-4 border border-outline-variant shadow-xl">
+            <h3 className="font-headline-sm text-base font-bold text-primary">Request Staff Assistance</h3>
+            <p className="text-body-sm text-on-surface-variant">Select the type of assistance required on this Tatami:</p>
             <div className="grid grid-cols-1 gap-2">
-              {['Doctor / Medical', 'Technical Support', 'Security', 'General Assistance'].map(type => (
-                <button 
-                  key={type} 
+              {['Doctor / Medical', 'Technical Support', 'Security / Crowd', 'Official Referee'].map(type => (
+                <button
+                  key={type}
                   onClick={() => handleRequestAssistance(type)}
-                  className="bg-surface-container hover:bg-surface-container-high py-3 rounded font-bold text-sm border border-outline-variant"
+                  className="bg-surface-container hover:bg-surface-container-high py-3 px-4 rounded-xl font-bold text-sm border border-outline-variant text-left transition-colors"
                 >
                   {type}
                 </button>
               ))}
             </div>
-            <button onClick={() => setShowAssistanceModal(false)} className="w-full mt-2 py-2 text-on-surface-variant font-bold text-sm">Cancel</button>
+            <button onClick={() => setShowAssistanceModal(false)} className="w-full py-2.5 border border-outline-variant rounded-xl font-bold text-sm mt-2">
+              Cancel
+            </button>
           </div>
         </div>
       )}
 
       {showReturnModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-surface-container-lowest p-6 rounded-xl max-w-sm w-full space-y-4">
-            <h3 className="font-headline-sm text-error font-bold">Return to Queue</h3>
-            <p className="text-body-sm text-on-surface-variant">Are you sure? This will remove the category from the live tatami.</p>
+          <div className="bg-surface-container-lowest p-6 rounded-2xl max-w-sm w-full space-y-4 border border-outline-variant shadow-xl">
+            <h3 className="font-headline-sm text-base font-bold text-error">Return Category to Queue</h3>
+            <p className="text-body-sm text-on-surface-variant">This will pull the category off the mat and return it to the queue without marking it complete.</p>
             <div>
               <label className="text-[10px] font-bold text-on-surface-variant mb-1 block uppercase tracking-wider">Type CONFIRM to proceed</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={returnConfirmText}
                 onChange={(e) => setReturnConfirmText(e.target.value)}
-                className="w-full bg-surface-container border border-outline-variant p-3 rounded text-on-surface font-bold"
+                className="w-full bg-surface-container border border-outline-variant p-3 rounded-xl text-on-surface font-bold text-center uppercase"
                 placeholder="CONFIRM"
               />
             </div>
             <div className="flex gap-2">
-              <button onClick={() => setShowReturnModal(false)} className="flex-1 py-3 bg-surface-container hover:bg-surface-container-high rounded font-bold text-sm text-on-surface">Cancel</button>
-              <button 
-                onClick={executeReturnToQueue} 
+              <button onClick={() => setShowReturnModal(false)} className="flex-1 py-3 bg-surface-container rounded-xl font-bold text-sm">Cancel</button>
+              <button
+                onClick={executeReturnToQueue}
                 disabled={returnConfirmText !== "CONFIRM" || loading}
-                className="flex-1 py-3 bg-error text-white rounded font-bold text-sm disabled:opacity-50"
+                className="flex-1 py-3 bg-error text-white rounded-xl font-bold text-sm disabled:opacity-50"
               >
                 Return
               </button>
@@ -340,28 +388,85 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
 
       {showCompleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-surface-container-lowest p-6 rounded-xl max-w-sm w-full space-y-4">
-            <h3 className="font-headline-sm text-secondary font-bold">Complete Category</h3>
+          <div className="bg-surface-container-lowest p-6 rounded-2xl max-w-sm w-full space-y-4 border border-outline-variant shadow-xl">
+            <h3 className="font-headline-sm text-base font-bold text-secondary">Complete Category</h3>
             <p className="text-body-sm text-on-surface-variant">How would you like to record this category's completion?</p>
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={() => executeCompleteCategory(false)}
                 disabled={loading}
-                className="w-full text-left p-4 bg-surface-container hover:bg-surface-container-high border border-outline-variant rounded-xl flex flex-col gap-1"
+                className="w-full text-left p-4 bg-surface-container hover:bg-surface-container-high border border-outline-variant rounded-xl flex flex-col gap-1 transition-colors"
               >
-                <span className="font-bold text-primary">Complete at Current State</span>
-                <span className="text-xs text-on-surface-variant">Mark as finished with {currentCompleted} matches recorded.</span>
+                <span className="font-bold text-primary text-sm">Complete at Current State</span>
+                <span className="text-xs text-on-surface-variant">Finish with {currentCompleted} matches recorded.</span>
               </button>
-              <button 
+              <button
                 onClick={() => executeCompleteCategory(true)}
                 disabled={loading}
-                className="w-full text-left p-4 bg-surface-container hover:bg-surface-container-high border border-outline-variant rounded-xl flex flex-col gap-1"
+                className="w-full text-left p-4 bg-surface-container hover:bg-surface-container-high border border-outline-variant rounded-xl flex flex-col gap-1 transition-colors"
               >
-                <span className="font-bold text-secondary">Mark All Completed</span>
-                <span className="text-xs text-on-surface-variant">Set matches to {totalMatches} expected matches and finish.</span>
+                <span className="font-bold text-secondary text-sm">Fill All Expected & Complete</span>
+                <span className="text-xs text-on-surface-variant">Set count to {totalMatches} matches and complete.</span>
               </button>
             </div>
-            <button onClick={() => setShowCompleteModal(false)} className="w-full mt-2 py-2 text-on-surface-variant font-bold text-sm">Cancel</button>
+            <button onClick={() => setShowCompleteModal(false)} className="w-full py-2.5 border border-outline-variant rounded-xl font-bold text-sm">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {syncErrorModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="bg-surface-container-lowest p-6 rounded-xl max-w-sm w-full space-y-4 shadow-xl border border-outline-variant">
+            <div className="flex items-center gap-3 text-error">
+              <span className="material-symbols-outlined text-3xl">warning</span>
+              <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">{syncErrorModal.title}</h3>
+            </div>
+            <p className="text-body-sm text-on-surface-variant leading-relaxed">
+              {syncErrorModal.message}
+            </p>
+            <div className="flex flex-col gap-3 pt-2">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full py-3 bg-primary text-on-primary font-bold rounded-xl flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm"
+              >
+                <span className="material-symbols-outlined text-lg">refresh</span>
+                Reload Page
+              </button>
+
+              <div className="pt-1 text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedModalOptions(!showAdvancedModalOptions)}
+                  className="text-xs text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1 mx-auto transition-colors font-medium py-1"
+                >
+                  <span>More Options</span>
+                  <span className="material-symbols-outlined text-base">
+                    {showAdvancedModalOptions ? 'expand_less' : 'expand_more'}
+                  </span>
+                </button>
+
+                {showAdvancedModalOptions && (
+                  <div className="mt-3 pt-3 border-t border-outline-variant animate-fadeIn">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await logoutModerator();
+                        } catch (err) {
+                          console.error(err);
+                        }
+                        router.push("/moderator/login");
+                      }}
+                      className="w-full py-2.5 bg-error/10 hover:bg-error/20 text-error font-semibold rounded-xl flex items-center justify-center gap-2 text-xs transition-colors border border-error/20"
+                    >
+                      <span className="material-symbols-outlined text-base">logout</span>
+                      Logout & Re-login
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

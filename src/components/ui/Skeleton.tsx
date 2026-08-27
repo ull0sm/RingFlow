@@ -185,33 +185,23 @@ export function RingManagerCardSkeleton() {
 // 9. Public Dashboard Ring Card Skeleton
 export function PublicRingCardSkeleton() {
   return (
-    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-      <div className="bg-surface-container-highest text-on-surface px-5 py-3 flex justify-between items-center">
-        <Skeleton className="w-24 h-6" />
-        <Skeleton className="w-20 h-6 rounded-full" />
+    <div className="bg-white border border-[#E1DDCF] rounded-2xl p-6 shadow-sm animate-pulse flex flex-col justify-between">
+      <div>
+        <div className="flex justify-between items-start mb-4">
+          <Skeleton className="w-24 h-6 bg-[#E1DDCF]" />
+          <Skeleton className="w-16 h-6 rounded-full bg-[#E1DDCF]/60" />
+        </div>
+        <Skeleton className="w-48 h-5 mb-2 bg-[#E1DDCF]" />
+        <Skeleton className="w-32 h-4 mb-4 bg-[#E1DDCF]/60" />
+        <div className="flex gap-1.5 mb-4">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-2 flex-1 rounded-sm bg-[#E1DDCF]/80" />
+          ))}
+        </div>
       </div>
-      
-      <div className="p-5">
-        <div className="mb-4">
-          <Skeleton className="w-48 h-6 mb-2" />
-          <Skeleton className="w-36 h-4" />
-        </div>
-        
-        <div className="mb-6">
-          <div className="flex justify-between mb-2">
-            <Skeleton className="w-28 h-3" />
-            <Skeleton className="w-32 h-3" />
-          </div>
-          <Skeleton className="h-1.5 w-full bg-surface-container rounded-full" />
-        </div>
-        
-        <div className="bg-surface-container-low rounded-lg p-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-8 h-3" />
-            <Skeleton className="w-24 h-4" />
-          </div>
-          <Skeleton className="w-5 h-5 rounded-full" />
-        </div>
+      <div className="bg-[#F5F3EC] p-3 rounded-xl border border-[#E1DDCF]/60 flex items-center justify-between">
+        <Skeleton className="w-28 h-4 bg-[#E1DDCF]" />
+        <Skeleton className="w-16 h-4 bg-[#E1DDCF]/60" />
       </div>
     </div>
   );

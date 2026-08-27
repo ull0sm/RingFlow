@@ -1,265 +1,695 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import "./public-spectator.css";
+
+interface Tournament {
+  id: string;
+  name: string;
+  event_date?: string;
+  venue?: string;
+  city?: string;
+  status?: string;
+}
+
+interface Ring {
+  id: string;
+  name: string;
+  ring_order: number;
+  mat_name?: string;
+  access_code?: string;
+  tournament_id: string;
+}
+
+interface CategoryAssignment {
+  id: string;
+  ring_id: string;
+  category_id: string;
+  queue_order: number;
+  status: "pending" | "running" | "paused" | "completed";
+  matches_completed: number;
+  completed_at?: string;
+  categories?: {
+    name: string;
+    athletes_count: number;
+    expected_matches: number;
+  };
+}
+
+interface AthleteSearchResult {
+  id: string;
+  name: string;
+  chest_number?: string;
+  category_id?: string;
+  categories?: any;
+}
+
+const statusMeta = {
+  run: { cls: "spectator-status-run", label: "LIVE" },
+  pause: { cls: "spectator-status-pause", label: "PAUSED" },
+  idle: { cls: "spectator-status-idle", label: "IDLE" },
+  queued: { cls: "spectator-status-queued", label: "QUEUED" },
+  unscheduled: { cls: "spectator-status-unscheduled", label: "UNSCHEDULED" },
+};
+
+function tileMarkup(completed: number, total: number) {
+  const safeTotal = Math.max(1, total);
+  const safeCompleted = Math.min(safeTotal, Math.max(0, completed));
+  const pct = Math.round((safeCompleted / safeTotal) * 100);
+  const filled = Math.min(10, Math.round((safeCompleted / safeTotal) * 10));
+  return { pct, filled };
+}
+
+const SEARCH_PHRASES = [
+  "Search by athlete name...",
+  "Search by athlete chest number...",
+  "Search by #241, division, or mat...",
+];
 
 export default function PublicEventClient({
   tournament,
   initialRings,
   initialAssignments,
-  categories
+  categories,
 }: {
-  tournament: any;
-  initialRings: any[];
-  initialAssignments: any[];
+  tournament: Tournament;
+  initialRings: Ring[];
+  initialAssignments: CategoryAssignment[];
   categories: any[];
 }) {
-  const supabase = createClient();
-  const [rings, setRings] = useState(initialRings);
-  const [assignments, setAssignments] = useState(initialAssignments);
-  
-  // Athlete Search State
+  const supabase = useMemo(() => createClient(), []);
+  const [rings, setRings] = useState<Ring[]>(initialRings);
+  const [assignments, setAssignments] = useState<CategoryAssignment[]>(initialAssignments);
+  const [flashingMatId, setFlashingMatId] = useState<string | null>(null);
+
+  // Search state
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<AthleteSearchResult[]>([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Animated typewriter placeholder with blinking cursor
+  const [typedPlaceholder, setTypedPlaceholder] = useState("");
+  const [isCursorBlinking, setIsCursorBlinking] = useState(true);
+
+  // Realtime sync timer
+  const [secondsAgo, setSecondsAgo] = useState(0);
+
+  const searchWrapRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const matCardsRef = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Blinking cursor
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    const cursorInterval = setInterval(() => {
+      setIsCursorBlinking((prev) => !prev);
+    }, 530);
+    return () => clearInterval(cursorInterval);
+  }, []);
+
+  // Typewriter effect
+  useEffect(() => {
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+    let timer: NodeJS.Timeout;
+
+    const tick = () => {
+      const fullPhrase = SEARCH_PHRASES[phraseIdx];
+
+      if (!isDeleting) {
+        charIdx++;
+        setTypedPlaceholder(fullPhrase.substring(0, charIdx));
+
+        if (charIdx >= fullPhrase.length) {
+          isDeleting = true;
+          timer = setTimeout(tick, 1800);
+          return;
+        }
+        timer = setTimeout(tick, 70);
+      } else {
+        charIdx--;
+        setTypedPlaceholder(fullPhrase.substring(0, charIdx));
+
+        if (charIdx <= 0) {
+          isDeleting = false;
+          phraseIdx = (phraseIdx + 1) % SEARCH_PHRASES.length;
+          timer = setTimeout(tick, 350);
+          return;
+        }
+        timer = setTimeout(tick, 35);
+      }
+    };
+
+    timer = setTimeout(tick, 200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Sync Timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsAgo((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const syncTimeText = useMemo(() => {
+    if (secondsAgo <= 2) return "just now";
+    return `${secondsAgo}s ago`;
+  }, [secondsAgo]);
+
+  // Flash card trigger
+  const triggerFlash = (matId: string, duration = 1200) => {
+    setFlashingMatId(matId);
+    setTimeout(() => {
+      setFlashingMatId((prev) => (prev === matId ? null : prev));
+    }, duration);
+  };
 
   // Realtime Subscriptions
   useEffect(() => {
-    const channel = supabase.channel('public_dashboard')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rings' }, (payload) => {
-        if (payload.eventType === 'UPDATE') {
-          setRings(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
+    const channel = supabase
+      .channel(`public_dashboard_${tournament.id}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "rings", filter: `tournament_id=eq.${tournament.id}` },
+        (payload) => {
+          if (payload.eventType === "UPDATE") {
+            setRings((prev) => prev.map((r) => (r.id === payload.new.id ? { ...r, ...payload.new } : r)));
+            setSecondsAgo(0);
+            triggerFlash(payload.new.id);
+          } else if (payload.eventType === "INSERT") {
+            setRings((prev) => [...prev, payload.new as Ring].sort((a, b) => a.ring_order - b.ring_order));
+            setSecondsAgo(0);
+          } else if (payload.eventType === "DELETE") {
+            setRings((prev) => prev.filter((r) => r.id !== payload.old.id));
+            setSecondsAgo(0);
+          }
         }
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'category_assignments' }, (payload) => {
-        if (payload.eventType === 'UPDATE') {
-          setAssignments(prev => {
-            const copy = [...prev];
-            const idx = copy.findIndex(a => a.id === payload.new.id);
-            if (idx > -1) {
-              // Merge the new data but keep the joined category data
-              copy[idx] = { ...copy[idx], ...payload.new };
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "category_assignments" },
+        (payload) => {
+          if (payload.eventType === "UPDATE") {
+            setAssignments((prev) => {
+              const copy = [...prev];
+              const idx = copy.findIndex((a) => a.id === payload.new.id);
+              if (idx > -1) {
+                copy[idx] = { ...copy[idx], ...payload.new };
+              } else {
+                copy.push(payload.new as CategoryAssignment);
+              }
+              return copy;
+            });
+            setSecondsAgo(0);
+            if (payload.new.ring_id) {
+              triggerFlash(payload.new.ring_id);
             }
-            return copy;
-          });
+          } else if (payload.eventType === "INSERT") {
+            setAssignments((prev) => [...prev, payload.new as CategoryAssignment]);
+            setSecondsAgo(0);
+          } else if (payload.eventType === "DELETE") {
+            setAssignments((prev) => prev.filter((a) => a.id !== payload.old.id));
+            setSecondsAgo(0);
+          }
         }
-      })
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [supabase, tournament.id]);
 
-  // Handle Search
+  // Athlete Search Query
   useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setSearchResults([]);
+      setIsSearchOpen(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const cleanQ = q.replace(/^#/, "");
+
     const fetchAthletes = async () => {
-      if (searchQuery.trim().length < 2) {
+      const { data, error } = await supabase
+        .from("athletes")
+        .select("id, name, chest_number, category_id, categories(name)")
+        .eq("tournament_id", tournament.id)
+        .or(`name.ilike.%${cleanQ}%,chest_number.ilike.%${cleanQ}%`)
+        .limit(8);
+
+      if (!error && data) {
+        setSearchResults(data as unknown as AthleteSearchResult[]);
+      } else {
         setSearchResults([]);
-        return;
       }
-      setIsSearching(true);
-      const { data } = await supabase
-        .from('athletes')
-        .select('*, categories(name)')
-        .eq('tournament_id', tournament.id)
-        .or(`name.ilike.%${searchQuery}%,chest_number.ilike.%${searchQuery}%`)
-        .limit(5);
-        
-      setSearchResults(data || []);
       setIsSearching(false);
+      setIsSearchOpen(true);
+      setActiveIndex(-1);
     };
 
-    const debounce = setTimeout(fetchAthletes, 300);
+    const debounce = setTimeout(fetchAthletes, 200);
     return () => clearTimeout(debounce);
   }, [searchQuery, tournament.id, supabase]);
 
-  // Find ring assignment for a category
-  const getCategoryRingAssignment = (categoryId: string) => {
-    const assignment = assignments.find(a => a.category_id === categoryId);
-    if (!assignment) return null;
-    const ring = rings.find(r => r.id === assignment.ring_id);
-    return { assignment, ring };
+  // Outside click listener for search
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  // Compute ring assignment for athlete
+  const getAthleteRingStatus = (categoryId?: string) => {
+    if (!categoryId) {
+      return { status: "unscheduled" as const, matLabel: "Not yet allocated", ringId: null };
+    }
+    const assignment = assignments.find((a) => a.category_id === categoryId);
+    if (!assignment) {
+      return { status: "unscheduled" as const, matLabel: "Not yet allocated", ringId: null };
+    }
+    const ring = rings.find((r) => r.id === assignment.ring_id);
+    if (!ring) {
+      return { status: "unscheduled" as const, matLabel: "Not yet allocated", ringId: null };
+    }
+
+    const ringOrderNum = String(ring.ring_order || 1).padStart(2, "0");
+    const matLabel = ring.mat_name
+      ? `Tatami ${ringOrderNum} · ${ring.mat_name}`
+      : `Tatami ${ringOrderNum}`;
+
+    if (assignment.status === "running") {
+      return { status: "run" as const, matLabel, ringId: ring.id };
+    }
+    if (assignment.status === "paused") {
+      return { status: "pause" as const, matLabel, ringId: ring.id };
+    }
+    if (assignment.status === "pending") {
+      return { status: "queued" as const, matLabel, ringId: ring.id };
+    }
+    return { status: "idle" as const, matLabel, ringId: ring.id };
   };
 
-  return (
-    <div className="font-body-md text-on-background min-h-screen bg-surface">
-      {/* Top Navigation Shell */}
-      <header className="bg-surface-container-lowest border-b border-outline-variant fixed top-0 w-full z-50 flex justify-between items-center h-16 px-4 md:px-margin-desktop">
-        <div className="flex items-center gap-3 py-2">
-          <Link href="/">
-            <span className="font-headline-lg text-headline-lg font-black text-primary tracking-tighter">Ring Flow</span>
-          </Link>
-        </div>
-      </header>
+  const selectMatch = (matId: string | null) => {
+    setIsSearchOpen(false);
+    if (!matId) return;
+    const card = matCardsRef.current[matId];
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      triggerFlash(matId, 1600);
+    }
+  };
 
-      <main className="px-4 md:px-margin-desktop max-w-7xl mx-auto py-6 mt-16">
-        {/* Search & Info Bar */}
-        <div className="flex flex-col space-y-4 mb-6 relative">
-          <div className="flex items-center gap-3 py-6">
-            <div className="w-3 h-3 rounded-full bg-secondary animate-pulse"></div>
-            <h1 className="font-headline-lg text-headline-lg text-primary uppercase tracking-tight font-black">{tournament.name}</h1>
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isSearchOpen || searchResults.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((prev) => Math.min(prev + 1, searchResults.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeIndex >= 0 && searchResults[activeIndex]) {
+        const athlete = searchResults[activeIndex];
+        const { ringId } = getAthleteRingStatus(athlete.category_id);
+        selectMatch(ringId);
+      }
+    } else if (e.key === "Escape") {
+      setIsSearchOpen(false);
+    }
+  };
+
+  const runningCount = useMemo(() => {
+    return rings.filter((ring) => {
+      const active = assignments.find((a) => a.ring_id === ring.id && a.status === "running");
+      return !!active;
+    }).length;
+  }, [rings, assignments]);
+
+  // Eyebrow text
+  const eyebrowText = useMemo(() => {
+    if (tournament.venue && tournament.city) {
+      return `${tournament.venue}, ${tournament.city}`;
+    }
+    if (tournament.event_date) {
+      return new Date(tournament.event_date).toLocaleDateString(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+    return "LIVE TOURNAMENT FLOOR";
+  }, [tournament]);
+
+  return (
+    <div className="spectator-root">
+      <div className="spectator-page">
+        {/* ---------- Header ---------- */}
+        <header className="spectator-header">
+          <div className="spectator-header__top">
+            <Link href="/" className="spectator-back-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              All events
+            </Link>
+            <span className="spectator-live-chip">
+              <span className="spectator-beacon"></span>LIVE
+            </span>
           </div>
-          
-          <div className="relative group">
-            <input 
-              className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-4 pl-12 pr-4 focus:ring-2 focus:ring-secondary focus:border-transparent transition-all outline-none font-body-md" 
-              placeholder="Search athlete by name or chest number..." 
+          <p className="spectator-eyebrow">{eyebrowText}</p>
+          <h1 className="spectator-header__title">{tournament.name}</h1>
+          <div className="spectator-header__meta">
+            <span className="spectator-meta-item">
+              <strong id="tatami-count">{rings.length}</strong> tatamis configured
+            </span>
+            <span className="spectator-meta-dot"></span>
+            <span className="spectator-meta-item">
+              <strong id="live-count">{runningCount}</strong> running now
+            </span>
+            <span className="spectator-meta-dot"></span>
+            <span className="spectator-sync-note">
+              <span className="spectator-beacon"></span>Updated{" "}
+              <span id="sync-time" className="mono">
+                {syncTimeText}
+              </span>
+            </span>
+          </div>
+        </header>
+
+        {/* ---------- Search Box ---------- */}
+        <div className="spectator-search-wrap" ref={searchWrapRef}>
+          <div className="spectator-search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.3-4.3" />
+            </svg>
+            <input
+              ref={searchInputRef}
               type="text"
+              id="search-input"
+              placeholder={typedPlaceholder ? `${typedPlaceholder}${isCursorBlinking ? "|" : " "}` : "Search..."}
+              autoComplete="off"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => {
+                if (searchQuery.trim().length > 0 && searchResults.length > 0) {
+                  setIsSearchOpen(true);
+                }
+              }}
             />
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+            {searchQuery.length > 0 && (
+              <button
+                className="spectator-search-clear"
+                id="search-clear"
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                  setIsSearchOpen(false);
+                  searchInputRef.current?.focus();
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            )}
           </div>
 
-          {/* Search Results Dropdown */}
-          {searchQuery.trim().length >= 2 && (
-            <div className="absolute top-full left-0 w-full bg-surface-container-lowest border border-outline-variant shadow-lg rounded-lg mt-2 z-50 max-h-96 overflow-y-auto">
-              {isSearching ? (
-                <div className="p-4 text-center text-on-surface-variant text-sm">Searching...</div>
-              ) : searchResults.length > 0 ? (
-                <div className="flex flex-col">
-                  {searchResults.map(a => {
-                    const ringInfo = a.category_id ? getCategoryRingAssignment(a.category_id) : null;
-                    return (
-                      <div key={a.id} className="p-4 border-b border-outline-variant last:border-b-0 hover:bg-surface-container-low transition-colors">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="font-bold text-primary text-lg">{a.name}</span>
-                            <span className="ml-2 font-data-mono text-outline text-sm">#{a.chest_number || "N/A"}</span>
-                            <div className="text-on-surface-variant text-sm mt-1 flex items-center gap-2">
-                              <span className="material-symbols-outlined text-[16px]">sports_martial_arts</span>
-                              {a.categories?.name || "Uncategorized"}
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            {ringInfo ? (
-                              <div className="flex flex-col items-end gap-1">
-                                <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-caps text-xs">
-                                  {ringInfo.ring ? ringInfo.ring.name.toUpperCase().replace("RING", "TATAMI") : "UNASSIGNED"}
-                                </span>
-                                <span className={`text-[10px] font-label-caps tracking-widest ${
-                                  ringInfo.assignment.status === 'running' ? 'text-secondary font-bold animate-pulse' :
-                                  ringInfo.assignment.status === 'completed' ? 'text-outline' :
-                                  'text-primary'
-                                }`}>
-                                  {ringInfo.assignment.status.toUpperCase()}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="bg-surface-container-high text-on-surface px-3 py-1 rounded-full font-label-caps text-xs">
-                                PENDING
-                              </span>
-                            )}
-                          </div>
-                        </div>
+          {/* Search Dropdown Results */}
+          <div
+            className={`spectator-search-results ${isSearchOpen ? "open" : ""}`}
+            id="search-results"
+            role="listbox"
+          >
+            {isSearching ? (
+              <div className="spectator-no-results">Searching athletes...</div>
+            ) : searchResults.length === 0 ? (
+              <div className="spectator-no-results">No athletes match that search.</div>
+            ) : (
+              searchResults.map((a, i) => {
+                const { status, matLabel, ringId } = getAthleteRingStatus(a.category_id);
+                const meta = statusMeta[status];
+                const parts = matLabel.match(/(Tatami \d+)(.*)/);
+
+                return (
+                  <div
+                    key={a.id}
+                    className={`spectator-result-row ${activeIndex === i ? "active" : ""}`}
+                    role="option"
+                    aria-selected={activeIndex === i}
+                    data-index={i}
+                    data-mat-id={ringId || ""}
+                    onClick={() => selectMatch(ringId)}
+                  >
+                    <div className="spectator-result-main">
+                      <div className="spectator-result-name-row">
+                        <span className="spectator-result-chest mono">
+                          #{a.chest_number || "—"}
+                        </span>
+                        <span className="spectator-result-name">{a.name}</span>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="p-4 text-center text-on-surface-variant text-sm">No athletes found matching "{searchQuery}"</div>
-              )}
-            </div>
-          )}
+                      <div className="spectator-result-division">
+                        {(Array.isArray(a.categories) ? a.categories[0]?.name : a.categories?.name) || "Uncategorized"}
+                      </div>
+                    </div>
+                    <div className="spectator-result-side">
+                      <div className="spectator-result-mat">
+                        {parts ? (
+                          <>
+                            <strong>{parts[1]}</strong>
+                            {parts[2]}
+                          </>
+                        ) : (
+                          matLabel
+                        )}
+                      </div>
+                      <span className={`spectator-status ${meta.cls}`}>
+                        <span className="dot"></span>
+                        {meta.label}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {rings.map(ring => {
-            const activeAssignment = assignments.find(a => a.ring_id === ring.id && (a.status === 'running' || a.status === 'paused'));
-            const nextAssignment = assignments.find(a => a.ring_id === ring.id && a.status === 'pending');
-            const ringStatus = activeAssignment ? activeAssignment.status : 'idle';
-            
+        {/* ---------- Section Head ---------- */}
+        <div className="spectator-section-head">
+          <span className="spectator-section-title">Tournament floor</span>
+          <div className="spectator-legend">
+            <span className="spectator-legend-item">
+              <span className="spectator-legend-dot run"></span>Running
+            </span>
+            <span className="spectator-legend-item">
+              <span className="spectator-legend-dot pause"></span>Paused
+            </span>
+            <span className="spectator-legend-item">
+              <span className="spectator-legend-dot idle"></span>Idle
+            </span>
+          </div>
+        </div>
+
+        {/* ---------- Mat Grid ---------- */}
+        <div className="spectator-mat-grid" id="mat-grid">
+          {rings.map((ring) => {
+            const activeAssignment = assignments.find(
+              (a) => a.ring_id === ring.id && (a.status === "running" || a.status === "paused")
+            );
+            const nextAssignment = assignments.find(
+              (a) => a.ring_id === ring.id && a.status === "pending"
+            );
+
+            const state: "run" | "pause" | "idle" =
+              activeAssignment?.status === "running"
+                ? "run"
+                : activeAssignment?.status === "paused"
+                ? "pause"
+                : "idle";
+
+            const statusLabel =
+              state === "run" ? "RUNNING" : state === "pause" ? "PAUSED" : "IDLE";
+
+            const matNum = ring.ring_order
+              ? String(ring.ring_order).padStart(2, "0")
+              : ring.name.replace(/[^0-9]/g, "").padStart(2, "0") || "01";
+
+            const subLabel = ring.mat_name || (ring.name.toLowerCase().includes("ring") ? `Mat ${ring.name.replace(/[^0-9]/g, "")}` : ring.name);
+
+            const completed = activeAssignment?.matches_completed || 0;
+            const total = activeAssignment?.categories?.expected_matches || 1;
+            const { pct, filled } = tileMarkup(completed, total);
+
+            const isFlashing = flashingMatId === ring.id;
+
             return (
-              <div key={ring.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-                <div className={`${
-                  ringStatus === 'running' ? 'bg-secondary text-on-secondary' :
-                  ringStatus === 'paused' ? 'bg-error-container text-on-error-container border-b border-error/20' :
-                  'bg-surface-container-highest text-on-surface'
-                } px-5 py-3 flex justify-between items-center transition-colors`}>
-                  <div className="flex items-center gap-3">
-                    <span className="font-headline-sm text-headline-sm uppercase">{ring.name.replace(/Ring/i, "Tatami")}</span>
-                    {ring.mat_name && (
-                      <span className="bg-black/10 px-2 py-0.5 rounded font-label-caps text-[10px]">{ring.mat_name}</span>
+              <div
+                key={ring.id}
+                ref={(el) => {
+                  matCardsRef.current[ring.id] = el;
+                }}
+                className={`spectator-mat-card spectator-state-${state} ${
+                  isFlashing ? "flash" : ""
+                }`}
+                data-mat-id={ring.id}
+              >
+                {/* Scoreboard Band */}
+                <div className="spectator-mat-card__band">
+                  <div className="spectator-mat-id">
+                    <span className="spectator-mat-num scoreboard">{matNum}</span>
+                    {subLabel && <span className="spectator-mat-sub">{subLabel}</span>}
+                  </div>
+                  <span className="spectator-band-status">
+                    <span className="dot"></span>
+                    {statusLabel}
+                  </span>
+                </div>
+
+                {/* Perforation Notches */}
+                <div className="spectator-notch left"></div>
+                <div className="spectator-notch right"></div>
+
+                {/* Card Inner */}
+                <div className="spectator-mat-card__inner">
+                  <div className="spectator-mat-card__body">
+                    {state === "run" && activeAssignment && (
+                      <>
+                        <p className="spectator-division">
+                          {activeAssignment.categories?.name}
+                        </p>
+                        <div className="spectator-progress-block">
+                          <div className="spectator-tiles">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className={`spectator-tile ${i < filled ? "filled" : ""}`}
+                              />
+                            ))}
+                          </div>
+                          <div className="spectator-progress-label">
+                            <span>
+                              Match <span className="mono">{completed}</span> of{" "}
+                              <span className="mono">{total}</span>
+                            </span>
+                            <span className="spectator-progress-pct mono">{pct}%</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {state === "pause" && activeAssignment && (
+                      <>
+                        <div className="spectator-alert-row">
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 8v4M12 16h.01" />
+                          </svg>
+                          Ring paused / Timeout
+                        </div>
+                        <p className="spectator-division">
+                          {activeAssignment.categories?.name}
+                        </p>
+                        <div className="spectator-progress-block">
+                          <div className="spectator-tiles">
+                            {Array.from({ length: 10 }).map((_, i) => (
+                              <div
+                                key={i}
+                                className={`spectator-tile ${i < filled ? "filled" : ""}`}
+                              />
+                            ))}
+                          </div>
+                          <div className="spectator-progress-label">
+                            <span>
+                              Match <span className="mono">{completed}</span> of{" "}
+                              <span className="mono">{total}</span>
+                            </span>
+                            <span className="spectator-progress-pct mono">{pct}%</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {state === "idle" && (
+                      <p className="spectator-standby-msg">
+                        Mat is clear. Ready for the next scheduled division.
+                      </p>
                     )}
                   </div>
-                  <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${
-                    ringStatus === 'running' ? 'bg-on-secondary text-secondary' :
-                    ringStatus === 'paused' ? 'bg-error text-white' :
-                    'bg-surface-container text-on-surface'
-                  }`}>
-                    <span className="material-symbols-outlined text-[16px]" style={{fontVariationSettings: '"FILL" 1'}}>
-                      {ringStatus === 'running' ? 'play_arrow' : ringStatus === 'paused' ? 'pause' : 'stop'}
-                    </span>
-                    <span className="font-label-caps text-label-caps">{ringStatus.toUpperCase()}</span>
-                  </div>
-                </div>
-                
-                <div className={`p-5 transition-opacity ${ringStatus === 'paused' ? 'opacity-75' : ''}`}>
-                  {activeAssignment ? (
-                    <>
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h3 className="font-headline-sm text-headline-sm text-primary mb-1">
-                            {activeAssignment.categories?.name}
-                          </h3>
-                          <p className="font-body-sm text-on-surface-variant flex items-center gap-2">
-                            <span className="material-symbols-outlined text-[16px]">groups</span>
-                            {activeAssignment.matches_completed} of {activeAssignment.categories?.expected_matches || 0} Matches Completed
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {/* Progress Section */}
-                      <div className="mb-6">
-                        <div className="flex justify-between text-label-caps font-label-caps text-on-surface-variant mb-2">
-                          <span>MATCHES COMPLETED</span>
-                          <span className={ringStatus === 'running' ? 'text-secondary' : ''}>
-                            {Math.max(0, (activeAssignment.categories?.expected_matches || 0) - activeAssignment.matches_completed)} MATCHES REMAINING
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-                          <div 
-                            className={`h-full ${ringStatus === 'running' ? 'bg-secondary' : 'bg-error/40'} transition-all duration-1000`} 
-                            style={{ width: `${Math.min(100, (activeAssignment.matches_completed / Math.max(1, activeAssignment.categories?.expected_matches || 1)) * 100)}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-6 text-on-surface-variant italic">
-                      No active category. Tatami is idle.
-                    </div>
-                  )}
 
-                  {/* Upcoming */}
-                  {nextAssignment && (
-                    <div className="bg-surface-container-low rounded-lg p-3 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="font-label-caps text-label-caps text-outline">NEXT:</span>
-                        <span className="font-body-sm text-on-surface font-semibold">{nextAssignment.categories?.name}</span>
-                      </div>
-                      <span className="material-symbols-outlined text-outline text-[20px]">chevron_right</span>
-                    </div>
-                  )}
+                  {/* Foot / Next Queue */}
+                  <div className="spectator-mat-card__foot">
+                    {nextAssignment?.categories?.name ? (
+                      <>
+                        <span className="spectator-next-label">NEXT</span>
+                        <span className="spectator-next-value">
+                          {nextAssignment.categories.name}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="spectator-next-label">NEXT</span>
+                        <span className="spectator-next-value muted">
+                          No upcoming division queued
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             );
           })}
-          
-          {rings.length === 0 && (
-            <div className="text-center p-12 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface-variant">
-              No tatamis have been configured for this tournament yet.
-            </div>
-          )}
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-8 text-center p-6 border-t border-outline-variant">
+        {/* ---------- Empty State ---------- */}
+        <div
+          className={`spectator-empty-state ${
+            rings.length === 0 ? "open" : ""
+          }`}
+          id="empty-state"
+        >
+          <div className="spectator-empty-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+          </div>
+          <p className="spectator-empty-title">No tatamis configured</p>
+          <p className="spectator-empty-body">
+            Once mats are added to this tournament, live status and match progress
+            will appear here automatically.
+          </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

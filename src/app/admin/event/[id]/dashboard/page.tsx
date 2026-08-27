@@ -37,12 +37,11 @@ export default async function AdminDashboard({ params }: { params: Promise<{ id:
 
   const ringIds = rings?.map(r => r.id) || [];
 
-  // Fetch Category Assignments
+  // Fetch Category Assignments (including completed)
   const { data: assignments } = await supabase
     .from("category_assignments")
     .select("*, categories(name, expected_matches)")
     .in("ring_id", ringIds)
-    .in("status", ["running", "paused", "pending"])
     .order("queue_order", { ascending: true });
 
   // 4. Fetch Moderator Requests
@@ -63,7 +62,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ id:
     .select("*")
     .eq("tournament_id", tournamentId)
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(200);
 
   // Prepare assignments data joined with categories for client
   const fullAssignments = await Promise.all(assignments?.map(async (a) => {

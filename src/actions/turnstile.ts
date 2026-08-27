@@ -8,19 +8,22 @@ export async function verifyTurnstileToken(token: string) {
   }
 
   try {
+    const formData = new FormData();
+    formData.append("secret", secretKey.trim());
+    formData.append("response", token);
+
     const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(token)}`,
+      body: formData,
     });
 
     const data = await res.json();
     if (data.success) {
       return { success: true };
     } else {
-      return { success: false, error: "Turnstile verification failed" };
+      console.error("Turnstile siteverify failed:", data);
+      const errorDetail = data["error-codes"] ? data["error-codes"].join(", ") : "";
+      return { success: false, error: `Turnstile verification failed ${errorDetail}` };
     }
   } catch (error) {
     console.error("Turnstile verification error:", error);
