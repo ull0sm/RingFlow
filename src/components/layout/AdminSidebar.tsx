@@ -23,7 +23,7 @@ export default function AdminSidebar() {
     <aside className="hidden md:flex flex-col h-full py-6 px-4 space-y-2 w-64 bg-surface-container-low border-r border-outline-variant shrink-0">
       <div className="px-2 mb-8">
         <Link href="/admin" className="flex items-center gap-2.5 group">
-          <RingFlowLogo className="h-5 w-auto text-primary group-hover:scale-105 transition-transform" />
+          <RingFlowLogo className="h-8 w-8 text-primary group-hover:scale-105 transition-transform shrink-0" />
           <span className="font-headline-sm text-headline-sm font-black text-primary tracking-tight">RingFlow</span>
         </Link>
         <p className="text-[10px] font-label-caps text-on-surface-variant uppercase tracking-widest mt-1">Admin Terminal</p>
@@ -51,7 +51,7 @@ export default function AdminSidebar() {
 
       <div className="mt-auto pt-4 border-t border-outline-variant space-y-4">
         <div className="flex items-center gap-3 px-2">
-          <div className="h-10 w-10 rounded-full bg-white border border-outline-variant flex items-center justify-center overflow-hidden shrink-0 p-2 shadow-sm">
+          <div className="h-10 w-10 rounded-full bg-white border border-outline-variant flex items-center justify-center overflow-hidden shrink-0 p-1.5 shadow-sm">
             <RingFlowLogo className="w-full h-full text-primary" />
           </div>
           <div className="overflow-hidden">
