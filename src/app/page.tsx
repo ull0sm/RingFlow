@@ -43,8 +43,8 @@ export default async function PublicHome() {
       {/* Top Navigation Bar */}
       <header className="w-full top-0 sticky z-50 bg-[#F5F3EC]/90 backdrop-blur-md border-b border-[#E1DDCF] transition-all font-['Inter',sans-serif]">
         <div className="max-w-7xl mx-auto flex justify-between items-center h-16 px-4 md:px-margin-desktop">
-          <Link href="/" className="flex items-center gap-3 group">
-            <RingFlowLogo className="h-[22px] w-auto text-[#1B1815] group-hover:scale-105 transition-transform" />
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <RingFlowLogo className="h-[34px] w-[34px] text-[#1B1815] group-hover:scale-105 transition-transform shrink-0" />
             <span className="text-[23px] font-black text-[#1B1815] tracking-[-0.02em] leading-none font-['Plus_Jakarta_Sans',sans-serif]">
               RingFlow
             </span>

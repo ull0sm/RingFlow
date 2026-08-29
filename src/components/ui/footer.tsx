@@ -73,7 +73,7 @@ export function Footer({
                 aria-label={brandName}
                 className="font-bold text-[19px] leading-none tracking-tight text-[#1B1815] hover:text-black transition-colors duration-150 flex items-center gap-2.5"
               >
-                <RingFlowLogo className="h-[18px] w-auto text-[#1B1815]" />
+                <RingFlowLogo className="h-[26px] w-[26px] text-[#1B1815] shrink-0" />
                 <span className="font-black tracking-tight">{brandName}</span>
               </a>
 
