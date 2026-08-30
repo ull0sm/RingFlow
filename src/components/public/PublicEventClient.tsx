@@ -339,6 +339,47 @@ export default function PublicEventClient({
     }).length;
   }, [rings, assignments]);
 
+  const { isEventLive, isEventPast } = useMemo(() => {
+    if (tournament.status === "completed" || tournament.status === "archived") {
+      return { isEventLive: false, isEventPast: true };
+    }
+    if (tournament.status === "live") {
+      return { isEventLive: true, isEventPast: false };
+    }
+
+    if (tournament.event_date) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const todayStr = `${year}-${month}-${day}`;
+
+      const d = new Date(tournament.event_date);
+      let dateKey = "";
+      if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const dt = String(d.getDate()).padStart(2, "0");
+        dateKey = `${y}-${m}-${dt}`;
+      }
+      const rawKey = String(tournament.event_date).split("T")[0];
+
+      if (dateKey === todayStr || rawKey === todayStr) {
+        return { isEventLive: true, isEventPast: false };
+      } else if (dateKey > todayStr || rawKey > todayStr) {
+        return { isEventLive: false, isEventPast: false };
+      } else {
+        return { isEventLive: false, isEventPast: true };
+      }
+    }
+
+    if (runningCount > 0) {
+      return { isEventLive: true, isEventPast: false };
+    }
+
+    return { isEventLive: false, isEventPast: false };
+  }, [tournament, runningCount]);
+
   // Eyebrow text
   const eyebrowText = useMemo(() => {
     if (tournament.venue && tournament.city) {
@@ -352,7 +393,7 @@ export default function PublicEventClient({
         year: "numeric",
       });
     }
-    return "LIVE TOURNAMENT FLOOR";
+    return "TOURNAMENT FLOOR";
   }, [tournament]);
 
   return (
@@ -367,9 +408,19 @@ export default function PublicEventClient({
               </svg>
               All events
             </Link>
-            <span className="spectator-live-chip">
-              <span className="spectator-beacon"></span>LIVE
-            </span>
+            {isEventLive ? (
+              <span className="spectator-live-chip">
+                <span className="spectator-beacon"></span>LIVE
+              </span>
+            ) : isEventPast ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#ECE9DF] text-[#7A756B] border border-[#E1DDCF] text-[11px] font-bold tracking-wider uppercase font-['Inter',sans-serif]">
+                <span className="w-2 h-2 rounded-full bg-[#8C877C]"></span>OVER
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#2563EB]/10 text-[#1D4ED8] border border-[#2563EB]/20 text-[11px] font-extrabold tracking-wider uppercase font-['Inter',sans-serif]">
+                <span className="w-2 h-2 rounded-full bg-[#2563EB]"></span>UPCOMING
+              </span>
+            )}
           </div>
           <p className="spectator-eyebrow">{eyebrowText}</p>
           <h1 className="spectator-header__title">{tournament.name}</h1>
