@@ -28,7 +28,7 @@ function CountUp({ end, duration = 1500 }: { end: number; duration?: number }) {
 export default function PublicStats() {
   return (
     <section className="bg-[#1B1815] text-[#F5F3EC] py-7 border-b border-[#E1DDCF]/20 font-['Inter',sans-serif] relative">
-      <div className="max-w-7xl mx-auto px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-6 md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="flex items-center justify-center md:justify-start gap-4">
           <span className="font-['Bebas_Neue',sans-serif] text-[44px] text-[#F5F3EC] leading-none min-w-[2.5rem] tracking-wider">
             <CountUp end={28} />
@@ -54,7 +54,7 @@ export default function PublicStats() {
           </span>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-margin-desktop text-right mt-2 -mb-3">
+      <div className="max-w-7xl mx-auto px-6 md:px-margin-desktop text-right mt-2 -mb-3">
         <p className="text-[9px] text-[#A19C90]/40 tracking-wider">
           * Representative numbers displayed for branding illustration purposes.
         </p>
