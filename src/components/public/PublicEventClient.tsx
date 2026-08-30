@@ -424,22 +424,6 @@ export default function PublicEventClient({
           </div>
           <p className="spectator-eyebrow">{eyebrowText}</p>
           <h1 className="spectator-header__title">{tournament.name}</h1>
-          <div className="spectator-header__meta">
-            <span className="spectator-meta-item">
-              <strong id="tatami-count">{rings.length}</strong> tatamis configured
-            </span>
-            <span className="spectator-meta-dot"></span>
-            <span className="spectator-meta-item">
-              <strong id="live-count">{runningCount}</strong> running now
-            </span>
-            <span className="spectator-meta-dot"></span>
-            <span className="spectator-sync-note">
-              <span className="spectator-beacon"></span>Updated{" "}
-              <span id="sync-time" className="mono">
-                {syncTimeText}
-              </span>
-            </span>
-          </div>
         </header>
 
         {/* ---------- Search Box ---------- */}
