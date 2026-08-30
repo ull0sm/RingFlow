@@ -99,21 +99,13 @@ export function Footer({
             {/* 1px separator */}
             <div className="h-px bg-[#E1DDCF]/80 mx-6" />
 
-            {/* ── Row 2: Copyright + Attribution · Nav Links ── */}
+            {/* ── Row 2: Copyright · Nav Links ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-3.5">
-              {/* Left: copyright + Built by */}
-              <div className="flex flex-col gap-1">
+              {/* Left: Copyright */}
+              <div className="flex items-center">
                 <span className="text-[13px] text-[#68645A] leading-none font-medium">
                   © {copyright.year} {brandName}. All rights reserved.
                 </span>
-                {copyright.builtBy && (
-                  <div className="flex items-center gap-1.5 text-[14px] text-[#68645A]">
-                    <span className="font-mono uppercase tracking-widest text-[11px] text-[#8C877C]">
-                      Built by
-                    </span>
-                    {copyright.builtBy}
-                  </div>
-                )}
               </div>
 
               {/* Right: Main links + Legal links */}
@@ -147,6 +139,13 @@ export function Footer({
               </div>
             </div>
           </div>
+
+          {/* ── Below Footer Card: Right Bottom Attribution Badge ── */}
+          {copyright.builtBy && (
+            <div className="flex justify-center sm:justify-end mt-3 sm:mt-4">
+              {copyright.builtBy}
+            </div>
+          )}
         </div>
       </div>
     </footer>
