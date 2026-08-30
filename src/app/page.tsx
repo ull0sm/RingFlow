@@ -326,30 +326,30 @@ export default async function PublicHome() {
                     </div>
 
                     {/* Bottom Action */}
-                    <div className="mt-6 pt-4 border-t border-[#E1DDCF]/60 flex items-center justify-between">
-                      <span className={`text-[12.5px] ${isLiveEvent ? "font-semibold text-[#68645A]" : "font-medium text-[#8C877C]"}`}>
+                    <div className="mt-6 pt-4 border-t border-[#E1DDCF]/60 flex items-center justify-between gap-2">
+                      <span className={`text-[12px] sm:text-[12.5px] truncate ${isLiveEvent ? "font-semibold text-[#68645A]" : "font-medium text-[#8C877C]"}`}>
                         {isLiveEvent
-                          ? "Tatami Status & Athlete Queue"
+                          ? "Tatami Status & Queues"
                           : isUpcoming
-                          ? "Category & Tatami Routing"
-                          : "Tournament Archive & Results"}
+                          ? "Schedule & Routing"
+                          : "Archive & Results"}
                       </span>
                       {isLiveEvent ? (
-                        <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1815] text-[#F5F3EC] rounded-xl text-[13.5px] font-bold group-hover:bg-black transition-colors shadow-sm">
+                        <span className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 bg-[#1B1815] text-[#F5F3EC] rounded-xl text-[12.5px] sm:text-[13.5px] font-bold group-hover:bg-black transition-colors shadow-sm whitespace-nowrap shrink-0">
                           <span>Enter Floor</span>
                           <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                           </svg>
                         </span>
                       ) : isUpcoming ? (
-                        <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#ECE9DF] text-[#1B1815] rounded-xl text-[13.5px] font-bold group-hover:bg-[#1B1815] group-hover:text-[#F5F3EC] transition-all">
+                        <span className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 bg-[#ECE9DF] text-[#1B1815] rounded-xl text-[12.5px] sm:text-[13.5px] font-bold group-hover:bg-[#1B1815] group-hover:text-[#F5F3EC] transition-all whitespace-nowrap shrink-0">
                           <span>View Details</span>
                           <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                           </svg>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#ECE9DF] text-[#68645A] rounded-xl text-[13.5px] font-bold group-hover:bg-[#1B1815] group-hover:text-[#F5F3EC] transition-all">
+                        <span className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 bg-[#ECE9DF] text-[#68645A] rounded-xl text-[12.5px] sm:text-[13.5px] font-bold group-hover:bg-[#1B1815] group-hover:text-[#F5F3EC] transition-all whitespace-nowrap shrink-0">
                           <span>View Results</span>
                           <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7" />
