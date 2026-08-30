@@ -461,7 +461,7 @@ export default function PublicEventClient({
                     <div className="spectator-result-main">
                       <div className="spectator-result-name-row">
                         <span className="spectator-result-chest mono">
-                          #{a.chest_number || "—"}
+                          #{a.chest_number || "-"}
                         </span>
                         <span className="spectator-result-name">{a.name}</span>
                       </div>
@@ -522,8 +522,8 @@ export default function PublicEventClient({
               activeAssignment?.status === "running"
                 ? "run"
                 : activeAssignment?.status === "paused"
-                ? "pause"
-                : "idle";
+                  ? "pause"
+                  : "idle";
 
             const statusLabel =
               state === "run" ? "RUNNING" : state === "pause" ? "PAUSED" : "IDLE";
@@ -546,9 +546,8 @@ export default function PublicEventClient({
                 ref={(el) => {
                   matCardsRef.current[ring.id] = el;
                 }}
-                className={`spectator-mat-card spectator-state-${state} ${
-                  isFlashing ? "flash" : ""
-                }`}
+                className={`spectator-mat-card spectator-state-${state} ${isFlashing ? "flash" : ""
+                  }`}
                 data-mat-id={ring.id}
               >
                 {/* Scoreboard Band */}
@@ -665,9 +664,8 @@ export default function PublicEventClient({
 
         {/* ---------- Empty State ---------- */}
         <div
-          className={`spectator-empty-state ${
-            rings.length === 0 ? "open" : ""
-          }`}
+          className={`spectator-empty-state ${rings.length === 0 ? "open" : ""
+            }`}
           id="empty-state"
         >
           <div className="spectator-empty-icon">

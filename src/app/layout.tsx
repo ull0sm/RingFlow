@@ -20,7 +20,7 @@ const jetBrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RingFlow — Real-Time Tournament Floor Management",
+  title: "RingFlow | Real-Time Tournament Floor Management",
   description: "Live tournament rings, match queues, dynamic bracket flow, and spectator dashboard.",
   icons: {
     icon: [
