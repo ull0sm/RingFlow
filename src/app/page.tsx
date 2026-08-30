@@ -22,32 +22,49 @@ export default async function PublicHome() {
   const day = String(now.getDate()).padStart(2, "0");
   const todayStr = `${year}-${month}-${day}`;
 
+  const getEventDateKey = (dateVal: any): string => {
+    if (!dateVal) return "";
+    try {
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return String(dateVal).split("T")[0];
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const dt = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${dt}`;
+    } catch {
+      return String(dateVal).split("T")[0];
+    }
+  };
+
   const getEventStatus = (t: any): "live" | "upcoming" | "past" => {
     if (t.status === "completed" || t.status === "archived") return "past";
     if (t.status === "live") return "live";
     if (!t.event_date) return "upcoming";
-    const eventDateStr = String(t.event_date).split("T")[0];
-    if (eventDateStr === todayStr) {
+    const dateKey = getEventDateKey(t.event_date);
+    const rawKey = String(t.event_date).split("T")[0];
+    if (dateKey === todayStr || rawKey === todayStr) {
       return "live";
-    } else if (eventDateStr > todayStr) {
+    } else if (dateKey > todayStr || rawKey > todayStr) {
       return "upcoming";
     } else {
       return "past";
     }
   };
 
-  const allTournaments = (tournaments || []).sort((a, b) => {
-    const statusA = getEventStatus(a);
-    const statusB = getEventStatus(b);
-    const priority: Record<string, number> = { live: 0, upcoming: 1, past: 2 };
-    if (priority[statusA] !== priority[statusB]) {
-      return priority[statusA] - priority[statusB];
-    }
-    if (statusA === "past") {
-      return new Date(b.event_date || 0).getTime() - new Date(a.event_date || 0).getTime();
-    }
-    return new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime();
-  });
+  // Strictly Stacked: 1. Live Events on top -> 2. Upcoming Events in middle -> 3. Over Events at bottom
+  const liveTournaments = (tournaments || [])
+    .filter((t) => getEventStatus(t) === "live")
+    .sort((a, b) => new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime());
+
+  const upcomingTournaments = (tournaments || [])
+    .filter((t) => getEventStatus(t) === "upcoming")
+    .sort((a, b) => new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime());
+
+  const pastTournaments = (tournaments || [])
+    .filter((t) => getEventStatus(t) === "past")
+    .sort((a, b) => new Date(b.event_date || 0).getTime() - new Date(a.event_date || 0).getTime());
+
+  const allTournaments = [...liveTournaments, ...upcomingTournaments, ...pastTournaments];
 
   return (
     <>
