@@ -22,21 +22,32 @@ export default async function PublicHome() {
   const day = String(now.getDate()).padStart(2, "0");
   const todayStr = `${year}-${month}-${day}`;
 
-  const isLive = (t: any) => {
-    if (t.status === "completed") return false;
-    if (!t.event_date) return false;
+  const getEventStatus = (t: any): "live" | "upcoming" | "past" => {
+    if (t.status === "completed" || t.status === "archived") return "past";
+    if (t.status === "live") return "live";
+    if (!t.event_date) return "upcoming";
     const eventDateStr = String(t.event_date).split("T")[0];
-    return eventDateStr === todayStr;
+    if (eventDateStr === todayStr) {
+      return "live";
+    } else if (eventDateStr > todayStr) {
+      return "upcoming";
+    } else {
+      return "past";
+    }
   };
 
-  const allTournaments = (tournaments || [])
-    .filter((t) => t.status !== "completed")
-    .sort((a, b) => {
-      const aLive = isLive(a) ? 1 : 0;
-      const bLive = isLive(b) ? 1 : 0;
-      if (aLive !== bLive) return bLive - aLive;
-      return new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime();
-    });
+  const allTournaments = (tournaments || []).sort((a, b) => {
+    const statusA = getEventStatus(a);
+    const statusB = getEventStatus(b);
+    const priority: Record<string, number> = { live: 0, upcoming: 1, past: 2 };
+    if (priority[statusA] !== priority[statusB]) {
+      return priority[statusA] - priority[statusB];
+    }
+    if (statusA === "past") {
+      return new Date(b.event_date || 0).getTime() - new Date(a.event_date || 0).getTime();
+    }
+    return new Date(a.event_date || 0).getTime() - new Date(b.event_date || 0).getTime();
+  });
 
   return (
     <>
@@ -216,7 +227,11 @@ export default async function PublicHome() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {allTournaments.map((t) => {
-                const live = isLive(t);
+                const status = getEventStatus(t);
+                const isLiveEvent = status === "live";
+                const isUpcoming = status === "upcoming";
+                const isPast = status === "past";
+
                 const eventDateStr = t.event_date
                   ? new Date(t.event_date).toLocaleDateString(undefined, {
                       month: "short",
@@ -231,22 +246,30 @@ export default async function PublicHome() {
                     href={`/public/event/${t.id}`}
                     scroll={true}
                     className={`rounded-2xl p-6 md:p-7 transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden ${
-                      live
+                      isLiveEvent
                         ? "bg-white border-2 border-[#1B1815] shadow-[0_8px_30px_rgba(27,24,21,0.08)] hover:shadow-[0_16px_40px_rgba(27,24,21,0.14)] hover:-translate-y-1"
-                        : "bg-white border border-[#E1DDCF] shadow-[0_4px_24px_rgba(27,24,21,0.03)] hover:shadow-[0_12px_36px_rgba(27,24,21,0.08)] hover:-translate-y-0.5"
+                        : isUpcoming
+                        ? "bg-white border border-[#E1DDCF] shadow-[0_4px_24px_rgba(27,24,21,0.03)] hover:shadow-[0_12px_36px_rgba(27,24,21,0.08)] hover:-translate-y-0.5"
+                        : "bg-[#FAF9F5] border border-[#E1DDCF]/80 shadow-[0_2px_12px_rgba(27,24,21,0.02)] hover:shadow-[0_8px_24px_rgba(27,24,21,0.06)] hover:-translate-y-0.5 opacity-90 hover:opacity-100"
                     }`}
                   >
                     <div>
                       {/* Top Status Bar */}
                       <div className="flex items-center justify-between mb-4">
-                        {live ? (
+                        {isLiveEvent ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#2E7A4F]/10 text-[#2E7A4F] border border-[#2E7A4F]/20 text-[11px] font-extrabold tracking-wider uppercase font-['Inter',sans-serif]">
                             <span className="w-2 h-2 rounded-full bg-[#2E7A4F] animate-pulse"></span>
-                            Live Tatamis
+                            Live
+                          </span>
+                        ) : isUpcoming ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#2563EB]/10 text-[#1D4ED8] border border-[#2563EB]/20 text-[11px] font-extrabold tracking-wider uppercase font-['Inter',sans-serif]">
+                            <span className="w-2 h-2 rounded-full bg-[#2563EB]"></span>
+                            Upcoming
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#ECE9DF] text-[#68645A] border border-[#E1DDCF] text-[11px] font-bold tracking-wider uppercase font-['Inter',sans-serif]">
-                            Upcoming
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#ECE9DF] text-[#7A756B] border border-[#E1DDCF] text-[11px] font-bold tracking-wider uppercase font-['Inter',sans-serif]">
+                            <span className="w-2 h-2 rounded-full bg-[#8C877C]"></span>
+                            Over
                           </span>
                         )}
                         <span className="font-mono text-[12px] text-[#8C877C] font-semibold">
@@ -275,7 +298,11 @@ export default async function PublicHome() {
                             <path d="M12 6v6l4 2" />
                           </svg>
                           <span className="font-medium">
-                            {live ? "Active Tatami Rings & Categories" : "Tatami Schedule & Category Allocation"}
+                            {isLiveEvent
+                              ? "Active Tatami Rings & Categories"
+                              : isUpcoming
+                              ? "Tatami Schedule & Category Allocation"
+                              : "Final Match Results & Standings"}
                           </span>
                         </div>
                       </div>
@@ -283,19 +310,30 @@ export default async function PublicHome() {
 
                     {/* Bottom Action */}
                     <div className="mt-6 pt-4 border-t border-[#E1DDCF]/60 flex items-center justify-between">
-                      <span className={`text-[12.5px] ${live ? "font-semibold text-[#68645A]" : "font-medium text-[#8C877C]"}`}>
-                        {live ? "Tatami Status & Athlete Queue" : "Category & Tatami Routing"}
+                      <span className={`text-[12.5px] ${isLiveEvent ? "font-semibold text-[#68645A]" : "font-medium text-[#8C877C]"}`}>
+                        {isLiveEvent
+                          ? "Tatami Status & Athlete Queue"
+                          : isUpcoming
+                          ? "Category & Tatami Routing"
+                          : "Tournament Archive & Results"}
                       </span>
-                      {live ? (
+                      {isLiveEvent ? (
                         <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#1B1815] text-[#F5F3EC] rounded-xl text-[13.5px] font-bold group-hover:bg-black transition-colors shadow-sm">
                           <span>Enter Floor</span>
                           <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                           </svg>
                         </span>
-                      ) : (
+                      ) : isUpcoming ? (
                         <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#ECE9DF] text-[#1B1815] rounded-xl text-[13.5px] font-bold group-hover:bg-[#1B1815] group-hover:text-[#F5F3EC] transition-all">
                           <span>View Details</span>
+                          <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#ECE9DF] text-[#68645A] rounded-xl text-[13.5px] font-bold group-hover:bg-[#1B1815] group-hover:text-[#F5F3EC] transition-all">
+                          <span>View Results</span>
                           <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                           </svg>
