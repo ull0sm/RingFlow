@@ -10,7 +10,7 @@ export default function TermsOfServicePage() {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Header — primary-container (deep navy) per design system */}
+      {/* Header - primary-container (deep navy) per design system */}
       <div className="bg-primary-container">
         <div className="max-w-3xl mx-auto px-margin-desktop pt-12 pb-10">
           <p className="text-label-caps font-label-caps text-on-primary-container mb-4 uppercase tracking-widest">
@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
         <Section title="No warranties">
           <p>
             RingFlow is provided as-is. We don't guarantee uptime or accuracy of results. Tournament
-            outcomes depend on data entered by event administrators — CruxStudios is not responsible
+            outcomes depend on data entered by event administrators - CruxStudios is not responsible
             for errors in that data.
           </p>
         </Section>
@@ -87,7 +87,7 @@ export default function TermsOfServicePage() {
         <Section title="Limitation of liability">
           <p>
             CruxStudios is not liable for indirect, incidental, or consequential damages arising from
-            use of RingFlow — including loss of data, disputes over results, or reputational harm.
+            use of RingFlow - including loss of data, disputes over results, or reputational harm.
           </p>
         </Section>
 

@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background">
 
-      {/* Header — primary-container (deep navy) per design system */}
+      {/* Header - primary-container (deep navy) per design system */}
       <div className="bg-primary-container">
         <div className="max-w-3xl mx-auto px-margin-desktop pt-12 pb-10">
           <p className="text-label-caps font-label-caps text-on-primary-container mb-4 uppercase tracking-widest">
@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
         </div>
       </div>
 
-      {/* Body — background slate tint, Level 0 surface */}
+      {/* Body - background slate tint, Level 0 surface */}
       <div className="max-w-3xl mx-auto px-margin-desktop py-12 space-y-8">
 
         <p className="text-body-md font-body-md text-on-surface-variant">
@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
         <Section title="How long we keep it">
           <p>
             Data is scoped entirely to the lifetime of an event. When an event is marked complete, all associated
-            data — participants, brackets, results — is permanently deleted. Nothing is archived or retained.
+            data - participants, brackets, results - is permanently deleted. Nothing is archived or retained.
           </p>
           <p>
             RingFlow is built to be ephemeral. That is not a caveat; it is the point.
