@@ -538,7 +538,7 @@ export default function RingBalancingClient({ tournamentId, tournamentName, init
   const uniqueSexes = Array.from(new Set(initialCategories.map(c => c.sex).filter(Boolean)));
 
   return (
-    <div className="flex flex-col h-full overflow-hidden w-full">
+    <div className="flex flex-col h-screen overflow-hidden w-full">
       {/* TopNavBar */}
       <header className="flex justify-between items-center w-full px-8 h-16 bg-surface-container-lowest border-b border-outline-variant shrink-0 z-10">
         <div className="flex items-center gap-6">

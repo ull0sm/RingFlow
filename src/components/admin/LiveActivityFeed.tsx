@@ -67,7 +67,7 @@ export default function LiveActivityFeed({ tournamentId, initialLogs, rings }: {
             <div key={log.id} className={`flex flex-col gap-1 text-sm ${bg}`}>
               <div className="flex items-center gap-2">
                 <span className={`material-symbols-outlined text-[14px] ${color}`} style={{fontVariationSettings: '"FILL" 1'}}>{icon}</span>
-                <span className="font-data-mono text-[10px] text-on-surface-variant font-medium">
+                <span className="font-data-mono text-[10px] text-on-surface-variant font-medium" suppressHydrationWarning>
                   {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </span>
               </div>
