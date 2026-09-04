@@ -20,7 +20,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col h-full py-6 px-4 space-y-2 w-64 bg-surface-container-low border-r border-outline-variant shrink-0">
+    <aside className="hidden md:flex flex-col sticky top-0 h-screen py-6 px-4 space-y-2 w-64 bg-surface-container-low border-r border-outline-variant shrink-0 z-20 overflow-y-auto">
       <div className="px-2 mb-8">
         <Link href="/admin" className="flex items-center gap-2.5 group">
           <RingFlowLogo className="h-8 w-8 text-primary group-hover:scale-105 transition-transform shrink-0" />

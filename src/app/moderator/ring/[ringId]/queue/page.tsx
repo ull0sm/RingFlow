@@ -8,7 +8,7 @@ export default async function ModeratorQueuePage({ params }: { params: Promise<{
 
   const { data: assignments } = await supabase
     .from("category_assignments")
-    .select("*, categories(name, expected_matches)")
+    .select("*, categories(name, expected_matches, belt, age_bracket, weight_class, sex)")
     .eq("ring_id", ringId)
     .in("status", ["pending", "running", "paused"])
     .order("queue_order", { ascending: true });

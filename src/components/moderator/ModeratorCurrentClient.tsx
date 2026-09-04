@@ -217,13 +217,26 @@ export default function ModeratorCurrentClient({ ringId, initialAssignments, all
             {isPaused ? 'PAUSED' : 'RUNNING'}
           </span>
         </div>
-        <h2 className="font-headline-md text-2xl font-black text-primary mb-1">{activeAssignment.categories?.name}</h2>
-        <div className="flex items-center gap-3 text-xs text-on-surface-variant font-data-mono">
-          <span>{activeAssignment.categories?.belt || "-"}</span>
-          <span>•</span>
-          <span>{activeAssignment.categories?.age_bracket || "-"}</span>
-          <span>•</span>
-          <span>{currentCategoryAthletes.length} Athletes</span>
+        <h2 className="font-headline-md text-2xl font-black text-primary mb-2">{activeAssignment.categories?.name}</h2>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-on-surface-variant font-data-mono">
+          {activeAssignment.categories?.belt && (
+            <span className="px-2 py-0.5 bg-surface-container rounded font-medium text-primary">
+              {activeAssignment.categories.belt}
+            </span>
+          )}
+          {activeAssignment.categories?.age_bracket && (
+            <span className="px-2 py-0.5 bg-surface-container rounded font-medium text-on-surface-variant">
+              Age {activeAssignment.categories.age_bracket}
+            </span>
+          )}
+          {activeAssignment.categories?.weight_class && (
+            <span className="px-2 py-0.5 bg-surface-container rounded font-medium text-on-surface-variant">
+              {activeAssignment.categories.weight_class}
+            </span>
+          )}
+          <span className="px-2 py-0.5 bg-surface-container-high rounded font-bold text-primary">
+            {currentCategoryAthletes.length} Athletes
+          </span>
         </div>
       </div>
 

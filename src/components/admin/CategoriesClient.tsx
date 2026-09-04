@@ -149,7 +149,7 @@ export default function CategoriesClient({ tournamentId, initialCategories }: Pr
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-6 pb-24 w-full">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="font-headline-md text-headline-md text-primary font-bold">Category Management</h2>

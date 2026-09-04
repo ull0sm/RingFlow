@@ -3,6 +3,7 @@ import Link from "next/link";
 import AdminHeader from "@/components/layout/AdminHeader";
 import { createClient } from "@/utils/supabase/server";
 import { ensureAdmin } from "@/actions/admin";
+import { formatDisplayDate } from "@/lib/utils";
 
 export default async function EventSelectionPage() {
   let adminId;
@@ -30,7 +31,7 @@ export default async function EventSelectionPage() {
   return (
     <>
       <AdminHeader title="Select Tournament" />
-      <div className="flex-1 overflow-y-auto p-margin-desktop bg-surface">
+      <div className="p-margin-desktop bg-surface pb-24 w-full">
         <div className="max-w-7xl mx-auto w-full">
           {/* Welcome Section */}
           <div className="mb-12">
@@ -93,7 +94,7 @@ export default async function EventSelectionPage() {
                     <span className="font-data-mono text-data-mono text-on-surface-variant">ID: {tournament.id.split('-')[0]}</span>
                   </div>
                   <h4 className="font-headline-sm text-headline-sm text-on-surface mb-1 group-hover:text-secondary transition-colors">{tournament.name}</h4>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">{tournament.event_date ? new Date(tournament.event_date).toLocaleDateString() : 'No date'} • {tournament.venue || 'No venue'}</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-6">{tournament.event_date ? formatDisplayDate(tournament.event_date) : 'No date'} • {tournament.venue || 'No venue'}</p>
                 </div>
                 <div className="px-card-padding py-4 bg-surface-container-low border-t border-outline-variant flex justify-between items-center">
                   <span className="font-label-caps text-label-caps text-on-surface-variant">Enter Dashboard</span>

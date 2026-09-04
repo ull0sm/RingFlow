@@ -7,7 +7,7 @@ export default function CategoriesLoading() {
     <>
       <AdminHeader title="Categories" />
       
-      <div className="flex-1 overflow-y-auto p-margin-desktop space-y-8 bg-surface">
+      <div className="p-margin-desktop space-y-8 bg-surface pb-24 w-full">
         {/* Header Block */}
         <div className="flex justify-between items-center">
           <div>

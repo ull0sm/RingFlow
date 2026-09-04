@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { verifyTurnstileToken } from "@/actions/turnstile";
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
+  const searchParams = useSearchParams();
   const [turnstileToken, setTurnstileToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -27,17 +29,18 @@ export default function AdminLoginPage() {
       return;
     }
 
+    const nextUrl = searchParams.get("redirect") || "/admin";
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=/admin`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`,
       },
     });
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background">
+    <div className="flex min-h-screen w-full items-center justify-center bg-background py-12">
       <div className="w-full max-w-sm bg-surface-container-lowest p-card-padding border border-outline-variant rounded-lg shadow-sm text-center">
         <h1 className="font-headline-lg text-headline-lg font-bold text-primary mb-2">Ring Flow Admin</h1>
         <p className="font-body-sm text-on-surface-variant mb-6">
@@ -79,5 +82,17 @@ export default function AdminLoginPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen w-full items-center justify-center bg-background">
+        <span className="material-symbols-outlined animate-spin text-3xl text-primary">progress_activity</span>
+      </div>
+    }>
+      <AdminLoginForm />
+    </Suspense>
   );
 }

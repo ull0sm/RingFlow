@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import { formatDisplayDateWithWeekday } from "@/lib/utils";
 import "./public-spectator.css";
 
 interface Tournament {
@@ -386,12 +387,7 @@ export default function PublicEventClient({
       return `${tournament.venue}, ${tournament.city}`;
     }
     if (tournament.event_date) {
-      return new Date(tournament.event_date).toLocaleDateString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+      return formatDisplayDateWithWeekday(tournament.event_date);
     }
     return "TOURNAMENT FLOOR";
   }, [tournament]);
@@ -422,7 +418,7 @@ export default function PublicEventClient({
               </span>
             )}
           </div>
-          <p className="spectator-eyebrow">{eyebrowText}</p>
+          <p className="spectator-eyebrow" suppressHydrationWarning>{eyebrowText}</p>
           <h1 className="spectator-header__title">{tournament.name}</h1>
         </header>
 

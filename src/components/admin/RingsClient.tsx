@@ -114,7 +114,7 @@ export default function RingsClient({ tournamentId, initialRings, initialModRequ
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 max-w-7xl mx-auto space-y-6 pb-24 w-full">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="font-headline-md text-headline-md text-primary font-bold">Tatami Management</h2>
@@ -201,7 +201,7 @@ export default function RingsClient({ tournamentId, initialRings, initialModRequ
                       <div key={req.id} className="bg-white p-2.5 rounded border border-amber-300/50 flex items-center justify-between shadow-xs">
                         <div className="flex flex-col">
                           <span className="text-xs font-bold text-primary">{req.moderator_name}</span>
-                          <span className="text-[9px] font-data-mono text-on-surface-variant opacity-70">
+                          <span className="text-[9px] font-data-mono text-on-surface-variant opacity-70" suppressHydrationWarning>
                             {req.device_info?.browser || "Device"} • {new Date(req.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>

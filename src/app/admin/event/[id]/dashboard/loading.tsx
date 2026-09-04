@@ -7,7 +7,7 @@ export default function AdminDashboardLoading() {
     <>
       <AdminHeader title="Overview" />
       
-      <div className="flex-1 overflow-y-auto p-margin-desktop space-y-8">
+      <div className="p-margin-desktop space-y-8 pb-24 w-full">
         {/* Stats Grid Skeletons */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
           <StatsCardSkeleton />

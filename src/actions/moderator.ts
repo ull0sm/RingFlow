@@ -18,6 +18,14 @@ export async function approveModeratorRequest(requestId: string, ringId: string,
   const sessionToken = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
 
+  // Revoke any older approved sessions for this ring to maintain 1-moderator exclusivity
+  await supabase
+    .from("moderator_requests")
+    .update({ status: "revoked" })
+    .eq("ring_id", ringId)
+    .eq("status", "approved")
+    .neq("id", requestId);
+
   const { error } = await supabase
     .from("moderator_requests")
     .update({
@@ -124,51 +132,56 @@ export async function requestModeratorAccess(accessCode: string, moderatorName?:
 }
 
 export async function checkModeratorStatus(requestId: string) {
+  if (!requestId) return { status: "not_found", ringId: undefined, sessionToken: undefined };
   const supabase = await createClient();
 
   const { data: request } = await supabase
     .from("moderator_requests")
     .select("status, session_token, ring_id")
     .eq("id", requestId)
-    .single();
+    .maybeSingle();
 
   if (!request) return { status: "not_found", ringId: undefined, sessionToken: undefined };
 
-  if (request.status === "approved" && request.session_token) {
+  if (request.status === "approved" && (request.session_token || requestId)) {
+    const tokenToUse = request.session_token || requestId;
     const cookieStore = await cookies();
-    cookieStore.set("mod_token", request.session_token, {
-      httpOnly: true,
+    cookieStore.set("mod_token", tokenToUse, {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       maxAge: 12 * 60 * 60,
+      sameSite: "lax",
       path: "/",
     });
-    return { status: "approved", ringId: request.ring_id, sessionToken: request.session_token };
+    return { status: "approved", ringId: request.ring_id, sessionToken: tokenToUse };
   }
 
   return { status: request.status, ringId: request.ring_id, sessionToken: undefined };
 }
 
 export async function validateModeratorSession(ringId: string, token: string) {
+  if (!token || !ringId) return false;
   const supabase = await createClient();
   
-  // Exclusivity: 1 ring = 1 active moderator.
-  // Always validate against the LATEST approved session for this ring.
-  const { data: latestRequest } = await supabase
+  // Match by session_token OR by request id, ensuring it belongs to this ring and is approved
+  const { data: session } = await supabase
     .from("moderator_requests")
-    .select("id, session_token, status, moderator_name")
+    .select("id, session_token, status, moderator_name, ring_id, expires_at")
     .eq("ring_id", ringId)
     .eq("status", "approved")
+    .or(`session_token.eq.${token},id.eq.${token}`)
     .order("created_at", { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  if (!latestRequest) return false;
-  
-  // Must match the *latest* approved session token exactly
-  if (latestRequest.session_token === token) {
-    return latestRequest;
+  if (!session) return false;
+
+  // Check expiration if expires_at is set
+  if (session.expires_at && new Date(session.expires_at).getTime() < Date.now()) {
+    return false;
   }
-  return false;
+
+  return session;
 }
 
 export async function startCategory(assignmentId: string, ringId: string) {
@@ -180,6 +193,9 @@ export async function startCategory(assignmentId: string, ringId: string) {
 
   const supabase = await createClient();
   
+  const { data: ring } = await supabase.from("rings").select("tournament_id").eq("id", ringId).single();
+  const tournamentId = ring?.tournament_id;
+
   await supabase
     .from("category_assignments")
     .update({ status: "paused" })
@@ -198,7 +214,7 @@ export async function startCategory(assignmentId: string, ringId: string) {
   await supabase
     .from("event_log")
     .insert({
-      tournament_id: assignment.tournament_id,
+      tournament_id: tournamentId,
       ring_id: ringId,
       category_id: assignment.category_id,
       action: "START_CATEGORY",
@@ -229,6 +245,9 @@ export async function adjustMatchCount(assignmentId: string, ringId: string, del
 
   const supabase = await createClient();
   
+  const { data: ring } = await supabase.from("rings").select("tournament_id").eq("id", ringId).single();
+  const tournamentId = ring?.tournament_id;
+
   const { data: assignment } = await supabase
     .from("category_assignments")
     .select("*")
@@ -257,7 +276,7 @@ export async function adjustMatchCount(assignmentId: string, ringId: string, del
   await supabase
     .from("event_log")
     .insert({
-      tournament_id: assignment.tournament_id,
+      tournament_id: tournamentId,
       ring_id: ringId,
       category_id: assignment.category_id,
       action: delta > 0 ? "MATCH_COMPLETED_INCREMENT" : "MATCH_COMPLETED_DECREMENT",
@@ -277,6 +296,9 @@ export async function finishCategory(assignmentId: string, ringId: string) {
 
   const supabase = await createClient();
   
+  const { data: ring } = await supabase.from("rings").select("tournament_id").eq("id", ringId).single();
+  const tournamentId = ring?.tournament_id;
+
   const { data: assignment } = await supabase
     .from("category_assignments")
     .select("*")
@@ -298,7 +320,7 @@ export async function finishCategory(assignmentId: string, ringId: string) {
   await supabase
     .from("event_log")
     .insert({
-      tournament_id: assignment.tournament_id,
+      tournament_id: tournamentId,
       ring_id: ringId,
       category_id: assignment.category_id,
       action: "FINISH_CATEGORY",
@@ -315,6 +337,9 @@ export async function setRingStatus(assignmentId: string, ringId: string, isPaus
 
   const supabase = await createClient();
   
+  const { data: ring } = await supabase.from("rings").select("tournament_id").eq("id", ringId).single();
+  const tournamentId = ring?.tournament_id;
+
   const { data: assignment } = await supabase
     .from("category_assignments")
     .select("*")
@@ -333,7 +358,7 @@ export async function setRingStatus(assignmentId: string, ringId: string, isPaus
   await supabase
     .from("event_log")
     .insert({
-      tournament_id: assignment.tournament_id,
+      tournament_id: tournamentId,
       ring_id: ringId,
       category_id: assignment.category_id,
       action: isPaused ? "PAUSE_RING" : "RESUME_RING",

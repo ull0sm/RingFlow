@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { generateAccessCode } from "@/lib/utils";
 
 export type CategoryInput = {
   name: string;
@@ -82,7 +83,7 @@ export async function createTournament(input: TournamentInput): Promise<string> 
     const ringsToInsert = Array.from({ length: ringTotal }).map(
       (_, index) => {
         const ringNumber = index + 1;
-        const accessCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const accessCode = generateAccessCode();
         return {
           tournament_id: tournamentId,
           name: `Tatami ${ringNumber}`,
