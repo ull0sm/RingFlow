@@ -1,6 +1,6 @@
 export default function AdminHeader({ title, eventName }: { title: string; eventName?: string }) {
   return (
-    <header className="flex justify-between items-center w-full px-margin-desktop h-16 bg-surface-container-lowest border-b border-outline-variant shrink-0">
+    <header className="flex justify-between items-center w-full px-margin-desktop h-16 bg-surface-container-lowest border-b border-outline-variant shrink-0 sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <h2 className="font-headline-sm text-headline-sm text-primary">{title}</h2>
         {eventName && (

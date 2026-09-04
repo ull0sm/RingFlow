@@ -72,7 +72,7 @@ export default function SettingsClient({ tournament }: Props) {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-margin-desktop space-y-8 bg-surface">
+    <div className="p-margin-desktop space-y-8 bg-surface pb-24 w-full">
       <div className="max-w-3xl">
         <div className="mb-8">
           <h2 className="font-headline-sm text-headline-sm text-primary">Tournament Configuration</h2>
