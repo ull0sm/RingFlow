@@ -84,7 +84,7 @@ export default function ModeratorRequestsWidget({ tournamentId, initialRequests 
                   <span className="font-label-caps text-[10px] text-secondary font-bold block mb-1">
                     {req.rings?.name || "Unknown Tatami"}
                   </span>
-                  <span className="text-[10px] text-on-surface-variant">{new Date(req.created_at).toLocaleTimeString()}</span>
+                  <span className="text-[10px] text-on-surface-variant" suppressHydrationWarning>{new Date(req.created_at).toLocaleTimeString()}</span>
                 </div>
                 {req.moderator_name && req.moderator_name !== "Unknown" && (
                   <p className="font-body-sm font-semibold mb-1 text-primary">{req.moderator_name}</p>

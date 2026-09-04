@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { checkModeratorStatus } from "@/actions/moderator";
@@ -10,28 +10,61 @@ export default function WaitingRoom() {
   const router = useRouter();
   const supabase = createClient();
   const [status, setStatus] = useState("pending");
+  const isNavigating = useRef(false);
+
+  const handleApproved = (ringId: string, token?: string) => {
+    if (isNavigating.current) return;
+    isNavigating.current = true;
+
+    const tokenToSave = token || id;
+    // Set client-side cookie with SameSite=Lax
+    document.cookie = `mod_token=${tokenToSave}; path=/; max-age=86400; SameSite=Lax`;
+    try {
+      localStorage.setItem(`mod_token_${ringId}`, tokenToSave);
+    } catch (_) {}
+
+    // Animate a bit then redirect with full page reload to ensure fresh cookies and no cached route
+    setStatus("approved");
+    setTimeout(() => {
+      window.location.href = `/moderator/ring/${ringId}/queue`;
+    }, 1200);
+  };
 
   useEffect(() => {
-    // 1. Initial check
-    checkModeratorStatus(id).then(res => {
-      if (res.status === 'approved') {
-        handleApproved(res.ringId, res.sessionToken);
-      } else if (res.status === 'rejected') {
-        setStatus("rejected");
-      }
-    });
+    let isMounted = true;
 
-    // 2. Realtime listener
+    const pollStatus = async () => {
+      if (isNavigating.current) return;
+      try {
+        const res = await checkModeratorStatus(id);
+        if (!isMounted) return;
+        if (res.status === "approved" && res.ringId) {
+          handleApproved(res.ringId, res.sessionToken);
+        } else if (res.status === "rejected") {
+          setStatus("rejected");
+        }
+      } catch (err) {
+        console.error("Error checking moderator status:", err);
+      }
+    };
+
+    // 1. Initial check immediately
+    pollStatus();
+
+    // 2. Poll every 2 seconds as reliable fallback for network/websocket delays
+    const interval = setInterval(pollStatus, 2000);
+
+    // 3. Realtime listener for immediate push notification
     const channel = supabase.channel(`mod_req_${id}`)
       .on('postgres_changes', { 
         event: 'UPDATE', 
         schema: 'public', 
         table: 'moderator_requests',
         filter: `id=eq.${id}`
-      }, (payload) => {
+      }, async (payload) => {
         const newStatus = payload.new.status;
         if (newStatus === 'approved') {
-          handleApproved(payload.new.ring_id, payload.new.session_token);
+          await pollStatus();
         } else if (newStatus === 'rejected') {
           setStatus("rejected");
         }
@@ -39,28 +72,14 @@ export default function WaitingRoom() {
       .subscribe();
 
     return () => {
+      isMounted = false;
+      clearInterval(interval);
       supabase.removeChannel(channel);
     };
-  }, [id, router, supabase]);
-
-  const handleApproved = (ringId: string, token?: string) => {
-    // Save token in cookie or local storage so middleware/layout can read it
-    if (token) {
-      document.cookie = `mod_token=${token}; path=/; max-age=86400; SameSite=Strict`;
-    } else {
-      // MVP fallback
-      document.cookie = `mod_token=${id}; path=/; max-age=86400; SameSite=Strict`;
-    }
-    
-    // Animate a bit then redirect
-    setStatus("approved");
-    setTimeout(() => {
-      router.push(`/moderator/ring/${ringId}/queue`);
-    }, 1500);
-  };
+  }, [id, supabase]);
 
   return (
-    <div className="bg-surface text-on-surface min-h-screen flex flex-col font-body-md overflow-hidden relative">
+    <div className="bg-surface text-on-surface min-h-screen flex flex-col font-body-md relative">
       <header className="w-full px-4 py-6 flex items-center z-10 justify-center">
         <div className="flex items-center gap-2">
           <span className="text-headline-sm font-headline-sm font-extrabold text-primary tracking-tighter">Ring Flow</span>
