@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { formatDisplayDate, getEventDateKey } from "@/lib/utils";
 
 interface Tournament {
   id: string;
@@ -22,20 +23,6 @@ interface PublicTournamentGridProps {
 export default function PublicTournamentGrid({ tournaments, todayStr }: PublicTournamentGridProps) {
   const [selectedUpcoming, setSelectedUpcoming] = useState<Tournament | null>(null);
 
-  const getEventDateKey = (dateVal: any): string => {
-    if (!dateVal) return "";
-    try {
-      const d = new Date(dateVal);
-      if (isNaN(d.getTime())) return String(dateVal).split("T")[0];
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const dt = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${dt}`;
-    } catch {
-      return String(dateVal).split("T")[0];
-    }
-  };
-
   const getEventStatus = (t: Tournament): "live" | "upcoming" | "past" => {
     if (t.status === "completed" || t.status === "archived") return "past";
     if (t.status === "live") return "live";
@@ -51,14 +38,7 @@ export default function PublicTournamentGrid({ tournaments, todayStr }: PublicTo
     }
   };
 
-  const formatDate = (dateVal?: string) => {
-    if (!dateVal) return "DATE TBD";
-    return new Date(dateVal).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  const formatDate = (dateVal?: string) => formatDisplayDate(dateVal);
 
   if (tournaments.length === 0) {
     return (
@@ -93,7 +73,7 @@ export default function PublicTournamentGrid({ tournaments, todayStr }: PublicTo
                       <span className="w-2 h-2 rounded-full bg-[#2E7A4F] animate-pulse" />
                       Live
                     </span>
-                    <span className="font-mono text-[12px] text-[#8C877C] font-semibold">
+                    <span className="font-mono text-[12px] text-[#8C877C] font-semibold" suppressHydrationWarning>
                       {eventDateStr}
                     </span>
                   </div>
@@ -149,7 +129,7 @@ export default function PublicTournamentGrid({ tournaments, todayStr }: PublicTo
                       <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
                       Upcoming
                     </span>
-                    <span className="font-mono text-[12px] text-[#8C877C] font-semibold">
+                    <span className="font-mono text-[12px] text-[#8C877C] font-semibold" suppressHydrationWarning>
                       {eventDateStr}
                     </span>
                   </div>
@@ -210,7 +190,7 @@ export default function PublicTournamentGrid({ tournaments, todayStr }: PublicTo
                     <span className="w-2 h-2 rounded-full bg-[#8C877C]" />
                     Over
                   </span>
-                  <span className="font-mono text-[12px] text-[#8C877C] font-semibold">
+                  <span className="font-mono text-[12px] text-[#8C877C] font-semibold" suppressHydrationWarning>
                     {eventDateStr}
                   </span>
                 </div>

@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import PublicStats from "@/components/public/PublicStats";
 import PublicTournamentGrid from "@/components/public/PublicTournamentGrid";
 import { RingFlowLogo } from "@/components/ui/ringflow-logo";
+import { getEventDateKey } from "@/lib/utils";
 
 export default async function PublicHome() {
   const supabase = await createClient();
@@ -22,20 +23,6 @@ export default async function PublicHome() {
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
   const todayStr = `${year}-${month}-${day}`;
-
-  const getEventDateKey = (dateVal: any): string => {
-    if (!dateVal) return "";
-    try {
-      const d = new Date(dateVal);
-      if (isNaN(d.getTime())) return String(dateVal).split("T")[0];
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const dt = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${dt}`;
-    } catch {
-      return String(dateVal).split("T")[0];
-    }
-  };
 
   const getEventStatus = (t: any): "live" | "upcoming" | "past" => {
     if (t.status === "completed" || t.status === "archived") return "past";
