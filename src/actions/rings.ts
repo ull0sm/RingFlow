@@ -3,10 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { ensureAdmin } from "./admin";
-
-function generateAccessCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+import { generateAccessCode } from "@/lib/utils";
 
 export async function addRing(tournamentId: string) {
   const adminId = await ensureAdmin();

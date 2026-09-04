@@ -24,9 +24,6 @@ export async function addAthlete(tournamentId: string, input: AthleteInput) {
     category_id: input.category_id || null,
     name: input.name,
     chest_number: input.chest_number,
-    school: input.school || null,
-    school_code: input.school_code || null,
-    sports_id: input.sports_id || null,
     dojo: input.dojo || input.school || null,
     belt: input.belt || null,
     age: input.age || null,
@@ -235,9 +232,6 @@ export async function bulkAddMasterAthletes(tournamentId: string, athletes: any[
       age: a.age || null,
       sex: a.sex || null,
       dojo: a.dojo || a.school || null,
-      school: a.school || null,
-      school_code: a.school_code || null,
-      sports_id: a.sports_id || null,
       day: a.day || null,
     };
   });
